@@ -1,0 +1,429 @@
+"use client"
+import { useEffect, useId, useState } from "react"
+import Particles, { initParticlesEngine } from "@tsparticles/react"
+import { loadSlim } from "@tsparticles/slim"
+
+export function Sparkles({
+  className,
+  size = 1,
+  minSize = null,
+  density = 800,
+  speed = 1,
+  minSpeed = null,
+  opacity = 1,
+  opacitySpeed = 3,
+  minOpacity = null,
+  color = "#FFFFFF",
+  background = "transparent",
+  options = {},
+}) {
+  const [isReady, setIsReady] = useState(false)
+  useEffect(() => {
+    initParticlesEngine(async (engine) => {
+      await loadSlim(engine)
+    }).then(() => {
+      setIsReady(true)
+    })
+  }, [])
+  const id = useId()
+  const defaultOptions = {
+    background: {
+      color: {
+        value: background,
+      },
+    },
+    fullScreen: {
+      enable: false,
+      zIndex: 1,
+    },
+    fpsLimit: 120,
+    particles: {
+      color: {
+        value: color,
+      },
+      move: {
+        enable: true,
+        direction: "none",
+        speed: {
+          min: minSpeed || speed / 10,
+          max: speed,
+        },
+        straight: false,
+      },
+      number: {
+        value: density,
+      },
+      opacity: {
+        value: {
+          min: minOpacity || opacity / 10,
+          max: opacity,
+        },
+        animation: {
+          enable: true,
+          sync: false,
+          speed: opacitySpeed,
+        },
+      },
+      size: {
+        value: {
+          min: minSize || size / 2.5,
+          max: size,
+        },
+      },
+    },
+    detectRetina: true,
+  }
+  return isReady && <Particles id={id} options={{ ...defaultOptions, ...options }} className={className} />
+}
+
+// ============================================================
+// COMPANY TOOLS - RESEND, META, GOOGLE ANALYTICS, VERCEL, GITHUB, BUFFER
+// ============================================================
+
+export const TOOL_COLORS = {
+  resend: "#5E5CE6",           // Resend Purple
+  meta: "#0668E1",             // Meta Blue
+  googleAnalytics: "#F9AB00",  // Google Analytics Orange
+  vercel: "#000000",           // Vercel Black
+  github: "#238636",           // GitHub Green
+  buffer: "#168EEA",           // Buffer Blue
+}
+
+// All 6 tool colors as an array for multi-color sparkles
+export const ALL_TOOL_COLORS = [
+  TOOL_COLORS.resend,
+  TOOL_COLORS.meta,
+  TOOL_COLORS.googleAnalytics,
+  TOOL_COLORS.vercel,
+  TOOL_COLORS.github,
+  TOOL_COLORS.buffer,
+]
+
+// ============================================================
+// PRE-CONFIGURED SPARKLE COMPONENTS
+// ============================================================
+
+// All company tools - multi-color sparkles
+export function CompanyToolsSparkles({ className = "" }) {
+  return (
+    <Sparkles
+      className={className}
+      size={2}
+      minSize={0.6}
+      density={600}
+      speed={0.7}
+      opacity={0.75}
+      opacitySpeed={3}
+      options={{
+        particles: {
+          color: {
+            value: ALL_TOOL_COLORS,
+          },
+        },
+      }}
+      background="transparent"
+    />
+  )
+}
+
+// Resend only - purple sparkles
+export function ResendSparkles({ className = "" }) {
+  return (
+    <Sparkles
+      className={className}
+      size={1.5}
+      minSize={0.5}
+      density={500}
+      speed={0.6}
+      opacity={0.7}
+      opacitySpeed={2.5}
+      color={TOOL_COLORS.resend}
+      background="transparent"
+    />
+  )
+}
+
+// Meta only - blue sparkles
+export function MetaSparkles({ className = "" }) {
+  return (
+    <Sparkles
+      className={className}
+      size={1.8}
+      minSize={0.6}
+      density={600}
+      speed={0.7}
+      opacity={0.8}
+      opacitySpeed={3}
+      color={TOOL_COLORS.meta}
+      background="transparent"
+    />
+  )
+}
+
+// Google Analytics only - orange sparkles
+export function GoogleAnalyticsSparkles({ className = "" }) {
+  return (
+    <Sparkles
+      className={className}
+      size={1.6}
+      minSize={0.5}
+      density={550}
+      speed={0.65}
+      opacity={0.75}
+      opacitySpeed={2.5}
+      color={TOOL_COLORS.googleAnalytics}
+      background="transparent"
+    />
+  )
+}
+
+// Vercel only - black sparkles
+export function VercelSparkles({ className = "" }) {
+  return (
+    <Sparkles
+      className={className}
+      size={1.7}
+      minSize={0.6}
+      density={500}
+      speed={0.6}
+      opacity={0.7}
+      opacitySpeed={2.5}
+      color={TOOL_COLORS.vercel}
+      background="transparent"
+    />
+  )
+}
+
+// GitHub only - green sparkles
+export function GithubSparkles({ className = "" }) {
+  return (
+    <Sparkles
+      className={className}
+      size={1.5}
+      minSize={0.5}
+      density={520}
+      speed={0.65}
+      opacity={0.75}
+      opacitySpeed={2.5}
+      color={TOOL_COLORS.github}
+      background="transparent"
+    />
+  )
+}
+
+// Buffer only - light blue sparkles
+export function BufferSparkles({ className = "" }) {
+  return (
+    <Sparkles
+      className={className}
+      size={1.8}
+      minSize={0.6}
+      density={600}
+      speed={0.7}
+      opacity={0.8}
+      opacitySpeed={3}
+      color={TOOL_COLORS.buffer}
+      background="transparent"
+    />
+  )
+}
+
+// Development tools (Vercel + GitHub) - black and green
+export function DevToolsSparkles({ className = "" }) {
+  return (
+    <Sparkles
+      className={className}
+      size={1.8}
+      minSize={0.5}
+      density={500}
+      speed={0.6}
+      opacity={0.7}
+      opacitySpeed={2.5}
+      options={{
+        particles: {
+          color: {
+            value: [TOOL_COLORS.vercel, TOOL_COLORS.github],
+          },
+        },
+      }}
+      background="transparent"
+    />
+  )
+}
+
+// Marketing tools (Meta + Buffer + Analytics) - blues and orange
+export function MarketingToolsSparkles({ className = "" }) {
+  return (
+    <Sparkles
+      className={className}
+      size={2}
+      minSize={0.6}
+      density={700}
+      speed={0.8}
+      opacity={0.8}
+      opacitySpeed={3}
+      options={{
+        particles: {
+          color: {
+            value: [
+              TOOL_COLORS.meta,
+              TOOL_COLORS.buffer,
+              TOOL_COLORS.googleAnalytics,
+            ],
+          },
+        },
+      }}
+      background="transparent"
+    />
+  )
+}
+
+// Communication tools (Resend + Buffer) - purple and blue
+export function CommunicationSparkles({ className = "" }) {
+  return (
+    <Sparkles
+      className={className}
+      size={1.5}
+      minSize={0.5}
+      density={600}
+      speed={0.7}
+      opacity={0.75}
+      opacitySpeed={2.5}
+      options={{
+        particles: {
+          color: {
+            value: [TOOL_COLORS.resend, TOOL_COLORS.buffer],
+          },
+        },
+      }}
+      background="transparent"
+    />
+  )
+}
+
+// ============================================================
+// USAGE EXAMPLES
+// ============================================================
+
+/**
+ * EXAMPLE 1: All company tools (multi-color)
+ * 
+ * <section className="relative h-screen bg-gradient-to-b from-slate-900 to-black">
+ *   <CompanyToolsSparkles className="absolute inset-0" />
+ *   <div className="relative z-10">
+ *     <h1>Powered by Industry-Leading Tools</h1>
+ *   </div>
+ * </section>
+ */
+
+/**
+ * EXAMPLE 2: Single tool sparkles
+ * 
+ * <section className="relative py-20 bg-slate-900">
+ *   <ResendSparkles className="absolute inset-0" />
+ *   <div className="relative z-10">
+ *     <h2>Email Infrastructure</h2>
+ *     <p>Powered by Resend</p>
+ *   </div>
+ * </section>
+ */
+
+/**
+ * EXAMPLE 3: Marketing tools
+ * 
+ * <section className="relative py-20 bg-gradient-to-r from-blue-900 to-purple-900">
+ *   <MarketingToolsSparkles className="absolute inset-0" />
+ *   <div className="relative z-10">
+ *     <h2>Social Media Marketing</h2>
+ *     <p>Meta • Buffer • Google Analytics</p>
+ *   </div>
+ * </section>
+ */
+
+/**
+ * EXAMPLE 4: Development tools
+ * 
+ * <section className="relative py-20 bg-slate-950">
+ *   <DevToolsSparkles className="absolute inset-0" />
+ *   <div className="relative z-10">
+ *     <h2>Built with Modern Tech</h2>
+ *     <p>Vercel • GitHub</p>
+ *   </div>
+ * </section>
+ */
+
+/**
+ * EXAMPLE 5: Custom configuration
+ * 
+ * <Sparkles
+ *   className="absolute inset-0"
+ *   size={2}
+ *   density={800}
+ *   speed={0.7}
+ *   options={{
+ *     particles: {
+ *       color: {
+ *         value: [
+ *           TOOL_COLORS.resend,
+ *           TOOL_COLORS.meta,
+ *           TOOL_COLORS.vercel,
+ *         ],
+ *       },
+ *     },
+ *   }}
+ * />
+ */
+
+/**
+ * EXAMPLE 6: Grid of individual tools
+ * 
+ * <div className="grid grid-cols-3 gap-8">
+ *   <div className="relative p-8 bg-slate-800 rounded-lg overflow-hidden">
+ *     <ResendSparkles className="absolute inset-0" />
+ *     <div className="relative z-10">
+ *       <h3>Resend</h3>
+ *       <p>Email API</p>
+ *     </div>
+ *   </div>
+ *   
+ *   <div className="relative p-8 bg-slate-800 rounded-lg overflow-hidden">
+ *     <MetaSparkles className="absolute inset-0" />
+ *     <div className="relative z-10">
+ *       <h3>Meta</h3>
+ *       <p>Social Media</p>
+ *     </div>
+ *   </div>
+ *   
+ *   <div className="relative p-8 bg-slate-800 rounded-lg overflow-hidden">
+ *     <GoogleAnalyticsSparkles className="absolute inset-0" />
+ *     <div className="relative z-10">
+ *       <h3>Analytics</h3>
+ *       <p>Insights</p>
+ *     </div>
+ *   </div>
+ *   
+ *   <div className="relative p-8 bg-slate-800 rounded-lg overflow-hidden">
+ *     <VercelSparkles className="absolute inset-0" />
+ *     <div className="relative z-10">
+ *       <h3>Vercel</h3>
+ *       <p>Deployment</p>
+ *     </div>
+ *   </div>
+ *   
+ *   <div className="relative p-8 bg-slate-800 rounded-lg overflow-hidden">
+ *     <GithubSparkles className="absolute inset-0" />
+ *     <div className="relative z-10">
+ *       <h3>GitHub</h3>
+ *       <p>Version Control</p>
+ *     </div>
+ *   </div>
+ *   
+ *   <div className="relative p-8 bg-slate-800 rounded-lg overflow-hidden">
+ *     <BufferSparkles className="absolute inset-0" />
+ *     <div className="relative z-10">
+ *       <h3>Buffer</h3>
+ *       <p>Scheduling</p>
+ *     </div>
+ *   </div>
+ * </div>
+ */
