@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { TrendingUp, TrendingDown, ChevronLeft, ChevronRight } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { useSignals } from "@/hooks/useSignals";
 
 // ─── Types ───
 export interface SignalData {
@@ -98,37 +98,7 @@ export function TradingTerminal() {
     const [selectedSymbol, setSelectedSymbol] = useState(WATCHLIST[0].symbol);
     const [leftOpen, setLeftOpen] = useState(true);
     const [rightOpen, setRightOpen] = useState(true);
-    const [signals, setSignals] = useState<SignalData[]>([]);
-
-    // Fetch signals from Supabase 
-    useEffect(() => {
-        const fetchSignals = async () => {
-            const { data, error } = await supabase
-                .from('signals')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                console.error("Error fetching signals:", error);
-            } else if (data) {
-                setSignals(data as SignalData[]);
-            }
-        };
-
-        fetchSignals();
-
-        // Subscribe to live updates
-        const channel = supabase
-            .channel('signals_changes')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'signals' }, (payload) => {
-                fetchSignals(); // Refresh on any change
-            })
-            .subscribe();
-
-        return () => {
-            supabase.removeChannel(channel);
-        };
-    }, []);
+    const { signals } = useSignals();
 
     // Derived global stats
     const totalPipsToday = signals.reduce((acc, sig) => acc + (sig.total_pips || 0), 0);

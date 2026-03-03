@@ -1,21 +1,12 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
 
-let _supabase: SupabaseClient | null = null
-
-function getSupabase(): SupabaseClient {
-    if (!_supabase) {
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-        if (!supabaseUrl || !supabaseAnonKey) {
-            throw new Error('Missing Supabase environment variables. Make sure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set.')
-        }
-        _supabase = createClient(supabaseUrl, supabaseAnonKey)
-    }
-    return _supabase
+export function createClient() {
+    return createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
 }
 
-export const supabase = new Proxy({} as SupabaseClient, {
-    get(_target, prop) {
-        return (getSupabase() as any)[prop]
-    },
-})
+// Global singleton for legacy client-side usage if needed, 
+// though using the factory is preferred in most cases.
+export const supabase = createClient()

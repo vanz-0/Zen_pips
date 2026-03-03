@@ -8,7 +8,7 @@ import { TradingTerminal } from "@/components/ui/trading-terminal";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { SignalData } from "@/components/ui/trading-terminal";
-import { supabase } from "@/lib/supabase";
+import { useSignals } from "@/hooks/useSignals";
 
 function FadeInSection({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const ref = useRef(null);
@@ -28,37 +28,7 @@ function FadeInSection({ children, className = "", delay = 0 }: { children: Reac
 }
 
 export default function Home() {
-  const [signals, setSignals] = useState<SignalData[]>([]);
-
-  // Fetch signals from Supabase 
-  useEffect(() => {
-    const fetchSignals = async () => {
-      const { data, error } = await supabase
-        .from('signals')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error("Error fetching signals from page:", error);
-      } else if (data) {
-        setSignals(data as SignalData[]);
-      }
-    };
-
-    fetchSignals();
-
-    // Subscribe to live updates
-    const channel = supabase
-      .channel('home_signals_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'signals' }, (payload) => {
-        fetchSignals();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+  const { signals } = useSignals();
 
   // Derived stats
   const totalPipsToday = signals.reduce((acc, sig) => acc + (sig.total_pips || 0), 0);

@@ -2,10 +2,53 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Shield, Lock, Mail, ArrowRight } from "lucide-react"
+import { Shield, Lock, Mail, ArrowRight, Loader2 } from "lucide-react"
+import { supabase } from "@/lib/supabase"
+import { useRouter } from "next/navigation"
 
 export default function AuthPage() {
     const [isLogin, setIsLogin] = useState(true)
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [fullName, setFullName] = useState("")
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+    const router = useRouter()
+
+    const handleAuth = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setLoading(true)
+        setError(null)
+
+        try {
+            if (isLogin) {
+                const { error: signInError } = await supabase.auth.signInWithPassword({
+                    email,
+                    password,
+                })
+                if (signInError) throw signInError
+            } else {
+                const { error: signUpError } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            full_name: fullName,
+                        },
+                        emailRedirectTo: `${window.location.origin}/auth/callback`,
+                    },
+                })
+                if (signUpError) throw signUpError
+                alert("Check your email to confirm your account!")
+            }
+            router.push("/")
+            router.refresh()
+        } catch (err: any) {
+            setError(err.message || "An error occurred during authentication")
+        } finally {
+            setLoading(false)
+        }
+    }
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6 font-outfit relative overflow-hidden">
@@ -34,7 +77,12 @@ export default function AuthPage() {
                     </p>
                 </div>
 
-                <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                <form className="space-y-4" onSubmit={handleAuth}>
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm p-3 rounded-xl text-center">
+                            {error}
+                        </div>
+                    )}
                     {!isLogin && (
                         <div className="space-y-1">
                             <label className="text-xs text-gray-400 uppercase font-bold tracking-widest ml-1">Full Name</label>
@@ -42,6 +90,9 @@ export default function AuthPage() {
                                 <input
                                     type="text"
                                     placeholder="John Doe"
+                                    value={fullName}
+                                    onChange={(e) => setFullName(e.target.value)}
+                                    required
                                     className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-11 outline-none focus:border-yellow-500/50 transition-all text-white"
                                 />
                                 <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
@@ -55,6 +106,9 @@ export default function AuthPage() {
                             <input
                                 type="email"
                                 placeholder="dominator@zenpips.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
                                 className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-11 outline-none focus:border-yellow-500/50 transition-all text-white"
                             />
                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
@@ -67,15 +121,27 @@ export default function AuthPage() {
                             <input
                                 type="password"
                                 placeholder="••••••••"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
                                 className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-11 outline-none focus:border-yellow-500/50 transition-all text-white"
                             />
                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                         </div>
                     </div>
 
-                    <button className="w-full bg-yellow-500 text-black py-4 rounded-xl font-bold flex items-center justify-center gap-2 group hover:bg-yellow-400 transition-all mt-4">
-                        {isLogin ? "Access Terminal" : "Create Account"}
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    <button
+                        disabled={loading}
+                        className="w-full bg-yellow-500 text-black py-4 rounded-xl font-bold flex items-center justify-center gap-2 group hover:bg-yellow-400 transition-all mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {loading ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                            <>
+                                {isLogin ? "Access Terminal" : "Create Account"}
+                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            </>
+                        )}
                     </button>
                 </form>
 
