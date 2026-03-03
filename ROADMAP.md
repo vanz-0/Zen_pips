@@ -23,9 +23,11 @@ This roadmap defines the core focus areas and the progression of the Zen Pips co
 - [x] Integrate "Social Proof" (Live pip counts, recent signal performance cards, stats grid).
 - [x] Route all website traffic directly to the `@Zen_pips` onboarding bot to handle subscriptions smoothly without manual DMing.
 - [x] Integrate HFM Broker affiliate and Binance exchange affiliate into the "Get Set Up" section.
+- [x] **Automation & Monitoring:** Standardized Daily Recap and Signal Monitoring scripts powered by Supabase.
 
 ## Phase 4: Expansion & "Inner Circle" Value
 *Focus: Increasing Life-Time Value (LTV) and offering higher-ticket mentorship.*
 - [ ] **Live Trading Webinars:** Host weekly Zoom sessions exclusively for VIP members to trade the NY open live.
-- [ ] **Trade Copier Integration:** Connect the VIP signals to Cornix or a custom trade copier so members can auto-execute the setups.
-- [ ] **Educational Vault:** Create a structured video course or PDF guidebook detailing the "Dominators" strategy, offered as an upsell or an annual subscription bonus.
+- [ ] **Trade Copier Integration:** Connect the VIP signals to Cornix or a custom trade copier for auto-execution.
+- [ ] **Educational Vault:** Create a structured video course or PDF guidebook detailing the "Dominators" strategy.
+- [ ] **Advanced Analytics:** Implement a dashboard for users to track their subscription status and personal trading stats.

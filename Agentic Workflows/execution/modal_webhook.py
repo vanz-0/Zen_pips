@@ -48,23 +48,21 @@ image = (
         "python-dotenv",
         "yt-dlp",  # For YouTube video scraping
     )
-    .add_local_dir("/Users/nicksaraev/Example Workspace/directives", remote_path="/app/directives")
-    .add_local_dir("/Users/nicksaraev/Example Workspace/execution", remote_path="/app/execution")
-    .add_local_file("/Users/nicksaraev/Example Workspace/execution/webhooks.json", remote_path="/app/webhooks.json")
-    .add_local_file("/Users/nicksaraev/Example Workspace/.tmp/demo_kickoff_call_transcript.md", remote_path="/app/demo_kickoff_call_transcript.md")
-    .add_local_file("/Users/nicksaraev/Example Workspace/.tmp/demo_sales_call_transcript.md", remote_path="/app/demo_sales_call_transcript.md")
+    .add_local_dir("c:/Users/Admin/OneDrive/Desktop/ZENPIPS/Agentic Workflows/directives", remote_path="/app/directives")
+    .add_local_dir("c:/Users/Admin/OneDrive/Desktop/ZENPIPS/Agentic Workflows/execution", remote_path="/app/execution")
+    .add_local_file("c:/Users/Admin/OneDrive/Desktop/ZENPIPS/Agentic Workflows/execution/webhooks.json", remote_path="/app/webhooks.json")
 )
 
 # All secrets
 ALL_SECRETS = [
-    modal.Secret.from_name("anthropic-secret"),
-    modal.Secret.from_name("google-token"),
+    # modal.Secret.from_name("anthropic-secret"),
+    # modal.Secret.from_name("google-token"),
     modal.Secret.from_name("env-vars"),
-    modal.Secret.from_name("slack-webhook"),
-    modal.Secret.from_name("instantly-api"),
-    modal.Secret.from_name("apify-secret"),
-    modal.Secret.from_name("anymailfinder-secret"),
-    modal.Secret.from_name("pandadoc-secret"),
+    # modal.Secret.from_name("slack-webhook"),
+    # modal.Secret.from_name("instantly-api"),
+    # modal.Secret.from_name("apify-secret"),
+    # modal.Secret.from_name("anymailfinder-secret"),
+    # modal.Secret.from_name("pandadoc-secret"),
 ]
 
 # ============================================================================
@@ -2429,6 +2427,63 @@ def youtube_outliers_background(
         logger.error(f"YouTube outliers error: {e}")
         slack_error(f"YouTube outliers failed: {str(e)}")
         return {"status": "error", "error": str(e)}
+
+
+@app.function(image=image, secrets=ALL_SECRETS, timeout=60)
+@modal.fastapi_endpoint(method="POST")
+def rag_query(payload: dict):
+    """
+    RAG-powered chat query for the Zen Pips website.
+    """
+    from fastapi.responses import JSONResponse
+    import anthropic
+    import requests
+
+    query = payload.get("query", "")
+    if not query:
+        return JSONResponse({"error": "No query provided"}, status_code=400)
+
+    supabase_url = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+    supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+
+    # Step 1: Fetch relevant context from Supabase bot_faqs
+    context = ""
+    try:
+        search_url = f"{supabase_url}/rest/v1/bot_faqs?select=question_trigger,answer_response"
+        headers = {"apikey": supabase_key, "Authorization": f"Bearer {supabase_key}"}
+        resp = requests.get(search_url, headers=headers, timeout=10)
+        if resp.status_code == 200:
+            faqs = resp.json()
+            relevant_faqs = [f for f in faqs if any(word.lower() in f['question_trigger'].lower() or word.lower() in f['answer_response'].lower() for word in query.split())]
+            for faq in relevant_faqs[:5]: 
+                context += f"Q: {faq['question_trigger']}\nA: {faq['answer_response']}\n\n"
+    except Exception as e:
+        logger.error(f"Supabase search error: {e}")
+
+    # Step 2: Use Claude to generate an answer
+    try:
+        client = anthropic.Anthropic(api_key=anthropic_key)
+        system_prompt = """You are the Zen Pips Institutional Assistant. 
+        Your goal is to provide precise, disciplined, and helpful answers based on the provided context.
+        If the information is not in the context, use your general knowledge but maintain the Zen Pips persona.
+        Be concise and professional. Refer users to the @Zen_pips Telegram bot for VIP payments and specific signals."""
+        
+        prompt = f"CONTEXT:\n{context}\n\nUSER QUERY: {query}"
+        
+        message = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=500,
+            system=system_prompt,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        answer = message.content[0].text
+        return JSONResponse({"answer": answer})
+
+    except Exception as e:
+        logger.error(f"Claude RAG error: {e}")
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
 @app.function(image=image, secrets=ALL_SECRETS, timeout=60)

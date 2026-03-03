@@ -17,6 +17,7 @@ Logic:
 
 import os
 import sys
+import io
 import json
 import asyncio
 import time
@@ -25,13 +26,25 @@ from dotenv import load_dotenv
 from telegram import Bot
 import requests
 
+# Force UTF-8 encoding for stdout to handle emojis in Windows terminal
+if sys.stdout.encoding != 'UTF-8':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='UTF-8')
+
 # Load configurations
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 FREE_GROUP_ID = os.getenv("FREE_GROUP_ID")
 VIP_CHANNEL_ID = os.getenv("ZENPIPS_CHANNEL_ID")
 
-SIGNALS_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.tmp', 'signals', 'active_signals.json')
+SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+
+HEADERS = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": f"Bearer {SUPABASE_KEY}",
+    "Content-Type": "application/json",
+    "Prefer": "return=minimal"
+}
 
 
 # ─── Price Fetching ───
@@ -43,7 +56,7 @@ def get_btc_price():
         data = resp.json()
         return float(data["price"])
     except Exception as e:
-        print(f"  ⚠ Error fetching BTC price: {e}")
+        print(f"  [!] Error fetching BTC price: {e}")
         return None
 
 
@@ -86,35 +99,55 @@ def get_metals_price(symbol):
     except Exception:
         pass
 
-    print(f"  ⚠ Could not fetch price for {symbol} from any source")
+    print(f"  [!] Could not fetch price for {symbol} from any source")
     return None
 
 
 def get_current_price(signal):
     """Get current price for a signal based on its source type."""
-    if signal["source"] == "binance":
-        return get_btc_price()
-    elif signal["source"] == "metals":
-        return get_metals_price(signal["ticker"])
-    return None
+    ticker = signal.get("ticker", "Unknown")
+    source = signal.get("source", "unknown")
+    
+    print(f"    [DEBUG] Fetching {ticker} price from {source}...")
+    
+    price = None
+    if source == "binance":
+        price = get_btc_price()
+    elif source == "metals":
+        price = get_metals_price(signal["ticker"])
+    
+    if price is None:
+        print(f"    [!] FAILED to fetch {ticker} price from {source}")
+    else:
+        print(f"    [DEBUG] Got {ticker} price: {price:,.2f}")
+        
+    return price
 
 
 # ─── Signal State Management ───
 
-def load_signals():
-    """Load active signals from JSON file."""
+def fetch_active_signals():
+    """Fetch all non-closed signals from Supabase."""
+    url = f"{SUPABASE_URL}/rest/v1/signals?closed=eq.false"
     try:
-        with open(SIGNALS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        print("⚠ No active signals file found.")
-        return []
+        resp = requests.get(url, headers=HEADERS, timeout=10)
+        if resp.status_code == 200:
+            return resp.json()
+        print(f"  [!] Error fetching signals: {resp.text}")
+    except Exception as e:
+        print(f"  [!] HTTP Error: {e}")
+    return []
 
 
-def save_signals(signals):
-    """Save updated signals to JSON file."""
-    with open(SIGNALS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(signals, f, indent=2, ensure_ascii=False)
+def update_signal_in_supabase(signal_id, updates):
+    """Patch a specific signal row in Supabase."""
+    url = f"{SUPABASE_URL}/rest/v1/signals?id=eq.{signal_id}"
+    try:
+        resp = requests.patch(url, headers=HEADERS, json=updates, timeout=10)
+        return resp.status_code in (200, 204)
+    except Exception as e:
+        print(f"  ⚠ Error updating signal {signal_id}: {e}")
+    return False
 
 
 # ─── TP/SL Detection ───
@@ -259,13 +292,6 @@ async def send_notification(bot, signal, event, pips, current_price):
     """Send TP/SL hit notification to both VIP and Free groups."""
     message = format_tp_hit_message(signal, event, pips, current_price)
 
-    # Send to VIP channel
-    try:
-        await bot.send_message(chat_id=VIP_CHANNEL_ID, text=message, parse_mode='HTML', disable_web_page_preview=True)
-        print(f"    ✓ VIP notified")
-    except Exception as e:
-        print(f"    ✗ VIP error: {e}")
-
     # Send to Free group
     try:
         await bot.send_message(chat_id=FREE_GROUP_ID, text=message, parse_mode='HTML', disable_web_page_preview=True)
@@ -279,8 +305,8 @@ async def send_notification(bot, signal, event, pips, current_price):
 # ─── Main Monitoring Logic ───
 
 async def check_all_signals():
-    """Single pass: check all active signals and send notifications."""
-    signals = load_signals()
+    """Single pass: check all active signals and update Supabase."""
+    signals = fetch_active_signals()
     if not signals:
         print("No signals to monitor.")
         return
@@ -297,14 +323,21 @@ async def check_all_signals():
     print(f"{'='*50}")
 
     for signal in signals:
-        if signal["closed"]:
-            print(f"\n  ⏭ {signal['pair']} {signal['timeframe']} — CLOSED ({signal['status']})")
+        # Check current status from DB row (redundant but safe)
+        if signal.get("closed"):
+            print(f"\n  ⏭ {signal['pair']} {signal['timeframe']} — CLOSED")
             continue
 
         # Check if enough time has passed since last check
-        last_checked = datetime.fromisoformat(signal["last_checked"].replace("Z", "+00:00"))
+        last_checked_str = signal.get("last_checked")
+        if last_checked_str:
+            last_checked = datetime.fromisoformat(last_checked_str.replace("Z", "+00:00"))
+        else:
+            # If never checked, use created_at or a very old date to trigger immediate check
+            last_checked = datetime.fromisoformat(signal["created_at"].replace("Z", "+00:00"))
+        
         minutes_since = (now - last_checked).total_seconds() / 60
-        interval = signal["check_interval_minutes"]
+        interval = signal.get("check_interval_minutes", 15)
 
         if minutes_since < interval:
             remaining = round(interval - minutes_since)
@@ -326,26 +359,44 @@ async def check_all_signals():
         signal["last_checked"] = now.isoformat()
 
         if events:
-            for event, pips in events:
-                print(f"    🔥 {event}! ({'+' if pips >= 0 else ''}{pips} pips)")
-                signal = apply_events(signal, [(event, pips)])
-                if bot:
-                    await send_notification(bot, signal, event, pips, current_price)
-            updated = True
+            # Prepare updates for the DB
+            db_updates = {
+                "tp1_hit": signal["tp1_hit"],
+                "tp2_hit": signal["tp2_hit"],
+                "tp3_hit": signal["tp3_hit"],
+                "closed": signal["closed"],
+                "status": signal["status"],
+                "current_sl": signal["current_sl"],
+                "total_pips": signal["total_pips"],
+                "last_checked": now.isoformat()
+            }
+            
+            if update_signal_in_supabase(signal["id"], db_updates):
+                print(f"    [OK] Supabase updated for {signal['pair']}")
+                updated = True
+                # Send notifications AFTER DB update is confirmed
+                for event, pips in events:
+                    print(f"    [FIRE] {event}! ({'+' if pips >= 0 else ''}{pips} pips)")
+                    if bot:
+                        await send_notification(bot, signal, event, pips, current_price)
+            else:
+                print(f"    [X] Failed to update Supabase for {signal['pair']}")
+
         else:
-            # Calculate floating P/L
+            # No events, just update last_checked
+            update_signal_in_supabase(signal["id"], {"last_checked": now.isoformat()})
+            
+            # Calculate floating P/L for console log
             if signal["direction"] == "BUY":
                 floating = round((current_price - signal["entry"]) * signal["pip_multiplier"])
             else:
                 floating = round((signal["entry"] - current_price) * signal["pip_multiplier"])
             status = "profit" if floating > 0 else "loss" if floating < 0 else "flat"
             print(f"    No new levels hit. Floating: {'+' if floating >= 0 else ''}{floating} pips ({status})")
-            updated = True  # Update last_checked timestamp
 
     if updated:
-        save_signals(signals)
         print(f"\n{'='*50}")
-        print("✓ Signals file updated.")
+        print("✓ Monitoring cycle complete. Database is synced.")
 
     # Summary
     active = [s for s in signals if not s["closed"]]
