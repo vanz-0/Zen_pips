@@ -3,6 +3,7 @@ import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import ChatWidget from "@/components/ChatWidget";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { AuthProvider } from "@/context/AuthContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,10 +30,13 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${outfit.variable} antialiased bg-[#0a0a0a] text-white selection:bg-yellow-500 selection:text-black min-h-screen flex flex-col`}
       >
-        {children}
-        <ChatWidget />
+        <AuthProvider>
+          {children}
+          <ChatWidget />
+        </AuthProvider>
       </body>
       <GoogleAnalytics gaId="G-XXXXXXXXXX" />
     </html>
   );
 }
+

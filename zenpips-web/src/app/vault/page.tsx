@@ -1,85 +1,236 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
-import { BookOpen, Download, FileText, Lock, GraduationCap } from "lucide-react"
+import {
+    BookOpen, Download, FileText, Lock, GraduationCap, ArrowLeft,
+    Search, Filter, Video, Headphones, Star, ChevronDown, ExternalLink, Loader2
+} from "lucide-react"
+import { useAuth } from "@/context/AuthContext"
+import { supabase } from "@/lib/supabase"
+import { useRouter } from "next/navigation"
+
+interface VaultResource {
+    id: string
+    title: string
+    description: string
+    type: "PDF" | "Video" | "Course" | "Audio"
+    category: string
+    level: "Foundation" | "Intermediate" | "Elite"
+    locked: boolean
+    file_path?: string | null
+    external_url?: string | null
+    created_at: string
+}
+
+const LEVEL_COLORS: Record<string, string> = {
+    Foundation: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+    Intermediate: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20",
+    Elite: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+}
+
+const TYPE_ICONS: Record<string, typeof FileText> = {
+    PDF: FileText,
+    Video: Video,
+    Course: BookOpen,
+    Audio: Headphones,
+}
+
+// Default resources (used if no Supabase vault_resources table exists yet)
+const DEFAULT_RESOURCES: VaultResource[] = [
+    { id: "1", title: "Zen Pips: The Institutional Playbook", description: "Complete institutional trading strategy breakdown with real-world case studies.", type: "PDF", category: "Strategy", level: "Elite", locked: false, file_path: null, external_url: null, created_at: "" },
+    { id: "2", title: "Market Structure Mastery", description: "Deep dive into market structure, BOS, CHoCH, and institutional orderflow.", type: "PDF", category: "Technical Analysis", level: "Intermediate", locked: false, file_path: null, external_url: null, created_at: "" },
+    { id: "3", title: "Risk Management & Psychology", description: "The mental edge: discipline, position sizing, and emotional control.", type: "PDF", category: "Psychology", level: "Foundation", locked: false, file_path: null, external_url: null, created_at: "" },
+    { id: "4", title: "Advanced Orderflow Techniques", description: "Institutional order blocks, FVGs, breakers, and liquidity sweeps.", type: "Course", category: "Strategy", level: "Elite", locked: true, file_path: null, external_url: null, created_at: "" },
+    { id: "5", title: "Candlestick Psychology", description: "Understanding what each candle tells you about the battle between buyers and sellers.", type: "PDF", category: "Technical Analysis", level: "Foundation", locked: false, file_path: null, external_url: null, created_at: "" },
+    { id: "6", title: "Smart Money Concepts (SMC)", description: "The complete guide to trading with the institutions, not against them.", type: "Video", category: "Strategy", level: "Intermediate", locked: false, file_path: null, external_url: null, created_at: "" },
+    { id: "7", title: "Live Session Recordings", description: "Weekly live trading session recordings with real-time commentary.", type: "Video", category: "Live Sessions", level: "Elite", locked: true, file_path: null, external_url: null, created_at: "" },
+    { id: "8", title: "Trader's Morning Routine", description: "Audio guide: the pre-market ritual of a disciplined trader.", type: "Audio", category: "Psychology", level: "Foundation", locked: false, file_path: null, external_url: null, created_at: "" },
+]
+
+const ALL_CATEGORIES = ["All", "Strategy", "Technical Analysis", "Psychology", "Live Sessions"]
 
 export default function VaultPage() {
-    const [guides, setGuides] = useState([
-        { id: 1, title: "Zen Pips: The Institutional Playbook", type: "PDF Strategy", level: "Elite", locked: false },
-        { id: 2, title: "Market Structure Mastery", type: "PDF Guide", level: "Intermediate", locked: false },
-        { id: 3, title: "Risk Management & Psychology", type: "PDF Guide", level: "Foundation", locked: false },
-        { id: 4, title: "Advanced Orderflow Techniques", type: "Premium Course", level: "Elite", locked: true },
-    ])
+    const { user, loading: authLoading } = useAuth()
+    const router = useRouter()
+    const [resources, setResources] = useState<VaultResource[]>(DEFAULT_RESOURCES)
+    const [loading, setLoading] = useState(true)
+    const [search, setSearch] = useState("")
+    const [category, setCategory] = useState("All")
+    const [level, setLevel] = useState("All")
+
+    const fetchResources = useCallback(async () => {
+        const { data, error } = await supabase
+            .from("vault_resources")
+            .select("*")
+            .order("created_at", { ascending: false })
+
+        if (!error && data && data.length > 0) {
+            setResources(data as VaultResource[])
+        }
+        // If table doesn't exist or is empty, keep defaults
+        setLoading(false)
+    }, [])
+
+    useEffect(() => {
+        fetchResources()
+    }, [fetchResources])
+
+    const filtered = resources.filter(r => {
+        const matchesSearch = !search || r.title.toLowerCase().includes(search.toLowerCase()) || r.description.toLowerCase().includes(search.toLowerCase())
+        const matchesCategory = category === "All" || r.category === category
+        const matchesLevel = level === "All" || r.level === level
+        return matchesSearch && matchesCategory && matchesLevel
+    })
+
+    const handleDownload = async (resource: VaultResource) => {
+        if (resource.locked) return
+        if (resource.external_url) {
+            window.open(resource.external_url, "_blank")
+            return
+        }
+        if (resource.file_path) {
+            const { data } = await supabase.storage
+                .from("education-vault")
+                .createSignedUrl(resource.file_path, 3600)
+            if (data?.signedUrl) {
+                window.open(data.signedUrl, "_blank")
+            }
+        }
+    }
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white p-6 md:p-12 font-outfit">
+        <div className="min-h-screen bg-[#0a0a0a] text-white p-6 md:p-12 font-[family-name:var(--font-outfit)]">
             <div className="max-w-6xl mx-auto space-y-8">
+                {/* Back */}
+                <button onClick={() => router.push("/")} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm group">
+                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                    Back to Terminal
+                </button>
+
+                {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <div className="flex items-center gap-2 text-yellow-500 mb-2">
                             <GraduationCap className="w-6 h-6" />
                             <span className="text-sm font-bold uppercase tracking-widest">Education Hub</span>
                         </div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
-                            The Dominator Vault
-                        </h1>
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">The Dominator Vault</h1>
                         <p className="text-gray-400 mt-2">Institutional-grade education for the selected few.</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                        <span className="bg-yellow-500/10 text-yellow-500 px-3 py-1.5 rounded-full border border-yellow-500/20 font-bold">
+                            {resources.filter(r => !r.locked).length} Resources Available
+                        </span>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {guides.map((guide, i) => (
-                        <motion.div
-                            key={guide.id}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: i * 0.1 }}
-                            className="group relative bg-[#111] p-6 rounded-2xl border border-white/5 hover:border-yellow-500/50 transition-all cursor-pointer overflow-hidden"
-                        >
-                            {/* Glow effect */}
-                            <div className="absolute -top-12 -right-12 w-24 h-24 bg-yellow-500/10 blur-3xl group-hover:bg-yellow-500/20 transition-all" />
-
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="bg-yellow-500/10 p-3 rounded-xl border border-yellow-500/20">
-                                        <FileText className="w-6 h-6 text-yellow-500" />
-                                    </div>
-                                    {guide.locked && (
-                                        <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 rounded-md border border-white/10">
-                                            <Lock className="w-3 h-3 text-gray-500" />
-                                            <span className="text-[10px] text-gray-400 uppercase font-bold tracking-tighter">LOCKED</span>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <h3 className="text-xl font-bold text-white group-hover:text-yellow-500 transition-colors">
-                                        {guide.title}
-                                    </h3>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <span className="text-xs text-gray-500">{guide.type}</span>
-                                        <span className="w-1 h-1 bg-gray-700 rounded-full" />
-                                        <span className="text-xs font-semibold text-yellow-500/80 uppercase tracking-wider">{guide.level}</span>
-                                    </div>
-                                </div>
-
-                                <button
-                                    disabled={guide.locked}
-                                    className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${guide.locked
-                                            ? 'bg-white/5 text-gray-500 border border-white/5 cursor-not-allowed'
-                                            : 'bg-white text-black hover:bg-yellow-500 transition-colors'
-                                        }`}
-                                >
-                                    {guide.locked ? 'Unlock with Lifetime VIP' : 'Download Resources'}
-                                    {!guide.locked && <Download className="w-4 h-4" />}
-                                </button>
-                            </div>
-                        </motion.div>
-                    ))}
+                {/* Search & Filters */}
+                <div className="flex flex-col md:flex-row gap-4">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search resources..."
+                            className="w-full bg-[#111] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:border-yellow-500/50 outline-none text-white placeholder-gray-500"
+                        />
+                    </div>
+                    <div className="flex gap-2">
+                        <select value={category} onChange={(e) => setCategory(e.target.value)} className="bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-yellow-500/50 outline-none text-white">
+                            {ALL_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                        </select>
+                        <select value={level} onChange={(e) => setLevel(e.target.value)} className="bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-yellow-500/50 outline-none text-white">
+                            <option>All</option>
+                            <option>Foundation</option>
+                            <option>Intermediate</option>
+                            <option>Elite</option>
+                        </select>
+                    </div>
                 </div>
 
-                {/* Feature Banner */}
+                {/* Resources Grid */}
+                {loading ? (
+                    <div className="flex items-center justify-center p-12">
+                        <Loader2 className="w-8 h-8 text-yellow-500 animate-spin" />
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filtered.map((resource, i) => {
+                            const TypeIcon = TYPE_ICONS[resource.type] || FileText
+                            return (
+                                <motion.div
+                                    key={resource.id}
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    className="group relative bg-[#111] p-6 rounded-2xl border border-white/5 hover:border-yellow-500/30 transition-all cursor-pointer overflow-hidden"
+                                >
+                                    {/* Glow */}
+                                    <div className="absolute -top-12 -right-12 w-24 h-24 bg-yellow-500/5 blur-3xl group-hover:bg-yellow-500/15 transition-all" />
+
+                                    <div className="space-y-4 relative z-10">
+                                        <div className="flex items-center justify-between">
+                                            <div className="bg-yellow-500/10 p-3 rounded-xl border border-yellow-500/20">
+                                                <TypeIcon className="w-6 h-6 text-yellow-500" />
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter border ${LEVEL_COLORS[resource.level]}`}>
+                                                    {resource.level}
+                                                </span>
+                                                {resource.locked && (
+                                                    <div className="flex items-center gap-1 px-2 py-0.5 bg-white/5 rounded-md border border-white/10">
+                                                        <Lock className="w-3 h-3 text-gray-500" />
+                                                        <span className="text-[10px] text-gray-400 uppercase font-bold tracking-tighter">VIP</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h3 className="text-lg font-bold text-white group-hover:text-yellow-500 transition-colors leading-tight">
+                                                {resource.title}
+                                            </h3>
+                                            <p className="text-sm text-gray-400 mt-2 line-clamp-2">{resource.description}</p>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <span className="text-[10px] text-gray-500 uppercase tracking-wider">{resource.type}</span>
+                                                <span className="w-1 h-1 bg-gray-700 rounded-full" />
+                                                <span className="text-[10px] text-gray-500 uppercase tracking-wider">{resource.category}</span>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            onClick={() => handleDownload(resource)}
+                                            disabled={resource.locked}
+                                            className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${resource.locked
+                                                ? "bg-white/5 text-gray-500 border border-white/5 cursor-not-allowed"
+                                                : "bg-white text-black hover:bg-yellow-500 transition-colors"
+                                                }`}
+                                        >
+                                            {resource.locked ? (
+                                                <>Unlock with Lifetime VIP</>
+                                            ) : resource.file_path || resource.external_url ? (
+                                                <>Access Resource <ExternalLink className="w-4 h-4" /></>
+                                            ) : (
+                                                <>Coming Soon</>
+                                            )}
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            )
+                        })}
+                    </div>
+                )}
+
+                {filtered.length === 0 && !loading && (
+                    <div className="flex flex-col items-center justify-center p-12 gap-4">
+                        <Search className="w-12 h-12 text-gray-600" />
+                        <p className="text-gray-400">No resources match your search.</p>
+                    </div>
+                )}
+
+                {/* Mentorship Banner */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
@@ -88,9 +239,14 @@ export default function VaultPage() {
                     <div className="space-y-4 text-center md:text-left">
                         <h2 className="text-2xl font-bold">Want personalized mentorship?</h2>
                         <p className="text-gray-400 max-w-md">Join our weekly live breakdown sessions where we analyze institutional orderflow in real-time.</p>
-                        <button className="bg-yellow-500 text-black px-8 py-3 rounded-xl font-bold hover:bg-yellow-400 transition-colors">
+                        <a
+                            href="https://t.me/MadDmakz"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block bg-yellow-500 text-black px-8 py-3 rounded-xl font-bold hover:bg-yellow-400 transition-colors"
+                        >
                             Apply for Mentorship
-                        </button>
+                        </a>
                     </div>
                     <div className="relative">
                         <div className="w-48 h-48 bg-yellow-500/20 blur-3xl absolute inset-0" />
