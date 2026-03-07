@@ -8,9 +8,11 @@ import { useRouter } from "next/navigation"
 
 export default function AuthPage() {
     const [isLogin, setIsLogin] = useState(true)
+    const [isForgotPassword, setIsForgotPassword] = useState(false)
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [fullName, setFullName] = useState("")
+    const [rememberMe, setRememberMe] = useState(true)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const router = useRouter()
@@ -21,12 +23,21 @@ export default function AuthPage() {
         setError(null)
 
         try {
-            if (isLogin) {
+            if (isForgotPassword) {
+                const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/auth/update-password`,
+                })
+                if (resetError) throw resetError
+                alert("Password reset instructions sent to your email!")
+                setIsForgotPassword(false)
+            } else if (isLogin) {
                 const { error: signInError } = await supabase.auth.signInWithPassword({
                     email,
                     password,
                 })
                 if (signInError) throw signInError
+                router.push("/")
+                router.refresh()
             } else {
                 const { error: signUpError } = await supabase.auth.signUp({
                     email,
@@ -40,9 +51,9 @@ export default function AuthPage() {
                 })
                 if (signUpError) throw signUpError
                 alert("Check your email to confirm your account!")
+                router.push("/")
+                router.refresh()
             }
-            router.push("/")
-            router.refresh()
         } catch (err: any) {
             setError(err.message || "An error occurred during authentication")
         } finally {
@@ -68,12 +79,14 @@ export default function AuthPage() {
                         <Shield className="w-8 h-8 text-yellow-500" />
                     </div>
                     <h1 className="text-3xl font-bold text-white">
-                        {isLogin ? "Welcome Back" : "Join the Elite"}
+                        {isForgotPassword ? "Reset Password" : isLogin ? "Welcome Back" : "Join the Elite"}
                     </h1>
                     <p className="text-gray-400">
-                        {isLogin
-                            ? "Enter your credentials to access the terminal."
-                            : "Start your journey to market dominance today."}
+                        {isForgotPassword
+                            ? "Enter your email to receive recovery instructions."
+                            : isLogin
+                                ? "Enter your credentials to access the terminal."
+                                : "Start your journey to market dominance today."}
                     </p>
                 </div>
 
@@ -83,7 +96,7 @@ export default function AuthPage() {
                             {error}
                         </div>
                     )}
-                    {!isLogin && (
+                    {!isLogin && !isForgotPassword && (
                         <div className="space-y-1">
                             <label className="text-xs text-gray-400 uppercase font-bold tracking-widest ml-1">Full Name</label>
                             <div className="relative">
@@ -115,20 +128,44 @@ export default function AuthPage() {
                         </div>
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-xs text-gray-400 uppercase font-bold tracking-widest ml-1">Password</label>
-                        <div className="relative">
-                            <input
-                                type="password"
-                                placeholder="••••••••"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-11 outline-none focus:border-yellow-500/50 transition-all text-white"
-                            />
-                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    {!isForgotPassword && (
+                        <div className="space-y-1">
+                            <label className="text-xs text-gray-400 uppercase font-bold tracking-widest ml-1">Password</label>
+                            <div className="relative">
+                                <input
+                                    type="password"
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-11 outline-none focus:border-yellow-500/50 transition-all text-white"
+                                />
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                            </div>
                         </div>
-                    </div>
+                    )}
+
+                    {isLogin && !isForgotPassword && (
+                        <div className="flex items-center justify-between text-sm py-2">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="remember"
+                                    checked={rememberMe}
+                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                    className="w-4 h-4 rounded border-gray-600 bg-black/50 text-yellow-500 focus:ring-yellow-500/50"
+                                />
+                                <label htmlFor="remember" className="text-gray-400 cursor-pointer">Remember me</label>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setIsForgotPassword(true)}
+                                className="text-yellow-500 hover:text-yellow-400 transition-colors"
+                            >
+                                Forgot Password?
+                            </button>
+                        </div>
+                    )}
 
                     <button
                         disabled={loading}
@@ -138,22 +175,41 @@ export default function AuthPage() {
                             <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
                             <>
-                                {isLogin ? "Access Terminal" : "Create Account"}
-                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                {isForgotPassword ? "Send Reset Link" : isLogin ? "Access Terminal" : "Create Account"}
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </>
                         )}
                     </button>
-                </form>
 
-                <div className="mt-8 text-center">
-                    <button
-                        onClick={() => setIsLogin(!isLogin)}
-                        className="text-gray-400 hover:text-white text-sm transition-colors"
-                    >
-                        {isLogin ? "Don't have an account? " : "Already a member? "}
-                        <span className="text-yellow-500 font-bold ml-1">{isLogin ? "Sign Up" : "Log In"}</span>
-                    </button>
-                </div>
+                    <div className="text-center mt-6">
+                        {isForgotPassword ? (
+                            <p className="text-sm text-gray-400">
+                                Remembered your password?{" "}
+                                <button
+                                    type="button"
+                                    onClick={() => setIsForgotPassword(false)}
+                                    className="text-yellow-500 font-bold hover:text-yellow-400 transition-colors"
+                                >
+                                    Return to Login
+                                </button>
+                            </p>
+                        ) : (
+                            <p className="text-sm text-gray-400">
+                                {isLogin ? "Don't have an elite pass?" : "Already part of the inner circle?"}{" "}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsLogin(!isLogin)
+                                        setIsForgotPassword(false)
+                                    }}
+                                    className="text-yellow-500 font-bold hover:text-yellow-400 transition-colors"
+                                >
+                                    {isLogin ? "Apply Now" : "Sign In"}
+                                </button>
+                            </p>
+                        )}
+                    </div>
+                </form>
             </motion.div>
         </div>
     )

@@ -1,2 +1,33 @@
+# Environment & Secrets
+.env
+.env.*
+!.env.example
 
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+dist/
+
+# Large binary / media files (stored in Supabase Storage)
+Trading Edu/
+*.pdf
+*.zip
+*.mp4
+*.mp3
+*.wav
+
+# System files
+.DS_Store
+Thumbs.db
+*.log
+
+# Skills / AI
 skills/
+
+# Python
+__pycache__/
+*.pyc
+.tmp/

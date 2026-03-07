@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation"
 import { useSignals } from "@/hooks/useSignals"
 import Image from "next/image"
 
-export default function ProfilePage() {
+export function ProfileTab() {
   const { user, loading: authLoading, signOut } = useAuth()
   const { signals } = useSignals()
   const router = useRouter()
@@ -59,7 +59,7 @@ export default function ProfilePage() {
 
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a]">
+      <div className="flex items-center justify-center py-24">
         <div className="w-12 h-12 border-4 border-yellow-500/20 border-t-yellow-500 rounded-full animate-spin" />
       </div>
     )
@@ -67,7 +67,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] gap-6">
+      <div className="flex flex-col items-center justify-center py-24 gap-6">
         <Shield className="w-16 h-16 text-yellow-500/30" />
         <h2 className="text-2xl font-bold text-white">Access Restricted</h2>
         <p className="text-gray-400 text-center max-w-sm">You need to be logged in to view your Dominator Profile.</p>
@@ -91,16 +91,8 @@ export default function ProfilePage() {
   })
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white p-6 md:p-12 font-[family-name:var(--font-outfit)]">
+    <div className="w-full text-white py-12 font-[family-name:var(--font-outfit)]">
       <div className="max-w-6xl mx-auto space-y-8">
-        {/* Back Navigation */}
-        <button
-          onClick={() => router.push("/")}
-          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          Back to Terminal
-        </button>
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">

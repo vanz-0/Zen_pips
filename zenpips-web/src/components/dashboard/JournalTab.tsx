@@ -26,7 +26,7 @@ interface JournalEntry {
     created_at: string
 }
 
-export default function JournalPage() {
+export function JournalTab() {
     const { user, loading: authLoading } = useAuth()
     const { signals } = useSignals()
     const router = useRouter()
@@ -122,7 +122,7 @@ export default function JournalPage() {
 
     if (authLoading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a]">
+            <div className="flex items-center justify-center py-24">
                 <div className="w-12 h-12 border-4 border-yellow-500/20 border-t-yellow-500 rounded-full animate-spin" />
             </div>
         )
@@ -130,7 +130,7 @@ export default function JournalPage() {
 
     if (!user) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] gap-6">
+            <div className="flex flex-col items-center justify-center py-24 gap-6">
                 <Book className="w-16 h-16 text-yellow-500/30" />
                 <h2 className="text-2xl font-bold text-white">Access Restricted</h2>
                 <p className="text-gray-400 text-center max-w-sm">Log in to access your Trading Journal.</p>
@@ -142,15 +142,8 @@ export default function JournalPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white p-6 md:p-12 font-[family-name:var(--font-outfit)]">
+        <div className="w-full text-white py-12 font-[family-name:var(--font-outfit)]">
             <div className="max-w-6xl mx-auto space-y-8">
-                {/* Back */}
-                <button onClick={() => router.push("/")} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm group">
-                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    Back to Terminal
-                </button>
-
-                {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">Trading Journal</h1>
@@ -341,8 +334,16 @@ export default function JournalPage() {
                                     </div>
                                 )}
                                 <div className="space-y-1">
-                                    <label className="text-xs text-gray-400 uppercase font-bold">Notes & Comments</label>
-                                    <textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Analysis, lessons learned, observations..." className="w-full bg-black border border-white/10 rounded-lg p-2.5 focus:border-yellow-500 outline-none resize-none text-white" />
+                                    <label className="text-xs text-gray-400 uppercase font-bold">Reason & Mindset (Max 500 words)</label>
+                                    <textarea rows={4} value={form.notes} onChange={(e) => {
+                                        const words = e.target.value.split(/\s+/).filter(w => w.length > 0);
+                                        if (words.length <= 500) {
+                                            setForm({ ...form, notes: e.target.value });
+                                        }
+                                    }} placeholder="What was the reason for this profit or loss? What was on your mind when taking this trade? (Max 500 words)" className="w-full bg-black border border-white/10 rounded-lg p-2.5 focus:border-yellow-500 outline-none resize-none text-white text-sm" />
+                                    <p className="text-[10px] text-gray-500 text-right">
+                                        {form.notes.split(/\s+/).filter(w => w.length > 0).length}/500 words
+                                    </p>
                                 </div>
                                 <button onClick={handleSave} disabled={saving || !form.pair} className="w-full py-3 bg-yellow-500 text-black font-bold rounded-xl mt-4 hover:bg-yellow-400 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
                                     {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
@@ -390,7 +391,7 @@ export default function JournalPage() {
                                 )}
                                 {selectedEntry.notes && (
                                     <div className="bg-white/[0.02] border border-white/5 rounded-lg p-3">
-                                        <p className="text-xs text-gray-400 uppercase font-bold mb-1">Notes</p>
+                                        <p className="text-xs text-gray-400 uppercase font-bold mb-1">Reason & Mindset</p>
                                         <p className="text-gray-300 text-sm leading-relaxed">{selectedEntry.notes}</p>
                                     </div>
                                 )}

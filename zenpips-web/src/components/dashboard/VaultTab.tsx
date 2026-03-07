@@ -50,7 +50,7 @@ const DEFAULT_RESOURCES: VaultResource[] = [
 
 const ALL_CATEGORIES = ["All", "Strategy", "Technical Analysis", "Psychology", "Live Sessions"]
 
-export default function VaultPage() {
+export function VaultTab() {
     const { user, loading: authLoading } = useAuth()
     const router = useRouter()
     const [resources, setResources] = useState<VaultResource[]>(DEFAULT_RESOURCES)
@@ -100,15 +100,8 @@ export default function VaultPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white p-6 md:p-12 font-[family-name:var(--font-outfit)]">
+        <div className="w-full text-white py-12 font-[family-name:var(--font-outfit)]">
             <div className="max-w-6xl mx-auto space-y-8">
-                {/* Back */}
-                <button onClick={() => router.push("/")} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm group">
-                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    Back to Terminal
-                </button>
-
-                {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <div className="flex items-center gap-2 text-yellow-500 mb-2">
