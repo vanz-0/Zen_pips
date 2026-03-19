@@ -318,10 +318,10 @@ export function TradingTerminal() {
                                     <div className="text-[9px] text-gray-600">Pips · 0 Losses</div>
                                 </div>
                                 <a
-                                    href="https://t.me/Zen_pips"
+                                    href="https://t.me/Zen_pips_bot"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="bg-[#d4af37] text-black text-[10px] font-bold px-3 py-2 rounded-lg hover:brightness-110 transition-all"
+                                    className="px-6 py-2.5 bg-yellow-500 text-black font-bold uppercase tracking-widest text-sm rounded-lg hover:bg-yellow-400 transition-colors flex items-center gap-2"
                                 >
                                     Get VIP Access
                                 </a>

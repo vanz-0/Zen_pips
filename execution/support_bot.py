@@ -55,7 +55,7 @@ Gain access to our full institutional ecosystem:
 • 6 Months: <code>$250</code>
 • 1 Year: <code>$450</code>
 
-👉 Ready? Use our automated onboarding bot: @Zen_pips"""
+👉 Ready? Use our automated onboarding bot: @Zen_pips_bot"""
 
 BROKER_TEXT = """🏦 <b>Broker Setup: HFM</b>
 
@@ -76,7 +76,7 @@ If you need to purchase USDT to join the VIP group or fund your broker:
 👉 <a href="https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?hl=en&ref=GRO_28502_E50OE&utm_source=default">Create Binance Account</a>
 
 2. Buy USDT using your Card or Bank transfer.
-3. Withdraw via <b>TRC20</b> to pay the VIP bot (@Zen_pips) or your broker."""
+3. Withdraw via <b>TRC20</b> to pay the VIP bot (@Zen_pips_bot) or your broker."""
 
 # --- Handlers ---
 
@@ -120,7 +120,7 @@ async def keyword_monitor(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if "broker" in text or "hfm" in text:
         await update.message.reply_text("Looking for our recommended broker? Setup your institutional account here: \nhttps://www.hfm.com/ke/en/?refid=30508914", disable_web_page_preview=True)
     elif "vip" in text or "join" in text or "payment" in text:
-        await update.message.reply_text("To join the Zen Pips VIP Dominators Room, message our automated bot here: @Zen_pips")
+        await update.message.reply_text("To join the Zen Pips VIP Dominators Room, message our automated bot here: @Zen_pips_bot")
     elif "binance" in text or "usdt" in text:
         await update.message.reply_text("New to crypto? Set up your Binance account here to get started: \nhttps://www.binance.com/referral/earn-together/refer2earn-usdc/claim?hl=en&ref=GRO_28502_E50OE&utm_source=default", disable_web_page_preview=True)
 
