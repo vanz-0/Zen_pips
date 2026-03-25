@@ -13,6 +13,8 @@ import { useAuth } from "@/context/AuthContext";
 import { ProfileTab } from "@/components/dashboard/ProfileTab";
 import { JournalTab } from "@/components/dashboard/JournalTab";
 import { VaultTab } from "@/components/dashboard/VaultTab";
+import { ChartAITab } from "@/components/dashboard/ChartAITab";
+import { SignalControlPanel } from "@/components/admin/SignalControlPanel";
 import { LeadMagnetSection } from "@/components/marketing/LeadMagnetSection";
 import { useRouter } from "next/navigation";
 
@@ -36,7 +38,7 @@ function FadeInSection({ children, className = "", delay = 0 }: { children: Reac
 export default function Home() {
   const { signals } = useSignals();
   const { user, loading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState<"journal" | "vault" | "profile" | null>(null);
+  const [activeTab, setActiveTab] = useState<"journal" | "vault" | "profile" | "chartai" | "admin" | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
@@ -47,7 +49,7 @@ export default function Home() {
     : 100;
   const activeCount = signals.filter(s => !s.closed).length;
 
-  const handleNavClick = (tab: "journal" | "vault" | "profile" | null) => {
+  const handleNavClick = (tab: "journal" | "vault" | "profile" | "chartai" | "admin" | null) => {
     if (tab && !user) {
       router.push("/auth");
       return;
@@ -97,7 +99,11 @@ export default function Home() {
                 <button onClick={() => handleNavClick(null)} className="hover:text-white transition-colors duration-300">Home</button>
                 <button onClick={() => { setActiveTab("vault"); handleNavClick("vault"); }} className="hover:text-white transition-colors duration-300">Vault</button>
                 <button onClick={() => { setActiveTab("journal"); handleNavClick("journal"); }} className="hover:text-white transition-colors duration-300">Journal</button>
-                <button onClick={() => { setActiveTab("profile"); handleNavClick("profile"); }} className="hover:text-white transition-colors duration-300">Profile</button>
+                <button onClick={() => { setActiveTab("profile"); handleNavClick("profile"); }} className="hover:text-white transition-colors duration-300">Analytics & Broker</button>
+                <button onClick={() => { setActiveTab("chartai"); handleNavClick("chartai"); }} className="hover:text-[#d4af37] transition-colors duration-300 font-semibold">Chart AI</button>
+                {user?.email === "dev@zenpips.com" && (
+                  <button onClick={() => { setActiveTab("admin"); handleNavClick("admin"); }} className="hover:text-red-400 transition-colors duration-300 border border-red-500/20 px-3 py-1 rounded-lg bg-red-500/5">Admin</button>
+                )}
               </>
             ) : (
               <>
@@ -193,10 +199,40 @@ export default function Home() {
                     <User className="w-4 h-4 text-yellow-400" />
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-semibold text-white group-hover:text-yellow-500 transition-colors">Profile</p>
-                    <p className="text-[10px] text-gray-500">Settings</p>
+                    <p className="text-sm font-semibold text-white group-hover:text-yellow-500 transition-colors">Analytics</p>
+                    <p className="text-[10px] text-gray-500">Broker & Settings</p>
                   </div>
                 </button>
+
+                {/* Chart AI */}
+                <button
+                  onClick={() => handleNavClick("chartai")}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/[0.05] hover:bg-blue-500/[0.12] border border-blue-500/20 hover:border-blue-500/40 transition-all group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <BarChart2 className="w-4 h-4 text-blue-400" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors">Chart AI</p>
+                    <p className="text-[10px] text-gray-500">Copy Trading</p>
+                  </div>
+                </button>
+
+                {/* Admin (Only if Dev) */}
+                {user?.email === "dev@zenpips.com" && (
+                  <button
+                    onClick={() => handleNavClick("admin")}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-500/[0.05] hover:bg-red-500/[0.12] border border-red-500/20 hover:border-red-500/40 transition-all group"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+                      <Zap className="w-4 h-4 text-red-400" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-semibold text-white group-hover:text-red-400 transition-colors">Admin Panel</p>
+                      <p className="text-[10px] text-gray-500">Direct Entry</p>
+                    </div>
+                  </button>
+                )}
 
                 {/* Free Group */}
                 <a
@@ -265,8 +301,22 @@ export default function Home() {
                 onClick={() => setActiveTab("profile")}
                 className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${activeTab === "profile" ? "bg-yellow-500 text-black shadow-[0_0_20px_rgba(212,175,55,0.3)]" : "bg-[#111] text-gray-400 hover:bg-white/5 hover:text-white border border-white/5"}`}
               >
-                Profile Settings
+                Analytics & Broker
               </button>
+              <button
+                onClick={() => setActiveTab("chartai")}
+                className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${activeTab === "chartai" ? "bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]" : "bg-[#111] text-gray-400 hover:bg-white/5 hover:text-white border border-white/5"}`}
+              >
+                Chart AI
+              </button>
+              {user?.email === "dev@zenpips.com" && (
+                <button
+                  onClick={() => setActiveTab("admin")}
+                  className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${activeTab === "admin" ? "bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.3)]" : "bg-[#111] text-gray-400 hover:bg-white/5 hover:text-white border border-white/5"}`}
+                >
+                  Admin Panel
+                </button>
+              )}
             </div>
           </FadeInSection>
 
@@ -276,6 +326,8 @@ export default function Home() {
               {activeTab === "journal" && <JournalTab />}
               {activeTab === "vault" && <VaultTab />}
               {activeTab === "profile" && <ProfileTab />}
+              {activeTab === "chartai" && <ChartAITab />}
+              {activeTab === "admin" && <SignalControlPanel />}
             </div>
           </FadeInSection>
         </section>

@@ -214,10 +214,93 @@ export function TradingTerminal() {
                         <div className="flex-1 overflow-y-auto">
                             {signals.map((sig, i) => {
                                 const isActive = sig.status === "ACTIVE";
+                                const isTp1 = sig.tp1_hit;
+                                const slMovedToEntry = sig.current_sl >= sig.entry && sig.direction === "BUY" || 
+                                                       sig.current_sl <= sig.entry && sig.direction === "SELL";
 
                                 // Format time from created_at
                                 const sigDate = new Date(sig.created_at);
                                 const timeStr = sigDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
+
+                                // Build activity timeline events
+                                const events: { icon: string; text: string; color: string; detail?: string }[] = [];
+                                
+                                events.push({
+                                    icon: "🎯",
+                                    text: `Entry placed at ${sig.entry}`,
+                                    color: "text-[#d4af37]",
+                                    detail: sig.confluence && !sig.confluence.includes("LOT OVERRIDE") ? sig.confluence : undefined
+                                });
+
+                                if (sig.tp1_hit) {
+                                    events.push({
+                                        icon: "✅",
+                                        text: `TP1 hit at ${sig.tp1}`,
+                                        color: "text-green-400",
+                                        detail: "First target secured — profit locked in."
+                                    });
+                                }
+                                
+                                if (isTp1 && slMovedToEntry) {
+                                    events.push({
+                                        icon: "🛡️",
+                                        text: `SL moved to ${sig.current_sl}`,
+                                        color: "text-blue-400",
+                                        detail: "Stop Loss moved to breakeven. This trade is now risk-free — capital fully protected while we target TP2 and TP3."
+                                    });
+                                } else if (sig.current_sl !== sig.sl) {
+                                    events.push({
+                                        icon: "🔄",
+                                        text: `SL adjusted to ${sig.current_sl}`,
+                                        color: "text-yellow-400",
+                                        detail: "Stop Loss updated to lock in partial profits and reduce exposure. Smart risk management in action."
+                                    });
+                                }
+
+                                if (sig.tp2_hit) {
+                                    events.push({
+                                        icon: "✅",
+                                        text: `TP2 hit at ${sig.tp2}`,
+                                        color: "text-green-400",
+                                        detail: "Second target reached — strong momentum confirmed."
+                                    });
+                                }
+                                if (sig.tp3_hit) {
+                                    events.push({
+                                        icon: "🏆",
+                                        text: `TP3 hit at ${sig.tp3}`,
+                                        color: "text-green-400",
+                                        detail: "Full target reached — maximum profit extracted. Trade complete."
+                                    });
+                                }
+                                if (sig.sl_hit) {
+                                    events.push({
+                                        icon: "🛑",
+                                        text: `SL hit at ${sig.current_sl}`,
+                                        color: "text-red-400",
+                                        detail: slMovedToEntry 
+                                            ? "Stopped at breakeven — no loss. Capital preserved for the next setup."
+                                            : "Stop Loss triggered. Risk was pre-calculated and contained."
+                                    });
+                                }
+
+                                // Status color mapping based on risk-management progression
+                                const isLoss = sig.sl_hit && !slMovedToEntry;
+                                const isBreakeven = sig.sl_hit && slMovedToEntry && !sig.tp2_hit;
+                                const isTp2Stop = (sig.sl_hit && sig.tp2_hit);
+
+                                const statusColor = sig.tp3_hit ? "text-green-400" 
+                                    : (isTp2Stop || (sig.tp2_hit && !sig.tp3_hit)) ? "text-yellow-400" 
+                                    : (isBreakeven || (sig.tp1_hit && !sig.tp2_hit)) ? "text-orange-400" 
+                                    : isLoss ? "text-red-400" 
+                                    : isActive ? "text-blue-400" 
+                                    : "text-gray-400";
+
+                                const statusDot = sig.tp3_hit ? "bg-green-500" 
+                                    : (isTp2Stop || (sig.tp2_hit && !sig.tp3_hit)) ? "bg-yellow-500" 
+                                    : (isBreakeven || (sig.tp1_hit && !sig.tp2_hit)) ? "bg-orange-500" 
+                                    : isLoss ? "bg-red-500" 
+                                    : "bg-blue-500";
 
                                 return (
                                     <div
@@ -242,57 +325,55 @@ export function TradingTerminal() {
                                             </span>
                                         </div>
 
-                                        {/* Status */}
+                                        {/* Status Badge */}
                                         <div className="flex items-center gap-1.5 mb-2">
-                                            {!isActive && (
-                                                <span className="relative flex h-1.5 w-1.5">
-                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
-                                                </span>
-                                            )}
-                                            {isActive && (
-                                                <span className="relative flex h-1.5 w-1.5">
-                                                    <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span>
-                                                </span>
-                                            )}
-                                            <span className={`text-[10px] font-mono font-bold ${isActive ? "text-blue-400" : "text-green-400"}`}>
+                                            <span className="relative flex h-1.5 w-1.5">
+                                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${statusDot} opacity-75`}></span>
+                                                <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${statusDot}`}></span>
+                                            </span>
+                                            <span className={`text-[10px] font-mono font-bold ${statusColor}`}>
                                                 {sig.status}
                                             </span>
                                             <span className="text-[9px] text-gray-600 ml-auto">{timeStr}</span>
                                         </div>
 
-                                        {/* Levels */}
+                                        {/* Levels Grid */}
                                         <div className="space-y-1 text-[10px]">
                                             <div className="flex justify-between">
                                                 <span className="text-gray-500">Entry</span>
-                                                <span className="text-[#d4af37] font-mono font-bold">{sig.entry.toLocaleString()}</span>
+                                                <span className="text-[#d4af37] font-mono font-bold">{sig.entry}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-gray-500">TP1</span>
                                                 <span className={`font-mono ${sig.tp1_hit ? "text-green-400 font-bold" : "text-gray-400"}`}>
-                                                    {sig.tp1.toLocaleString()} {sig.tp1_hit ? "✓" : ""}
+                                                    {sig.tp1} {sig.tp1_hit ? "✓" : ""}
                                                 </span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-gray-500">TP2</span>
                                                 <span className={`font-mono ${sig.tp2_hit ? "text-green-400 font-bold" : "text-gray-400"}`}>
-                                                    {sig.tp2.toLocaleString()} {sig.tp2_hit ? "✓" : ""}
+                                                    {sig.tp2} {sig.tp2_hit ? "✓" : ""}
                                                 </span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-gray-500">TP3</span>
                                                 <span className={`font-mono ${sig.tp3_hit ? "text-green-400 font-bold" : "text-gray-400"}`}>
-                                                    {sig.tp3.toLocaleString()} {sig.tp3_hit ? "✓" : ""}
+                                                    {sig.tp3} {sig.tp3_hit ? "✓" : ""}
                                                 </span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span className="text-gray-500">SL</span>
-                                                <span className="text-red-400 font-mono">{sig.sl.toLocaleString()}</span>
+                                                <span className="text-gray-500">Original SL</span>
+                                                <span className="text-red-400/50 font-mono line-through">{sig.sl}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-500 font-semibold">Current SL</span>
+                                                <span className={`font-mono font-bold ${slMovedToEntry ? "text-blue-400" : "text-red-400"}`}>
+                                                    {sig.current_sl} {slMovedToEntry ? "🛡️" : ""}
+                                                </span>
                                             </div>
                                         </div>
 
-                                        {/* Result */}
+                                        {/* Result Pips */}
                                         {sig.total_pips > 0 && (
                                             <div className="mt-2 pt-1.5 border-t border-white/5 flex justify-between items-center">
                                                 <span className="text-[9px] text-gray-500">Result</span>
@@ -300,10 +381,27 @@ export function TradingTerminal() {
                                             </div>
                                         )}
 
-                                        {/* Confluence */}
-                                        <p className="mt-1.5 text-[9px] text-gray-600 leading-relaxed italic">
-                                            {sig.confluence}
-                                        </p>
+                                        {/* Activity Timeline */}
+                                        <div className="mt-2 pt-2 border-t border-white/5">
+                                            <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-1.5 font-semibold">Activity</div>
+                                            <div className="space-y-1.5">
+                                                {events.map((evt, eIdx) => (
+                                                    <div key={eIdx} className="flex items-start gap-1.5">
+                                                        <span className="text-[10px] mt-0.5 flex-shrink-0">{evt.icon}</span>
+                                                        <div className="min-w-0">
+                                                            <div className={`text-[10px] font-mono font-semibold ${evt.color}`}>
+                                                                {evt.text}
+                                                            </div>
+                                                            {evt.detail && (
+                                                                <p className="text-[9px] text-gray-500 leading-snug mt-0.5">
+                                                                    {evt.detail}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 );
                             })}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { User, Shield, CreditCard, History, Settings, LogOut, ArrowLeft, Save, Loader2, Mail, AtSign, CheckCircle2 } from "lucide-react"
+import { User, Shield, CreditCard, History, Settings, LogOut, ArrowLeft, Save, Loader2, Mail, AtSign, CheckCircle2, Link, Zap } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { supabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
@@ -21,12 +21,14 @@ export function ProfileTab() {
   // Editable fields
   const [fullName, setFullName] = useState("")
   const [telegramUsername, setTelegramUsername] = useState("")
+  const [mt5AccountId, setMt5AccountId] = useState("")
 
   // Initialize form from user metadata
   useEffect(() => {
     if (user) {
       setFullName(user.user_metadata?.full_name || "")
       setTelegramUsername(user.user_metadata?.telegram_username || "")
+      setMt5AccountId(user.user_metadata?.mt5_account_id || "")
     }
   }, [user])
 
@@ -42,6 +44,7 @@ export function ProfileTab() {
       data: {
         full_name: fullName,
         telegram_username: telegramUsername,
+        mt5_account_id: mt5AccountId,
       },
     })
     setSaving(false)
@@ -97,10 +100,10 @@ export function ProfileTab() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
-              Dominator Profile
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-500 to-white bg-clip-text text-transparent">
+              Analytics Dashboard
             </h1>
-            <p className="text-gray-400 mt-2">Your command center. Manage your access, settings, and trading performance.</p>
+            <p className="text-gray-400 mt-2">Your command center. Track live performance and automate your edge.</p>
           </div>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -214,6 +217,109 @@ export function ProfileTab() {
             </div>
           </motion.div>
         </div>
+
+        {/* HFM Copy Trader Integration */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="bg-gradient-to-br from-[#1a1500] to-[#0a0a0a] rounded-2xl border border-[#d4af37]/30 overflow-hidden relative shadow-[0_0_40px_rgba(212,175,55,0.05)]"
+        >
+          {/* subtle gold glow behind */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/10 rounded-full blur-[80px] -mr-10 -mt-10 pointer-events-none" />
+          
+          <div className="p-8 md:p-10 flex flex-col md:flex-row gap-10 items-center">
+            <div className="flex-1 space-y-6 relative z-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs font-bold uppercase tracking-wider">
+                <Zap className="w-3.5 h-3.5 fill-yellow-500" /> Auto-Pilot Mode
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+                Automate Your Edge <br />
+                <span className="text-[#d4af37]">with HFM.</span>
+              </h2>
+              <p className="text-gray-400 text-lg leading-relaxed max-w-xl">
+                Stop manually punching in trades. Connect your account to our institutional Trade Copier and let the Zen Pips Bridge duplicate our sniper entries directly into your portfolio—with zero latency.
+              </p>
+              
+              <div className="space-y-5 pt-2">
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-sm font-bold mt-0.5">1</div>
+                  <div>
+                    <p className="font-semibold text-white">Open Your HFM Account</p>
+                    <p className="text-sm text-gray-400 mt-1">We exclusively partner with HFM (HotForex Markets) to ensure our members get raw, institutional-grade spreads on Gold (XAUUSD) and elite execution speeds. If your broker slips, our precision is useless.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-sm font-bold mt-0.5">2</div>
+                  <div>
+                    <p className="font-semibold text-white">Fund your Account</p>
+                    <p className="text-sm text-gray-400 mt-1">Start with a minimum of $100. We highly recommend $500+ for optimal risk management to safely match our 1% per trade model.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center shrink-0 border border-yellow-500/30 text-yellow-500 text-sm font-bold mt-0.5">3</div>
+                  <div>
+                    <p className="font-semibold text-white">Link MT5 ID</p>
+                    <p className="text-sm text-gray-400 mt-1">Save your MT5 ID to activate the copier.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 flex flex-wrap gap-4">
+                <a href="https://www.hfm.com/ke/en/?refid=30508914" target="_blank" rel="noopener noreferrer" className="bg-[#d4af37] text-black px-8 py-3.5 rounded-xl font-bold hover:brightness-110 transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+                  Create HFM Account
+                </a>
+              </div>
+            </div>
+            
+            {/* Right side input box */}
+            <div className="w-full md:w-[380px] bg-black/60 rounded-2xl p-6 border border-white/10 backdrop-blur-xl relative z-10 shrink-0 shadow-2xl">
+               <div className="mb-6">
+                 <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                   <Link className="w-5 h-5 text-gray-400" />
+                   Connection Portal
+                 </h3>
+                 <p className="text-sm text-gray-400">Enter your live MT5 Account ID to route signals dynamically.</p>
+               </div>
+
+               <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-xs text-gray-400 uppercase tracking-wider font-bold">HFM MT5 Account ID</label>
+                    <input
+                      type="text"
+                      value={mt5AccountId}
+                      onChange={(e) => setMt5AccountId(e.target.value)}
+                      className="w-full bg-black/50 p-3.5 rounded-xl border border-white/10 text-white focus:border-yellow-500/50 outline-none transition-colors font-mono"
+                      placeholder="e.g. 86213984"
+                    />
+                  </div>
+                  
+                  <button
+                    onClick={handleSave}
+                    disabled={saving || !mt5AccountId}
+                    className="w-full py-3.5 bg-white/5 text-white rounded-xl font-semibold hover:bg-white/10 transition-colors border border-white/10 flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Connection ID"}
+                  </button>
+
+                  {mt5AccountId && (
+                    <div className="mt-4 p-3 rounded-xl bg-green-500/10 border border-green-500/20 flex flex-col gap-2">
+                      <div className="flex items-center gap-3">
+                        <div className="mt-0.5">
+                          <span className="relative flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                          </span>
+                        </div>
+                        <p className="text-sm text-green-400 font-semibold">Active Connection</p>
+                      </div>
+                      <p className="text-xs text-green-400/80 leading-relaxed font-medium pl-6">Copier linked to <span className="font-mono text-white bg-black/50 px-1 rounded">{mt5AccountId}</span>. Listening for Zen Pips broadcasts.</p>
+                    </div>
+                  )}
+               </div>
+            </div>
+          </div>
+        </motion.div>
 
         {/* Account Settings */}
         <motion.div

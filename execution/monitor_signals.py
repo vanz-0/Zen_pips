@@ -23,7 +23,7 @@ import asyncio
 import time
 from datetime import datetime, timezone
 from dotenv import load_dotenv
-from telegram import Bot
+from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup
 import requests
 
 # Force UTF-8 encoding for stdout to handle emojis in Windows terminal
@@ -38,6 +38,9 @@ VIP_CHANNEL_ID = os.getenv("ZENPIPS_CHANNEL_ID")
 
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+
+WEBSITE_URL = "https://zenpips.com" 
+BROKER_LINK = "https://www.hfm.com/ke/en/?refid=30508914"
 
 HEADERS = {
     "apikey": SUPABASE_KEY,
@@ -57,18 +60,55 @@ def get_btc_price():
         return float(data["price"])
     except Exception as e:
         print(f"  [!] Error fetching BTC price: {e}")
-        return None
-
-
 def get_metals_price(symbol):
-    """Fetch gold/silver price. Uses multiple free sources with fallback."""
-    # Try TwelveData first (free tier: 800 calls/day)
+    """Fetch Gold/Silver prices from free public APIs."""
+    # Normalize to XAU/USD format for APIs that need it
+    sym_upper = symbol.upper().replace("/", "")
+    td_symbol = f"{sym_upper[:3]}/{sym_upper[3:]}"  # e.g. XAUUSD -> XAU/USD
+
+    # 1. GoldPrice.org (Very reliable if headers are correct)
+    try:
+        if "XAU" in sym_upper or "XAG" in sym_upper:
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept": "application/json",
+                "Referer": "https://goldprice.org/"
+            }
+            resp = requests.get(
+                "https://data-asg.goldprice.org/dbXRates/USD",
+                headers=headers,
+                timeout=10
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                items = data.get("items", [{}])
+                if items:
+                    key = "xauPrice" if "XAU" in sym_upper else "xagPrice"
+                    price = items[0].get(key)
+                    if price:
+                        return float(price)
+    except Exception as e:
+        print(f"    [!] GoldPrice.org Error: {e}")
+
+    # 2. Metals.dev (Demo key fallback)
+    try:
+        resp = requests.get("https://api.metals.dev/v1/latest?api_key=demo&currency=USD&unit=toz", timeout=10)
+        data = resp.json()
+        if "metals" in data:
+            key = "gold" if "XAU" in sym_upper else "silver"
+            price = data["metals"].get(key)
+            if price:
+                return float(price)
+    except Exception:
+        pass
+
+    # 3. TwelveData Fallback
     twelve_data_key = os.getenv("TWELVE_DATA_API_KEY", "")
     if twelve_data_key:
         try:
             resp = requests.get(
-                f"https://api.twelvedata.com/price",
-                params={"symbol": f"{symbol}", "apikey": twelve_data_key},
+                "https://api.twelvedata.com/price",
+                params={"symbol": td_symbol, "apikey": twelve_data_key},
                 timeout=10
             )
             data = resp.json()
@@ -77,49 +117,60 @@ def get_metals_price(symbol):
         except Exception:
             pass
 
-    # Fallback: use metals.dev free API
-    try:
-        metal_code = "XAU" if "XAU" in symbol.upper() else "XAG"
-        resp = requests.get(f"https://api.metals.dev/v1/latest?api_key=demo&currency=USD&unit=toz", timeout=10)
-        data = resp.json()
-        if "metals" in data:
-            key = "gold" if metal_code == "XAU" else "silver"
-            price = data["metals"].get(key)
-            if price:
-                return float(price)
-    except Exception:
-        pass
-
-    # Fallback 2: use exchangerate API
-    try:
-        resp = requests.get(f"https://open.er-api.com/v6/latest/XAU", timeout=10)
-        data = resp.json()
-        if symbol.upper() == "XAUUSD" and "rates" in data:
-            return 1 / data["rates"]["USD"] if data["rates"].get("USD") else None
-    except Exception:
-        pass
-
     print(f"  [!] Could not fetch price for {symbol} from any source")
     return None
 
 
+import MetaTrader5 as mt5
+
+def get_mt5_price(symbol):
+    """Fetch current price directly from MT5 terminal if available."""
+    try:
+        if not mt5.initialize():
+            return None
+        
+        # Normalize symbol for HFM/OANDA (e.g. XAU/USD -> XAUUSD)
+        clean_symbol = symbol.replace("/", "")
+        
+        # Check if visible in Market Watch
+        mt5.symbol_select(clean_symbol, True)
+        symbol_info = mt5.symbol_info(clean_symbol)
+        
+        if symbol_info:
+            tick = mt5.symbol_info_tick(clean_symbol)
+            if tick:
+                # Use Mid Price or Bid/Ask depending on direction? We use Mid for tracking
+                return (tick.bid + tick.ask) / 2
+    except Exception as e:
+        print(f"    [!] MT5 Price Error: {e}")
+    return None
+
 def get_current_price(signal):
-    """Get current price for a signal based on its source type."""
+    """Get current price for a signal. Priority: MT5 Terminal -> APIs."""
     ticker = signal.get("ticker", "Unknown")
     source = signal.get("source", "unknown")
     
-    print(f"    [DEBUG] Fetching {ticker} price from {source}...")
+    print(f"    [DEBUG] Checking {ticker} price...")
     
-    price = None
-    if source == "binance":
+    # 1. Primary: MT5 (Only if running locally)
+    price = get_mt5_price(ticker)
+    if price:
+        print(f"    [OK] Got MT5 price for {ticker}: {price:,.2f}")
+        return price
+        
+    # 2. Secondary: Specialist APIs (for Modal/Cloud)
+    if "BTC" in ticker or "ETH" in ticker:
         price = get_btc_price()
-    elif source == "metals":
-        price = get_metals_price(signal["ticker"])
+    elif "XAU" in ticker or "XAG" in ticker:
+        price = get_metals_price(ticker)
+    else:
+        # Defaults to TwelveData for FX or others
+        price = get_metals_price(ticker)
     
     if price is None:
-        print(f"    [!] FAILED to fetch {ticker} price from {source}")
+        print(f"    [!] FAILED to fetch {ticker} price from any source")
     else:
-        print(f"    [DEBUG] Got {ticker} price: {price:,.2f}")
+        print(f"    [OK] Got API price: {price:,.2f}")
         
     return price
 
@@ -226,7 +277,8 @@ def apply_events(signal, events):
 
         elif event == "TP2_HIT":
             signal["tp2_hit"] = True
-            signal["status"] = "TP2 HIT - RISK-FREE"
+            signal["current_sl"] = signal["tp1"]  # Move SL to TP1
+            signal["status"] = "TP2 HIT - SL AT TP1"
             total_new_pips += pips
 
         elif event == "TP3_HIT":
@@ -258,7 +310,7 @@ def format_tp_hit_message(signal, event, pips, current_price):
     if event == "TP1_HIT":
         action_note = "🔒 <b>SL moved to entry — RISK ELIMINATED.</b>"
     elif event == "TP2_HIT":
-        action_note = "🔒 <b>Running risk-free. Trailing for TP3.</b>"
+        action_note = "🔒 <b>SL moved to TP1. Trailing for TP3.</b>"
     elif event == "TP3_HIT":
         action_note = "🏆 <b>FULL SWEEP! All targets destroyed.</b>"
     elif event == "BREAK_EVEN":
@@ -275,6 +327,9 @@ def format_tp_hit_message(signal, event, pips, current_price):
 
     pips_display = f"+{pips:,}" if pips > 0 else f"{pips:,}" if pips < 0 else "0"
 
+    analysis = signal.get("confluence", "")
+    analysis_block = f"🧠 <i>Analysis:</i> {analysis}\n\n" if analysis else ""
+
     return (
         f"{emoji} <b>ZEN PIPS — {event_label}</b> {emoji}\n"
         f"📊 <b>{signal['pair']} ({signal['timeframe']}) — {signal['direction']}</b>\n\n"
@@ -284,6 +339,7 @@ def format_tp_hit_message(signal, event, pips, current_price):
         f"📈 <b>This target: {pips_display} Pips</b>\n"
         f"💰 <b>Trade total: +{signal['total_pips']:,} Pips</b>\n\n"
         f"{action_note}\n\n"
+        f"{analysis_block}"
         f"<i>Zen Pips. Discipline is the strategy.</i> 📈"
     )
 
@@ -292,12 +348,42 @@ async def send_notification(bot, signal, event, pips, current_price):
     """Send TP/SL hit notification to both VIP and Free groups."""
     message = format_tp_hit_message(signal, event, pips, current_price)
 
-    # Send to Free group
-    try:
-        await bot.send_message(chat_id=FREE_GROUP_ID, text=message, parse_mode='HTML', disable_web_page_preview=True)
-        print(f"    ✓ Free group notified")
-    except Exception as e:
-        print(f"    ✗ Free group error: {e}")
+    # Build Interactive Buttons
+    keyboard = [
+        [
+            InlineKeyboardButton("📊 View Live Chart", url=f"{WEBSITE_URL}?tab=chartai&signal={signal['id']}"),
+            InlineKeyboardButton("🏦 Trade with HFM", url=BROKER_LINK),
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # Send to Free group (Marketing)
+    if FREE_GROUP_ID:
+        try:
+            await bot.send_message(
+                chat_id=FREE_GROUP_ID, 
+                text=message, 
+                parse_mode='HTML', 
+                disable_web_page_preview=True,
+                reply_markup=reply_markup
+            )
+            print(f"    ✓ Free group notified")
+        except Exception as e:
+            print(f"    ✗ Free group error: {e}")
+
+    # Send to VIP group (Execution)
+    if VIP_CHANNEL_ID:
+        try:
+            await bot.send_message(
+                chat_id=VIP_CHANNEL_ID, 
+                text=message, 
+                parse_mode='HTML', 
+                disable_web_page_preview=True,
+                reply_markup=reply_markup
+            )
+            print(f"    ✓ VIP channel notified")
+        except Exception as e:
+            print(f"    ✗ VIP channel error: {e}")
 
     await asyncio.sleep(0.5)
 
@@ -337,7 +423,7 @@ async def check_all_signals():
             last_checked = datetime.fromisoformat(signal["created_at"].replace("Z", "+00:00"))
         
         minutes_since = (now - last_checked).total_seconds() / 60
-        interval = signal.get("check_interval_minutes", 15)
+        interval = signal.get("check_interval_minutes", 5)
 
         if minutes_since < interval:
             remaining = round(interval - minutes_since)
