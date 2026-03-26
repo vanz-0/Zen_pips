@@ -82,9 +82,25 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
             sig_data = json.loads(signal_json_str)
             global last_proposed_signal
             last_proposed_signal = sig_data
-            keyboard = [[InlineKeyboardButton("✅ CONFIRM & EXECUTE", callback_data="exec_sig_now")]]
-            await update.message.reply_text(f"📦 <b>EXTRACTED:</b>\n<pre>{json.dumps(sig_data, indent=2)}</pre>", parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard))
-        except: await update.message.reply_text("❌ Error.")
+
+            # Zen Pips Institutional Proposal Layout
+            action_emoji = "🟢 BUY" if sig_data.get('direction', '').upper() == 'BUY' else "🔴 SELL"
+            
+            proposal_msg = (
+                f"✅ <b>PROPOSED SIGNAL:</b>\n\n"
+                f"📊 <b>Pair:</b> {sig_data.get('pair', 'Unknown')}\n"
+                f"⚡️ <b>Action:</b> {action_emoji}\n"
+                f"⏱ <b>Timeframe:</b> {sig_data.get('timeframe', 'M15')}\n\n"
+                f"🎯 <b>Entry:</b> <code>{sig_data.get('entry', '0.00')}</code>\n"
+                f"🛑 <b>Stop Loss:</b> <code>{sig_data.get('sl', '0.00')}</code>\n\n"
+                f"🧠 <i>Review the parameters above before broadcasting.</i>"
+            )
+            
+            keyboard = [[InlineKeyboardButton("🚀 BROADCAST TO VIP", callback_data="exec_sig_now")]]
+            await update.message.reply_text(proposal_msg, parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard))
+        except Exception as e:
+            logger.error(f"Format error: {e}")
+            await update.message.reply_text("❌ Error formatting signal proposal.")
 
 async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query

@@ -39,7 +39,7 @@ VIP_CHANNEL_ID = os.getenv("ZENPIPS_CHANNEL_ID")
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
-WEBSITE_URL = "https://zenpips.com" 
+WEBSITE_URL = "https://zenpips.netlify.app" 
 BROKER_LINK = "https://www.hfm.com/ke/en/?refid=30508914"
 
 HEADERS = {
@@ -308,15 +308,15 @@ def format_tp_hit_message(signal, event, pips, current_price):
     emoji = "🎯" if "TP" in event else "⚖️" if "BREAK" in event else "🛑"
 
     if event == "TP1_HIT":
-        action_note = "🔒 <b>SL moved to entry — RISK ELIMINATED.</b>"
+        action_note = "🛡 <b>ENTRY SECURED. SL moved to breakeven — Risk is now ZERO.</b>"
     elif event == "TP2_HIT":
-        action_note = "🔒 <b>SL moved to TP1. Trailing for TP3.</b>"
+        action_note = "📈 <b>INSTITUTIONAL PRECISION. SL moved to TP1 — Profits Locked.</b>"
     elif event == "TP3_HIT":
-        action_note = "🏆 <b>FULL SWEEP! All targets destroyed.</b>"
+        action_note = "💎 <b>MARKET CONQUERED. All targets hit — Pure Dominance.</b>"
     elif event == "BREAK_EVEN":
-        action_note = "⚖️ <b>Trade closed at break-even. Capital preserved.</b>"
+        action_note = "⚖️ <b>Trade neutralized at break-even. Capital preserved.</b>"
     elif event == "SL_HIT":
-        action_note = "🛑 <b>Stopped out. Risk was managed.</b>"
+        action_note = "🛑 <b>Stopped out. Strategic risk management applied.</b>"
     else:
         action_note = ""
 
@@ -331,16 +331,16 @@ def format_tp_hit_message(signal, event, pips, current_price):
     analysis_block = f"🧠 <i>Analysis:</i> {analysis}\n\n" if analysis else ""
 
     return (
-        f"{emoji} <b>ZEN PIPS — {event_label}</b> {emoji}\n"
+        f"{emoji} <b>ZEN PIPS | {event_label}</b> {emoji}\n"
         f"📊 <b>{signal['pair']} ({signal['timeframe']}) — {signal['direction']}</b>\n\n"
-        f"⏱ Current Price: <code>{current_price:,.2f}</code>\n\n"
+        f"💰 Existing Profits: <code>{pips_display} Pips</code>\n"
+        f"🏆 Total Portfolio Gain: <code>+{signal['total_pips']:,} Pips</code>\n\n"
+        f"<b>STATUS UPDATE:</b>\n"
         f"{tp_status}"
-        f"• SL: <code>{signal['current_sl']}</code>\n\n"
-        f"📈 <b>This target: {pips_display} Pips</b>\n"
-        f"💰 <b>Trade total: +{signal['total_pips']:,} Pips</b>\n\n"
+        f"🛡 Current SL: <code>{signal['current_sl']}</code>\n\n"
         f"{action_note}\n\n"
-        f"{analysis_block}"
-        f"<i>Zen Pips. Discipline is the strategy.</i> 📈"
+        f"<i>Discipline is not just a rule; it's the edge. Join the dominators.</i>\n"
+        f"📈 #CHARTAI #ZENPIPS #MARKETDOMINANCE"
     )
 
 

@@ -14,7 +14,7 @@ load_dotenv(env_path)
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 VIP_CHANNEL_ID = os.getenv("ZENPIPS_CHANNEL_ID")
 BROKER_LINK = "https://www.hfm.com/ke/en/?refid=30508914"
-WEBSITE_URL = "https://zenpips.com" # Update to your live URL if different
+WEBSITE_URL = "https://zenpips.netlify.app" # Update to your live URL if different
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
@@ -25,14 +25,17 @@ async def send_to_telegram(signal_text, signal_id=None):
     
     bot = Bot(token=TELEGRAM_BOT_TOKEN)
 
+    # If we have a signal ID, append it. Otherwise default to the live app.
+    chart_url = f"{WEBSITE_URL}/?tab=chartai&signal={signal_id}" if signal_id and signal_id != "0" else WEBSITE_URL
+    
     # Build Interactive Buttons
     keyboard = [
         [
-            InlineKeyboardButton("🚀 Copy on Website", url=f"https://zenpips.com/dashboard?signal={signal_id}"),
-            InlineKeyboardButton("⚡ EXECUTE ORDER", url="https://zenpips.com/dashboard/chart-ai")
+            InlineKeyboardButton("🚀 Open Live Chart", url=chart_url),
+            InlineKeyboardButton("⚡ EXECUTE ORDER", url=chart_url)
         ],
         [
-            InlineKeyboardButton("💎 Join Broker (HFM)", url="https://active.hfm.com/en/market/trading-account/live?refid=383084"),
+            InlineKeyboardButton("💎 Join Broker (HFM)", url=BROKER_LINK),
             InlineKeyboardButton("💬 Support", url="https://t.me/ZenPipsSupport_Bot")
         ]
     ]
@@ -134,22 +137,37 @@ def main():
 
     # 1. Format Telegram Message
     action_emoji = "🟢" if args.direction == "BUY" else "🔴"
+    direction_word = "bullish" if args.direction == "BUY" else "bearish"
+    direction_icon = "📈" if args.direction == "BUY" else "📉"
     
-    telegram_msg = f"""⚡️ <b>NEW SIGNAL</b> ⚡️
+    telegram_msg = f"""📊 <b>{args.pair} {args.timeframe} Analysis</b> {direction_icon}
 
-{action_emoji} <b>{args.pair} | {args.direction}</b>
-⏱ Timeframe: {args.timeframe}
+Our structure and liquidity analysis is pointing to a <b>{direction_word}</b> move on {args.pair}. The market has shown us enough confluence at this level to execute.
 
-🎯 <b>Entry:</b> {args.entry}
-🛑 <b>SL:</b> {args.sl}
+{direction_icon} <b>According to our structure and liquidity view, we are expecting {direction_word} continuation from here.</b>
 
-✅ <b>TP1:</b> {args.tp1}
-✅ <b>TP2:</b> {args.tp2}
-✅ <b>TP3:</b> {args.tp3}
+🧠 <b>Institutional Edge:</b> <i>{args.confluence}</i>
 
-🧠 <i>Analysis:</i> {args.confluence}
+⚠️ We have confirmed our entry. As always, proper risk management is mandatory.
 
-#ZENPIPS #SIGNAL"""
+──────────────────
+
+{action_emoji} <b>LIVE SIGNAL: {args.pair} | {args.direction}</b>
+⏱ Timeframe: <code>{args.timeframe}</code>
+
+🎯 <b>Entry:</b> <code>{args.entry}</code>
+🛑 <b>Stop Loss:</b> <code>{args.sl}</code>
+
+✅ <b>TP 1:</b> <code>{args.tp1}</code>  (1:1 RR)
+✅ <b>TP 2:</b> <code>{args.tp2}</code>  (1:2 RR)
+✅ <b>TP 3:</b> <code>{args.tp3}</code>  (1:3 RR)
+
+──────────────────
+
+Trade with logic, not emotions. 🧠📊
+<i>Stay disciplined | Trade with a plan | Manage your risk</i>
+
+#ZENPIPS #SIGNAL #{args.pair.replace("/", "")}"""
 
     print("--- Executing Signal Processing ---")
     

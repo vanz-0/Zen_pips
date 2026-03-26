@@ -6,9 +6,13 @@ import json
 import time
 import hashlib
 import fitz  # PyMuPDF
+import io
 from supabase import create_client, Client
 from openai import OpenAI
 from dotenv import load_dotenv
+
+if sys.stdout.encoding != 'UTF-8':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='UTF-8')
 
 # Load env variables
 base_dir = os.path.dirname(os.path.dirname(__file__))
@@ -156,7 +160,7 @@ def process_pdf(pdf_path, process_images=True, start_page=0, max_pages=None):
     file_hash = get_file_hash(pdf_path)
     processed_hashes = load_processed_hashes()
     if file_hash in processed_hashes:
-        print(f"  \u23ed\ufe0f Skipping {source_name} - Already processed (Hash: {file_hash[:8]}).")
+        print(f"  [SKIP] Skipping {source_name} - Already processed (Hash: {file_hash[:8]}).")
         return
     
     doc = fitz.open(pdf_path)
@@ -168,7 +172,7 @@ def process_pdf(pdf_path, process_images=True, start_page=0, max_pages=None):
 
     first_page_text = doc.load_page(0).get_text()
     category = categorize_pdf(source_name, first_page_text)
-    print(f"  \ud83d\udcc2 Assigned Category: [{category}]")
+    print(f"  [CAT] Assigned Category: [{category}]")
 
     end_page = total_pages
     if max_pages is not None:
