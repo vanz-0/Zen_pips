@@ -4,6 +4,7 @@ import "./globals.css";
 import ChatWidget from "@/components/ChatWidget";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { AuthProvider } from "@/context/AuthContext";
+import { ExternalLink } from "lucide-react";
 
 const inter = Inter({
   variable: "--font-inter",

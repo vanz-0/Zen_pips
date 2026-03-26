@@ -16,7 +16,7 @@ interface VaultResource {
     description: string
     type: "PDF" | "Video" | "Course" | "Audio"
     category: string
-    level: "Foundation" | "Intermediate" | "Elite"
+    level: "Beginner" | "Intermediate" | "Advanced"
     locked: boolean
     file_path?: string | null
     external_url?: string | null
@@ -24,9 +24,9 @@ interface VaultResource {
 }
 
 const LEVEL_COLORS: Record<string, string> = {
-    Foundation: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+    Beginner: "text-blue-400 bg-blue-500/10 border-blue-500/20",
     Intermediate: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20",
-    Elite: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+    Advanced: "text-purple-400 bg-purple-500/10 border-purple-500/20",
 }
 
 const TYPE_ICONS: Record<string, typeof FileText> = {
@@ -36,22 +36,22 @@ const TYPE_ICONS: Record<string, typeof FileText> = {
     Audio: Headphones,
 }
 
-// Default resources (used if no Supabase vault_resources table exists yet)
+// Default resources (Premium content structure)
 const DEFAULT_RESOURCES: VaultResource[] = [
-    { id: "1", title: "Zen Pips: The Institutional Playbook", description: "Complete institutional trading strategy breakdown with real-world case studies.", type: "PDF", category: "Strategy", level: "Elite", locked: false, file_path: null, external_url: null, created_at: "" },
-    { id: "2", title: "Market Structure Mastery", description: "Deep dive into market structure, BOS, CHoCH, and institutional orderflow.", type: "PDF", category: "Technical Analysis", level: "Intermediate", locked: false, file_path: null, external_url: null, created_at: "" },
-    { id: "3", title: "Risk Management & Psychology", description: "The mental edge: discipline, position sizing, and emotional control.", type: "PDF", category: "Psychology", level: "Foundation", locked: false, file_path: null, external_url: null, created_at: "" },
-    { id: "4", title: "Advanced Orderflow Techniques", description: "Institutional order blocks, FVGs, breakers, and liquidity sweeps.", type: "Course", category: "Strategy", level: "Elite", locked: true, file_path: null, external_url: null, created_at: "" },
-    { id: "5", title: "Candlestick Psychology", description: "Understanding what each candle tells you about the battle between buyers and sellers.", type: "PDF", category: "Technical Analysis", level: "Foundation", locked: false, file_path: null, external_url: null, created_at: "" },
-    { id: "6", title: "Smart Money Concepts (SMC)", description: "The complete guide to trading with the institutions, not against them.", type: "Video", category: "Strategy", level: "Intermediate", locked: false, file_path: null, external_url: null, created_at: "" },
-    { id: "7", title: "Live Session Recordings", description: "Weekly live trading session recordings with real-time commentary.", type: "Video", category: "Live Sessions", level: "Elite", locked: true, file_path: null, external_url: null, created_at: "" },
-    { id: "8", title: "Trader's Morning Routine", description: "Audio guide: the pre-market ritual of a disciplined trader.", type: "Audio", category: "Psychology", level: "Foundation", locked: false, file_path: null, external_url: null, created_at: "" },
+    { id: "1", title: "SMC: Market Structure 101", description: "The foundation of Smart Money: BOS, CHoCH, and identifying true trend shifts.", type: "PDF", category: "Smart Money Concepts", level: "Beginner", locked: false, file_path: null, external_url: null, created_at: "" },
+    { id: "2", title: "ICT: Internal Liquidity Mastery", description: "Learn to identify buy-side and sell-side liquidity before the banks move.", type: "PDF", category: "ICT", level: "Beginner", locked: false, file_path: null, external_url: null, created_at: "" },
+    { id: "3", title: "Risk Management & Psychology", description: "The mental edge: discipline, position sizing, and institutional emotional control.", type: "PDF", category: "Psychology", level: "Beginner", locked: false, file_path: null, external_url: null, created_at: "" },
+    { id: "4", title: "Advanced Institutional Orderflow", description: "Deep dive into Order Blocks, FVGs, and Breaker Block manipulation.", type: "PDF", category: "Strategy", level: "Intermediate", locked: true, file_path: null, external_url: null, created_at: "" },
+    { id: "5", title: "Market Manipulation Cycles", description: "Identifying the AMD (Accumulation, Manipulation, Distribution) power of 3.", type: "Video", category: "Strategy", level: "Intermediate", locked: true, file_path: null, external_url: null, created_at: "" },
+    { id: "6", title: "Elite ICT Mentorship: Core 2026", description: "Full breakdown of the 2026 institutional model and silver bullet strategies.", type: "Video", category: "ICT", level: "Advanced", locked: true, file_path: null, external_url: null, created_at: "" },
+    { id: "7", title: "Live Session: High Frequency Analysis", description: "Weekly live institutional trading session recordings with real-time commentary.", type: "Video", category: "Live Sessions", level: "Advanced", locked: true, file_path: null, external_url: null, created_at: "" },
+    { id: "8", title: "The Institutional Playbook (Final)", description: "The complete Zen Pips methodology from A to Z for advanced operators.", type: "PDF", category: "Strategy", level: "Advanced", locked: true, file_path: null, external_url: null, created_at: "" },
 ]
 
-const ALL_CATEGORIES = ["All", "Strategy", "Technical Analysis", "Psychology", "Live Sessions"]
+const ALL_CATEGORIES = ["All", "Smart Money Concepts", "ICT", "Strategy", "Psychology", "Live Sessions"]
 
 export function VaultTab() {
-    const { user, loading: authLoading } = useAuth()
+    const { user, profile, loading: authLoading } = useAuth()
     const router = useRouter()
     const [resources, setResources] = useState<VaultResource[]>(DEFAULT_RESOURCES)
     const [loading, setLoading] = useState(true)
@@ -136,9 +136,9 @@ export function VaultTab() {
                         </select>
                         <select value={level} onChange={(e) => setLevel(e.target.value)} className="bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-yellow-500/50 outline-none text-white">
                             <option>All</option>
-                            <option>Foundation</option>
+                            <option>Beginner</option>
                             <option>Intermediate</option>
-                            <option>Elite</option>
+                            <option>Advanced</option>
                         </select>
                     </div>
                 </div>
@@ -152,6 +152,13 @@ export function VaultTab() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filtered.map((resource, i) => {
                             const TypeIcon = TYPE_ICONS[resource.type] || FileText
+                            
+                            // ─── Custom Gating Logic ───
+                            const isVIP = profile?.is_vip || profile?.plan === 'VIP';
+                            
+                            // Gating logic: Beginner is FREE. Intermediate/Advanced is VIP.
+                            const isFinallyLocked = !isVIP && (resource.level === 'Intermediate' || resource.level === 'Advanced');
+
                             return (
                                 <motion.div
                                     key={resource.id}
@@ -172,7 +179,7 @@ export function VaultTab() {
                                                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter border ${LEVEL_COLORS[resource.level]}`}>
                                                     {resource.level}
                                                 </span>
-                                                {resource.locked && (
+                                                {isFinallyLocked && (
                                                     <div className="flex items-center gap-1 px-2 py-0.5 bg-white/5 rounded-md border border-white/10">
                                                         <Lock className="w-3 h-3 text-gray-500" />
                                                         <span className="text-[10px] text-gray-400 uppercase font-bold tracking-tighter">VIP</span>
@@ -201,7 +208,7 @@ export function VaultTab() {
                                                 : "bg-white text-black hover:bg-yellow-500 transition-colors"
                                                 }`}
                                         >
-                                            {resource.locked ? (
+                                            {isFinallyLocked ? (
                                                 <>Unlock with Lifetime VIP</>
                                             ) : resource.file_path || resource.external_url ? (
                                                 <>Access Resource <ExternalLink className="w-4 h-4" /></>

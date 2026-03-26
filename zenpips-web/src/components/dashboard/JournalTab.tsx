@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
     Book, Plus, TrendingUp, AlertCircle, CheckCircle2, XCircle,
-    Brain, ArrowLeft, Loader2, Target, BarChart3, Flame
+    Brain, ArrowLeft, Loader2, Target, BarChart3, Flame, Calendar as CalendarIcon, ChevronLeft, ChevronRight
 } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { supabase } from "@/lib/supabase"
@@ -25,6 +25,15 @@ interface JournalEntry {
     signal_id?: string | null
     created_at: string
 }
+
+// ─── Calendar Logic Helpers ───
+const getDaysInMonth = (month: number, year: number) => {
+    return new Date(year, month + 1, 0).getDate();
+};
+
+const getFirstDayOfMonth = (month: number, year: number) => {
+    return new Date(year, month, 1).getDay();
+};
 
 export function JournalTab() {
     const { user, loading: authLoading } = useAuth()
@@ -62,6 +71,19 @@ export function JournalTab() {
         }
         setLoading(false)
     }, [user])
+
+    // Calendar state
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const daysInMonth = getDaysInMonth(currentDate.getMonth(), currentDate.getFullYear());
+    const firstDay = getFirstDayOfMonth(currentDate.getMonth(), currentDate.getFullYear());
+    
+    const journaledDates = new Set(entries.map(e => e.date));
+
+    // Automated entry logic: Find signals taken but not journaled
+    const pendingJournalSignals = signals.filter(s => 
+        (s.status === 'ALL TPs HIT' || s.status === 'SL HIT' || s.status === 'CLOSED - BREAK EVEN') && 
+        !entries.some(e => e.signal_id === s.id)
+    );
 
     useEffect(() => {
         if (user) fetchEntries()
@@ -173,32 +195,109 @@ export function JournalTab() {
                     ))}
                 </div>
 
-                {/* Signal Analysis Bar */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-[#111] p-4 rounded-xl border border-white/5 flex items-center gap-3">
-                        <div className="p-2 bg-green-500/10 rounded-lg"><Target className="w-5 h-5 text-green-500" /></div>
-                        <div>
-                            <p className="text-xs text-gray-400 uppercase tracking-wider">Signals Taken</p>
-                            <p className="text-xl font-bold text-green-400">{takenSignals.length}</p>
+                {/* Calendar Interface */}
+                <div className="bg-[#111] p-6 rounded-2xl border border-white/5 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <CalendarIcon className="w-5 h-5 text-yellow-500" />
+                            <h2 className="text-xl font-bold">Discipline Tracker</h2>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <span className="text-sm font-bold text-gray-400">
+                                {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                            </span>
+                            <div className="flex gap-1">
+                                <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))} className="p-1 hover:bg-white/5 rounded"><ChevronLeft className="w-4 h-4" /></button>
+                                <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))} className="p-1 hover:bg-white/5 rounded"><ChevronRight className="w-4 h-4" /></button>
+                            </div>
                         </div>
                     </div>
-                    <div className="bg-[#111] p-4 rounded-xl border border-white/5 flex items-center gap-3">
-                        <div className="p-2 bg-red-500/10 rounded-lg"><AlertCircle className="w-5 h-5 text-red-500" /></div>
-                        <div>
-                            <p className="text-xs text-gray-400 uppercase tracking-wider">Signals Missed</p>
-                            <p className="text-xl font-bold text-red-400">{missedSignals.length}</p>
-                        </div>
-                    </div>
-                    <div className="bg-[#111] p-4 rounded-xl border border-white/5 flex items-center gap-3">
-                        <div className="p-2 bg-yellow-500/10 rounded-lg"><Flame className="w-5 h-5 text-yellow-500" /></div>
-                        <div>
-                            <p className="text-xs text-gray-400 uppercase tracking-wider">Win Streak</p>
-                            <p className="text-xl font-bold text-yellow-400">
-                                {entries.reduce((streak, e) => e.outcome === "Profit" ? streak + 1 : 0, 0)}
-                            </p>
-                        </div>
+
+                    <div className="grid grid-cols-7 gap-2">
+                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                            <div key={d} className="text-[10px] text-gray-600 uppercase font-black text-center">{d}</div>
+                        ))}
+                        {Array.from({ length: firstDay }).map((_, i) => (
+                            <div key={`empty-${i}`} className="aspect-square bg-transparent" />
+                        ))}
+                        {Array.from({ length: daysInMonth }).map((_, i) => {
+                            const day = i + 1;
+                            const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                            const hasJournal = journaledDates.has(dateStr);
+                            const isToday = new Date().toDateString() === new Date(currentDate.getFullYear(), currentDate.getMonth(), day).toDateString();
+
+                            return (
+                                <div
+                                    key={day}
+                                    className={`aspect-square rounded-lg border flex items-center justify-center transition-all relative group cursor-pointer ${
+                                        hasJournal 
+                                            ? "bg-yellow-500/20 border-yellow-500/50 text-yellow-500" 
+                                            : isToday 
+                                                ? "bg-white/5 border-white/20 text-white" 
+                                                : "bg-white/[0.02] border-white/5 text-gray-700 hover:border-white/10"
+                                    }`}
+                                    onClick={() => {
+                                        setForm(prev => ({ ...prev, date: dateStr }));
+                                        setShowAdd(true);
+                                    }}
+                                >
+                                    <span className="text-xs font-bold">{day}</span>
+                                    {hasJournal && <div className="absolute top-1 right-1 w-1 h-1 rounded-full bg-yellow-500" />}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
+
+                {/* Pending Journals (Automated Feed) */}
+                {pendingJournalSignals.length > 0 && (
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                            <Flame className="w-5 h-5 text-orange-500" />
+                            <h2 className="text-xl font-bold">Awaiting Your Analysis</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {pendingJournalSignals.map(sig => (
+                                <motion.div
+                                    key={sig.id}
+                                    whileHover={{ y: -2 }}
+                                    className="bg-white/[0.03] border border-white/5 rounded-xl p-4 flex flex-col justify-between gap-4"
+                                >
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">{sig.pair}</p>
+                                            <p className={`text-lg font-bold ${sig.status?.includes('TP') ? 'text-green-500' : 'text-red-500'}`}>
+                                                {sig.status?.includes('TP') ? 'Profit Target Hit' : 'Exit Realized'}
+                                            </p>
+                                        </div>
+                                        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${sig.direction === 'BUY' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                                            {sig.direction}
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            setForm({
+                                                date: sig.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+                                                pair: sig.pair,
+                                                direction: sig.direction as any,
+                                                pips: sig.total_pips || 0,
+                                                outcome: sig.status?.includes('TP') ? 'Profit' : 'Loss',
+                                                psychology: "",
+                                                mistake: "None",
+                                                notes: "",
+                                                signal_id: sig.id
+                                            });
+                                            setShowAdd(true);
+                                        }}
+                                        className="w-full py-2 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500 text-xs font-bold rounded-lg transition-colors border border-yellow-500/20"
+                                    >
+                                        Add Analysis to Journal
+                                    </button>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Entries Table */}
                 <div className="bg-[#111] rounded-2xl border border-white/5 overflow-hidden">

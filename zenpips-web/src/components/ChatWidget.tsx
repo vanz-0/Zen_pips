@@ -3,8 +3,10 @@
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Terminal, X, Send, Bot, ExternalLink, Loader2 } from "lucide-react"
+import { useAuth } from "@/context/AuthContext"
 
 export default function ChatWidget() {
+    const { user } = useAuth()
     const [isOpen, setIsOpen] = useState(false)
     const [messages, setMessages] = useState([
         { role: "assistant", content: "Zen Pips Terminal active. Query institutional parameters, SOPs, or trading framework below." }
@@ -26,6 +28,7 @@ export default function ChatWidget() {
 
         const userMsg = { role: "user", content: input }
         setMessages(prev => [...prev, userMsg])
+        const currentInput = input
         setInput("")
         setLoading(true)
 
@@ -33,12 +36,12 @@ export default function ChatWidget() {
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: input })
+                body: JSON.stringify({ 
+                    message: currentInput,
+                    userId: user?.id 
+                })
             });
             const data = await response.json();
-
-            // Enforce a minimum 5-second thinking delay
-            await new Promise(resolve => setTimeout(resolve, 5000));
 
             if (data.reply) {
                 setMessages(prev => [...prev, { role: "assistant", content: data.reply }])
@@ -47,6 +50,7 @@ export default function ChatWidget() {
             }
         } catch (error) {
             console.error("Chat error:", error)
+            setMessages(prev => [...prev, { role: "assistant", content: "System error. Terminal disconnected." }])
         } finally {
             setLoading(false)
         }

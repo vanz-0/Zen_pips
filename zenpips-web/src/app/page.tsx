@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { BarChart2, Shield, TrendingUp, Zap, Target, Users, Clock, ExternalLink, Menu, X, LogIn, BookOpen, History, User, GraduationCap, MessageCircle, Home as HomeIcon } from "lucide-react";
+import { BarChart2, Shield, TrendingUp, Zap, Target, Users, Clock, ExternalLink, Menu, X, LogIn, BookOpen, History, User, GraduationCap, MessageCircle, Home as HomeIcon, Lock } from "lucide-react";
 import { Particles } from "@/components/ui/particles";
 import { GlowCard } from "@/components/ui/glow-card";
 import { TradingTerminal } from "@/components/ui/trading-terminal";
@@ -15,6 +15,7 @@ import { JournalTab } from "@/components/dashboard/JournalTab";
 import { VaultTab } from "@/components/dashboard/VaultTab";
 import { ChartAITab } from "@/components/dashboard/ChartAITab";
 import { SignalControlPanel } from "@/components/admin/SignalControlPanel";
+import { OnboardingTab } from "@/components/dashboard/OnboardingTab";
 import { LeadMagnetSection } from "@/components/marketing/LeadMagnetSection";
 import { useRouter } from "next/navigation";
 
@@ -37,8 +38,8 @@ function FadeInSection({ children, className = "", delay = 0 }: { children: Reac
 
 export default function Home() {
   const { signals } = useSignals();
-  const { user, loading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState<"journal" | "vault" | "profile" | "chartai" | "admin" | null>(null);
+  const { user, profile, loading: authLoading } = useAuth();
+  const [activeTab, setActiveTab] = useState<"journal" | "vault" | "profile" | "chartai" | "admin" | "help" | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
@@ -49,7 +50,7 @@ export default function Home() {
     : 100;
   const activeCount = signals.filter(s => !s.closed).length;
 
-  const handleNavClick = (tab: "journal" | "vault" | "profile" | "chartai" | "admin" | null) => {
+  const handleNavClick = (tab: "journal" | "vault" | "profile" | "chartai" | "admin" | "help" | null) => {
     if (tab && !user) {
       router.push("/auth");
       return;
@@ -65,7 +66,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] overflow-hidden relative font-[family-name:var(--font-inter)] selection:bg-[#d4af37] selection:text-black">
+    <main className="min-h-screen bg-[#0a0a0a] overflow-hidden relative font-[family-name:var(--font-inter)] selection:bg-[#d4af37] selection:text-black flex flex-col">
 
       {/* Particle Background */}
       <Particles
@@ -97,12 +98,15 @@ export default function Home() {
             {user ? (
               <>
                 <button onClick={() => handleNavClick(null)} className="hover:text-white transition-colors duration-300">Home</button>
-                <button onClick={() => { setActiveTab("vault"); handleNavClick("vault"); }} className="hover:text-white transition-colors duration-300">Vault</button>
-                <button onClick={() => { setActiveTab("journal"); handleNavClick("journal"); }} className="hover:text-white transition-colors duration-300">Journal</button>
-                <button onClick={() => { setActiveTab("profile"); handleNavClick("profile"); }} className="hover:text-white transition-colors duration-300">Analytics & Broker</button>
-                <button onClick={() => { setActiveTab("chartai"); handleNavClick("chartai"); }} className="hover:text-[#d4af37] transition-colors duration-300 font-semibold">Chart AI</button>
-                {user?.email === "dev@zenpips.com" && (
-                  <button onClick={() => { setActiveTab("admin"); handleNavClick("admin"); }} className="hover:text-red-400 transition-colors duration-300 border border-red-500/20 px-3 py-1 rounded-lg bg-red-500/5">Admin</button>
+                <button onClick={() => { setActiveTab("vault"); handleNavClick("vault"); }} className={`hover:text-white transition-colors duration-300 ${activeTab === 'vault' ? 'text-yellow-500 font-bold' : ''}`}>Vault</button>
+                <button onClick={() => { setActiveTab("journal"); handleNavClick("journal"); }} className={`hover:text-white transition-colors duration-300 ${activeTab === 'journal' ? 'text-yellow-500 font-bold' : ''}`}>Journal</button>
+                <button onClick={() => { setActiveTab("help"); handleNavClick("help"); }} className={`hover:text-[#d4af37] transition-colors duration-300 font-bold ${activeTab === 'help' ? 'text-[#d4af37]' : 'text-gray-300'}`}>Setup Guide</button>
+                <button onClick={() => { setActiveTab("profile"); handleNavClick("profile"); }} className={`hover:text-white transition-colors duration-300 ${activeTab === 'profile' ? 'text-yellow-500 font-bold' : ''}`}>Analytics</button>
+                <button onClick={() => { setActiveTab("chartai"); handleNavClick("chartai"); }} className={`hover:text-[#d4af37] transition-colors duration-300 font-semibold ${activeTab === 'chartai' ? 'text-[#d4af37]' : ''}`}>Chart AI</button>
+                {user?.email === "dev@zenpips.com" ? (
+                  <button onClick={() => { setActiveTab("admin"); handleNavClick("admin"); }} className={`hover:text-red-400 transition-colors duration-300 border border-red-500/20 px-3 py-1 rounded-lg bg-red-500/5 ${activeTab === 'admin' ? 'bg-red-500/20 text-red-500' : ''}`}>Partners</button>
+                ) : (
+                  <button disabled className="text-gray-500 border border-gray-800 px-3 py-1 rounded-lg bg-gray-900/50 cursor-not-allowed">Partners (Soon)</button>
                 )}
               </>
             ) : (
@@ -176,6 +180,20 @@ export default function Home() {
                   </div>
                 </button>
 
+                {/* Setup Guide */}
+                <button
+                  onClick={() => handleNavClick("help")}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#d4af37]/[0.05] hover:bg-[#d4af37]/[0.12] border border-[#d4af37]/20 hover:border-[#d4af37]/40 transition-all group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-[#d4af37]/10 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-[#d4af37]" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-white group-hover:text-[#d4af37] transition-colors">Setup Guide</p>
+                    <p className="text-[10px] text-gray-500">Go Live Guide</p>
+                  </div>
+                </button>
+
                 {/* Trade History */}
                 <button
                   onClick={() => handleNavClick("journal")}
@@ -219,7 +237,7 @@ export default function Home() {
                 </button>
 
                 {/* Admin (Only if Dev) */}
-                {user?.email === "dev@zenpips.com" && (
+                {user?.email === "dev@zenpips.com" ? (
                   <button
                     onClick={() => handleNavClick("admin")}
                     className="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-500/[0.05] hover:bg-red-500/[0.12] border border-red-500/20 hover:border-red-500/40 transition-all group"
@@ -228,8 +246,18 @@ export default function Home() {
                       <Zap className="w-4 h-4 text-red-400" />
                     </div>
                     <div className="text-left">
-                      <p className="text-sm font-semibold text-white group-hover:text-red-400 transition-colors">Admin Panel</p>
-                      <p className="text-[10px] text-gray-500">Direct Entry</p>
+                      <p className="text-sm font-semibold text-white group-hover:text-red-400 transition-colors">Partners Portal</p>
+                      <p className="text-[10px] text-gray-500">Institutional Onboarding</p>
+                    </div>
+                  </button>
+                ) : (
+                  <button disabled className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-900/50 border border-gray-800 opacity-50 cursor-not-allowed text-left">
+                    <div className="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center">
+                      <Zap className="w-4 h-4 text-gray-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-400">Partners (Soon)</p>
+                      <p className="text-[10px] text-gray-600">Institutional Onboarding</p>
                     </div>
                   </button>
                 )}
@@ -275,64 +303,42 @@ export default function Home() {
       </section>
 
       {user && activeTab ? (
-        <section id="dashboard-section" className="relative z-10 py-12 px-6 max-w-7xl mx-auto border-t border-white/5 min-h-[50vh]">
+        <section id="dashboard-section" className="relative z-10 py-12 px-6 max-w-7xl mx-auto border-t border-white/5 flex-1 w-full min-h-[60vh]">
           {/* Unified Dashboard Navigation */}
-          <FadeInSection>
-            <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
-              <button
-                onClick={() => handleNavClick(null)}
-                className="px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 bg-[#111] text-gray-400 hover:bg-white/5 hover:text-white border border-white/5"
-              >
-                ← Home
-              </button>
-              <button
-                onClick={() => setActiveTab("journal")}
-                className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${activeTab === "journal" ? "bg-yellow-500 text-black shadow-[0_0_20px_rgba(212,175,55,0.3)]" : "bg-[#111] text-gray-400 hover:bg-white/5 hover:text-white border border-white/5"}`}
-              >
-                Journal
-              </button>
-              <button
-                onClick={() => setActiveTab("vault")}
-                className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${activeTab === "vault" ? "bg-yellow-500 text-black shadow-[0_0_20px_rgba(212,175,55,0.3)]" : "bg-[#111] text-gray-400 hover:bg-white/5 hover:text-white border border-white/5"}`}
-              >
-                Education Vault
-              </button>
-              <button
-                onClick={() => setActiveTab("profile")}
-                className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${activeTab === "profile" ? "bg-yellow-500 text-black shadow-[0_0_20px_rgba(212,175,55,0.3)]" : "bg-[#111] text-gray-400 hover:bg-white/5 hover:text-white border border-white/5"}`}
-              >
-                Analytics & Broker
-              </button>
-              <button
-                onClick={() => setActiveTab("chartai")}
-                className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${activeTab === "chartai" ? "bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]" : "bg-[#111] text-gray-400 hover:bg-white/5 hover:text-white border border-white/5"}`}
-              >
-                Chart AI
-              </button>
-              {user?.email === "dev@zenpips.com" && (
-                <button
-                  onClick={() => setActiveTab("admin")}
-                  className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${activeTab === "admin" ? "bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.3)]" : "bg-[#111] text-gray-400 hover:bg-white/5 hover:text-white border border-white/5"}`}
-                >
-                  Admin Panel
-                </button>
-              )}
-            </div>
-          </FadeInSection>
+          {/* Removed redundant Unified Dashboard Navigation */}
 
           {/* Active Tab Content */}
           <FadeInSection delay={0.1}>
             <div className="w-full bg-[#0a0a0a]">
-              {activeTab === "journal" && <JournalTab />}
+              {activeTab === "journal" && (
+                profile?.is_vip ? <JournalTab /> : (
+                  <div className="flex flex-col items-center justify-center p-20 bg-[#111] rounded-3xl border border-white/5 text-center">
+                    <Lock className="w-16 h-16 text-yellow-500 mb-6 opacity-20" />
+                    <h2 className="text-3xl font-bold mb-4">Institutional Journaling</h2>
+                    <p className="text-gray-400 max-w-sm mx-auto mb-8">Access the multi-timeframe journal to track your metrics like a professional. VIP Exclusive.</p>
+                    <a href="https://t.me/Zen_pips_bot" className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-xl hover:bg-yellow-400 transition-all">Unlock with VIP</a>
+                  </div>
+                )
+              )}
               {activeTab === "vault" && <VaultTab />}
               {activeTab === "profile" && <ProfileTab />}
-              {activeTab === "chartai" && <ChartAITab />}
+              {activeTab === "help" && <OnboardingTab />}
+              {activeTab === "chartai" && (
+                profile?.is_vip ? <ChartAITab /> : (
+                  <div className="flex flex-col items-center justify-center p-20 bg-[#111] rounded-3xl border border-white/5 text-center">
+                    <BarChart2 className="w-16 h-16 text-blue-500 mb-6 opacity-20" />
+                    <h2 className="text-3xl font-bold mb-4">Chart AI Intelligence</h2>
+                    <p className="text-gray-400 max-w-sm mx-auto mb-8">Let GPT-4o Vision analyze your chart markups for institutional liquidity and structural traps. VIP Exclusive.</p>
+                    <a href="https://t.me/Zen_pips_bot" className="px-8 py-3 bg-blue-500 text-white font-bold rounded-xl hover:bg-blue-400 transition-all">Unlock Vision Engine</a>
+                  </div>
+                )
+              )}
               {activeTab === "admin" && <SignalControlPanel />}
             </div>
           </FadeInSection>
         </section>
       ) : (
-        <>
+        <section className="flex-1">
           {/* Features Bento Grid */}
           <section id="features" className="relative z-10 py-24 px-6 max-w-7xl mx-auto border-t border-white/5">
             <FadeInSection>
@@ -584,7 +590,7 @@ export default function Home() {
               </div>
             </FadeInSection>
           </section>
-        </>
+        </section>
       )}
 
       {/* Footer */}

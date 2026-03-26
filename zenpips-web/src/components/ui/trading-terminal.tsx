@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { TrendingUp, TrendingDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useSignals } from "@/hooks/useSignals";
+import { useAuth } from "@/context/AuthContext";
 
 // ─── Types ───
 export interface SignalData {
@@ -99,11 +100,12 @@ export function TradingTerminal() {
     const [leftOpen, setLeftOpen] = useState(true);
     const [rightOpen, setRightOpen] = useState(true);
     const { signals } = useSignals();
+    const { user, profile } = useAuth(); // Get profile for VIP status
 
     // Derived global stats
-    const totalPipsToday = signals.reduce((acc, sig) => acc + (sig.total_pips || 0), 0);
+    const totalPipsToday = signals.reduce((acc, sig: any) => acc + (sig.total_pips || 0), 0);
     const winRate = signals.length > 0
-        ? Math.round((signals.filter(s => s.total_pips > 0).length / signals.length) * 100)
+        ? Math.round((signals.filter((s: any) => (s.total_pips || 0) > 0).length / signals.length) * 100)
         : 100;
 
     return (
@@ -130,7 +132,7 @@ export function TradingTerminal() {
                         <span className="text-green-400 text-[10px] font-mono font-bold">MARKET OPEN</span>
                     </div>
                     <div className="bg-[#d4af37]/10 border border-[#d4af37]/20 px-2.5 py-1 rounded-full">
-                        <span className="text-[#d4af37] text-[10px] font-mono font-bold">+{totalPipsToday.toLocaleString()} PIPS TODAY</span>
+                        <span className="text-[#d4af37] text-[10px] font-mono font-bold">🎯 {totalPipsToday.toLocaleString()} TOTAL PIPS SECURED</span>
                     </div>
                 </div>
 
@@ -208,13 +210,13 @@ export function TradingTerminal() {
                             <div className="flex items-center gap-2">
                                 <span className="text-xs font-semibold text-[#d4af37] uppercase tracking-wider">⚡ Signals</span>
                             </div>
-                            <span className="text-[10px] text-gray-600">25 Feb</span>
                         </div>
-
                         <div className="flex-1 overflow-y-auto">
-                            {signals.map((sig, i) => {
+                            {signals.map((sig: any, i) => {
                                 const isActive = sig.status === "ACTIVE";
                                 const isTp1 = sig.tp1_hit;
+                                const isTp2 = sig.tp2_hit;
+                                const isTp3 = sig.tp3_hit;
                                 const slMovedToEntry = sig.current_sl >= sig.entry && sig.direction === "BUY" || 
                                                        sig.current_sl <= sig.entry && sig.direction === "SELL";
 
@@ -222,14 +224,19 @@ export function TradingTerminal() {
                                 const sigDate = new Date(sig.created_at);
                                 const timeStr = sigDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
 
-                                // Build activity timeline events
+                                const now = new Date();
+                                const diffMs = now.getTime() - sigDate.getTime();
+                                const diffHours = diffMs / (1000 * 3600);
+                                const isGated = !profile?.is_vip && diffHours < 2;
+
+                                // Build activity timeline events - Dynamic progression
                                 const events: { icon: string; text: string; color: string; detail?: string }[] = [];
                                 
                                 events.push({
                                     icon: "🎯",
                                     text: `Entry placed at ${sig.entry}`,
                                     color: "text-[#d4af37]",
-                                    detail: sig.confluence && !sig.confluence.includes("LOT OVERRIDE") ? sig.confluence : undefined
+                                    detail: sig.confluence
                                 });
 
                                 if (sig.tp1_hit) {
@@ -237,87 +244,63 @@ export function TradingTerminal() {
                                         icon: "✅",
                                         text: `TP1 hit at ${sig.tp1}`,
                                         color: "text-green-400",
-                                        detail: "First target secured — profit locked in."
+                                        detail: "Target 1 secured. Trade is now risk-free and partially realized."
                                     });
                                 }
                                 
                                 if (isTp1 && slMovedToEntry) {
                                     events.push({
                                         icon: "🛡️",
-                                        text: `SL moved to ${sig.current_sl}`,
+                                        text: "SL MOVED TO ENTRY",
                                         color: "text-blue-400",
-                                        detail: "Stop Loss moved to breakeven. This trade is now risk-free — capital fully protected while we target TP2 and TP3."
-                                    });
-                                } else if (sig.current_sl !== sig.sl) {
-                                    events.push({
-                                        icon: "🔄",
-                                        text: `SL adjusted to ${sig.current_sl}`,
-                                        color: "text-yellow-400",
-                                        detail: "Stop Loss updated to lock in partial profits and reduce exposure. Smart risk management in action."
+                                        detail: "Capital protected at breakeven. Riding the remains towards TP2/TP3."
                                     });
                                 }
 
                                 if (sig.tp2_hit) {
                                     events.push({
-                                        icon: "✅",
+                                        icon: "💰",
                                         text: `TP2 hit at ${sig.tp2}`,
                                         color: "text-green-400",
-                                        detail: "Second target reached — strong momentum confirmed."
+                                        detail: "Secondary targets hit. Strong trend continuation confirmed."
                                     });
                                 }
                                 if (sig.tp3_hit) {
                                     events.push({
                                         icon: "🏆",
-                                        text: `TP3 hit at ${sig.tp3}`,
+                                        text: "FULL TAKE PROFIT TAKEN",
                                         color: "text-green-400",
-                                        detail: "Full target reached — maximum profit extracted. Trade complete."
-                                    });
-                                }
-                                if (sig.sl_hit) {
-                                    events.push({
-                                        icon: "🛑",
-                                        text: `SL hit at ${sig.current_sl}`,
-                                        color: "text-red-400",
-                                        detail: slMovedToEntry 
-                                            ? "Stopped at breakeven — no loss. Capital preserved for the next setup."
-                                            : "Stop Loss triggered. Risk was pre-calculated and contained."
+                                        detail: `Market analysis: Completed at ${sig.tp3}. Maximum yield extracted.`
                                     });
                                 }
 
-                                // Status color mapping based on risk-management progression
-                                const isLoss = sig.sl_hit && !slMovedToEntry;
-                                const isBreakeven = sig.sl_hit && slMovedToEntry && !sig.tp2_hit;
-                                const isTp2Stop = (sig.sl_hit && sig.tp2_hit);
-
-                                const statusColor = sig.tp3_hit ? "text-green-400" 
-                                    : (isTp2Stop || (sig.tp2_hit && !sig.tp3_hit)) ? "text-yellow-400" 
-                                    : (isBreakeven || (sig.tp1_hit && !sig.tp2_hit)) ? "text-orange-400" 
-                                    : isLoss ? "text-red-400" 
+                                // Status color mapping
+                                const statusColor = isTp3 ? "text-green-400" 
+                                    : isTp2 ? "text-yellow-400" 
+                                    : isTp1 ? "text-orange-400" 
                                     : isActive ? "text-blue-400" 
                                     : "text-gray-400";
 
-                                const statusDot = sig.tp3_hit ? "bg-green-500" 
-                                    : (isTp2Stop || (sig.tp2_hit && !sig.tp3_hit)) ? "bg-yellow-500" 
-                                    : (isBreakeven || (sig.tp1_hit && !sig.tp2_hit)) ? "bg-orange-500" 
-                                    : isLoss ? "bg-red-500" 
+                                const statusDot = isTp3 ? "bg-green-500" 
+                                    : isTp2 ? "bg-yellow-500" 
+                                    : isTp1 ? "bg-orange-500" 
                                     : "bg-blue-500";
 
                                 return (
                                     <div
                                         key={sig.id}
-                                        className={`px-3 py-3 border-b border-white/5 transition-colors cursor-pointer hover:bg-white/3 ${i === 0 ? "bg-green-500/3" : ""}`}
+                                        className={`px-3 py-4 border-b border-white/5 transition-colors cursor-pointer hover:bg-white/3 ${i === 0 ? "bg-[#d4af37]/5" : ""}`}
                                         onClick={() => {
                                             const match = WATCHLIST.find((w) => w.display === sig.pair);
                                             if (match) setSelectedSymbol(match.symbol);
                                         }}
                                     >
-                                        {/* Signal Header */}
-                                        <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-white font-bold text-sm">{sig.pair}</span>
-                                                <span className="text-[9px] text-gray-500 font-mono">{sig.timeframe}</span>
+                                                <span className="text-white font-black text-sm tracking-tight">{sig.pair}</span>
+                                                <span className="text-[9px] text-gray-500 font-mono bg-white/5 px-1.5 py-0.5 rounded">{sig.timeframe}</span>
                                             </div>
-                                            <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${sig.direction === "BUY"
+                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded border ${sig.direction === "BUY"
                                                 ? "bg-green-500/10 text-green-400 border-green-500/20"
                                                 : "bg-red-500/10 text-red-400 border-red-500/20"
                                                 }`}>
@@ -325,82 +308,60 @@ export function TradingTerminal() {
                                             </span>
                                         </div>
 
-                                        {/* Status Badge */}
-                                        <div className="flex items-center gap-1.5 mb-2">
+                                        <div className="flex items-center gap-1.5 mb-4">
                                             <span className="relative flex h-1.5 w-1.5">
                                                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${statusDot} opacity-75`}></span>
                                                 <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${statusDot}`}></span>
                                             </span>
-                                            <span className={`text-[10px] font-mono font-bold ${statusColor}`}>
+                                            <span className={`text-[10px] font-black uppercase tracking-widest ${statusColor}`}>
                                                 {sig.status}
                                             </span>
-                                            <span className="text-[9px] text-gray-600 ml-auto">{timeStr}</span>
+                                            <span className="text-[9px] text-gray-600 ml-auto font-mono">{timeStr}</span>
                                         </div>
 
-                                        {/* Levels Grid */}
-                                        <div className="space-y-1 text-[10px]">
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-500">Entry</span>
-                                                <span className="text-[#d4af37] font-mono font-bold">{sig.entry}</span>
+                                        {/* THE COMPLETE TARGET GRID */}
+                                        <div className={`grid grid-cols-2 gap-2 text-[10px] mb-4 relative ${isGated ? 'blur-md select-none' : ''}`}>
+                                            <div className="bg-white/[0.02] border border-white/5 p-2 rounded-lg">
+                                                <span className="text-gray-500 block mb-0.5 font-bold uppercase text-[8px] tracking-tighter">Entry</span>
+                                                <span className="text-white font-mono font-bold">{sig.entry.toLocaleString()}</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-500">TP1</span>
-                                                <span className={`font-mono ${sig.tp1_hit ? "text-green-400 font-bold" : "text-gray-400"}`}>
-                                                    {sig.tp1} {sig.tp1_hit ? "✓" : ""}
-                                                </span>
+                                            <div className={`border p-2 rounded-lg transition-all ${isTp1 ? "bg-green-500/10 border-green-500/30" : "bg-white/[0.02] border-white/5"}`}>
+                                                <span className={`${isTp1 ? "text-green-400" : "text-gray-500"} block mb-0.5 font-bold uppercase text-[8px] tracking-tighter`}>TP 1</span>
+                                                <span className={`font-mono font-bold ${isTp1 ? "text-green-400" : "text-gray-400"}`}>{sig.tp1.toLocaleString()} {isTp1 && "✓"}</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-500">TP2</span>
-                                                <span className={`font-mono ${sig.tp2_hit ? "text-green-400 font-bold" : "text-gray-400"}`}>
-                                                    {sig.tp2} {sig.tp2_hit ? "✓" : ""}
-                                                </span>
+                                            <div className={`border p-2 rounded-lg transition-all ${isTp2 ? "bg-green-500/10 border-green-500/30" : "bg-white/[0.02] border-white/5"}`}>
+                                                <span className={`${isTp2 ? "text-green-400" : "text-gray-500"} block mb-0.5 font-bold uppercase text-[8px] tracking-tighter`}>TP 2</span>
+                                                <span className={`font-mono font-bold ${isTp2 ? "text-green-400" : "text-gray-400"}`}>{sig.tp2.toLocaleString()} {isTp2 && "✓"}</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-500">TP3</span>
-                                                <span className={`font-mono ${sig.tp3_hit ? "text-green-400 font-bold" : "text-gray-400"}`}>
-                                                    {sig.tp3} {sig.tp3_hit ? "✓" : ""}
-                                                </span>
+                                            <div className={`border p-2 rounded-lg transition-all ${isTp3 ? "bg-green-500/10 border-green-500/30" : "bg-white/[0.02] border-white/5"}`}>
+                                                <span className={`${isTp3 ? "text-green-400" : "text-gray-500"} block mb-0.5 font-bold uppercase text-[8px] tracking-tighter`}>TP 3</span>
+                                                <span className={`font-mono font-bold ${isTp3 ? "text-green-400" : "text-gray-400"}`}>{sig.tp3.toLocaleString()} {isTp3 && "✓"}</span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-500">Original SL</span>
-                                                <span className="text-red-400/50 font-mono line-through">{sig.sl}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-500 font-semibold">Current SL</span>
+                                            <div className="col-span-2 bg-blue-500/5 border border-blue-500/10 p-2 rounded-lg flex justify-between items-center">
+                                                <span className="text-blue-400 font-bold uppercase text-[8px] tracking-tighter">Current SL Protection</span>
                                                 <span className={`font-mono font-bold ${slMovedToEntry ? "text-blue-400" : "text-red-400"}`}>
-                                                    {sig.current_sl} {slMovedToEntry ? "🛡️" : ""}
+                                                    {sig.current_sl.toLocaleString()} {slMovedToEntry ? "🛡️" : ""}
                                                 </span>
                                             </div>
+                                            {isGated && (
+                                                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center rounded-lg border border-yellow-500/20">
+                                                    <span className="text-[9px] text-yellow-500 font-black uppercase tracking-widest">VIP ALPHA GATED</span>
+                                                </div>
+                                            )}
                                         </div>
-
-                                        {/* Result Pips */}
-                                        {sig.total_pips > 0 && (
-                                            <div className="mt-2 pt-1.5 border-t border-white/5 flex justify-between items-center">
-                                                <span className="text-[9px] text-gray-500">Result</span>
-                                                <span className="text-green-400 font-mono font-bold text-xs">+{sig.total_pips} Pips</span>
-                                            </div>
-                                        )}
 
                                         {/* Activity Timeline */}
-                                        <div className="mt-2 pt-2 border-t border-white/5">
-                                            <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-1.5 font-semibold">Activity</div>
-                                            <div className="space-y-1.5">
-                                                {events.map((evt, eIdx) => (
-                                                    <div key={eIdx} className="flex items-start gap-1.5">
-                                                        <span className="text-[10px] mt-0.5 flex-shrink-0">{evt.icon}</span>
-                                                        <div className="min-w-0">
-                                                            <div className={`text-[10px] font-mono font-semibold ${evt.color}`}>
-                                                                {evt.text}
-                                                            </div>
-                                                            {evt.detail && (
-                                                                <p className="text-[9px] text-gray-500 leading-snug mt-0.5">
-                                                                    {evt.detail}
-                                                                </p>
-                                                            )}
-                                                        </div>
+                                        <div className="space-y-2 mt-2 pt-3 border-t border-white/5">
+                                            <p className="text-[9px] text-gray-600 uppercase font-black tracking-widest">Operational Log</p>
+                                            {events.map((evt, eIdx) => (
+                                                <div key={eIdx} className="flex gap-2 group">
+                                                    <span className="text-xs group-hover:scale-110 transition-transform">{evt.icon}</span>
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className={`text-[10px] font-black tracking-tight ${evt.color}`}>{evt.text}</p>
+                                                        {evt.detail && <p className="text-[9px] text-gray-500 leading-tight mt-0.5">{evt.detail}</p>}
                                                     </div>
-                                                ))}
-                                            </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 );

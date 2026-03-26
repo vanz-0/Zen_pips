@@ -20,6 +20,9 @@ export interface Signal {
   closed: boolean
   created_at: string
   timeframe: string
+  total_pips: number
+  status?: string
+  confluence?: string
 }
 
 export function useSignals() {
@@ -33,6 +36,7 @@ export function useSignals() {
         .from("signals")
         .select("*")
         .order("created_at", { ascending: false })
+        .order("entry", { ascending: false })
       
       if (!error && data) {
         setSignals(data as Signal[])

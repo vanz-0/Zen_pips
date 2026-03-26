@@ -7,6 +7,7 @@ import type { User, Session } from "@supabase/supabase-js"
 interface AuthContextType {
     user: User | null
     session: Session | null
+    profile: any | null
     loading: boolean
     signOut: () => Promise<void>
 }
@@ -14,6 +15,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
     user: null,
     session: null,
+    profile: null,
     loading: true,
     signOut: async () => { },
 })
@@ -22,7 +24,7 @@ const AuthContext = createContext<AuthContextType>({
 const DEV_BYPASS = true
 
 const MOCK_USER = {
-    id: "dev-test-user-000",
+    id: "825e206a-1c83-4041-8fb5-16440c004f18",
     email: "dev@zenpips.com",
     app_metadata: {},
     user_metadata: { full_name: "Dev Tester" },
@@ -33,7 +35,20 @@ const MOCK_USER = {
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(DEV_BYPASS ? MOCK_USER : null)
     const [session, setSession] = useState<Session | null>(null)
+    const [profile, setProfile] = useState<any | null>(DEV_BYPASS ? { is_vip: true } : null)
     const [loading, setLoading] = useState(DEV_BYPASS ? false : true)
+
+    const fetchProfile = async (userId: string) => {
+        const { data, error } = await supabase
+            .from('client_trading_profiles')
+            .select('*')
+            .eq('id', userId)
+            .single()
+        
+        if (!error && data) {
+            setProfile(data)
+        }
+    }
 
     useEffect(() => {
         if (DEV_BYPASS) return // skip real auth in dev mode
@@ -41,6 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session)
             setUser(session?.user ?? null)
+            if (session?.user) fetchProfile(session.user.id)
             setLoading(false)
         })
 
@@ -48,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             (_event, session) => {
                 setSession(session)
                 setUser(session?.user ?? null)
+                if (session?.user) fetchProfile(session.user.id)
                 setLoading(false)
             }
         )
@@ -63,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, session, loading, signOut }}>
+        <AuthContext.Provider value={{ user, session, profile, loading, signOut }}>
             {children}
         </AuthContext.Provider>
     )
