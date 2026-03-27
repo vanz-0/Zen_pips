@@ -103,6 +103,7 @@ export default function Home() {
                 <button onClick={() => { setActiveTab("help"); handleNavClick("help"); }} className={`hover:text-[#d4af37] transition-colors duration-300 font-bold ${activeTab === 'help' ? 'text-[#d4af37]' : 'text-gray-300'}`}>Setup Guide</button>
                 <button onClick={() => { setActiveTab("profile"); handleNavClick("profile"); }} className={`hover:text-white transition-colors duration-300 ${activeTab === 'profile' ? 'text-yellow-500 font-bold' : ''}`}>Analytics</button>
                 <button onClick={() => { setActiveTab("chartai"); handleNavClick("chartai"); }} className={`hover:text-[#d4af37] transition-colors duration-300 font-semibold ${activeTab === 'chartai' ? 'text-[#d4af37]' : ''}`}>Chart AI</button>
+                <a href="/blog" className="hover:text-white transition-colors duration-300">Edu</a>
                 {user?.email === "dev@zenpips.com" ? (
                   <button onClick={() => { setActiveTab("admin"); handleNavClick("admin"); }} className={`hover:text-red-400 transition-colors duration-300 border border-red-500/20 px-3 py-1 rounded-lg bg-red-500/5 ${activeTab === 'admin' ? 'bg-red-500/20 text-red-500' : ''}`}>Partners</button>
                 ) : (
@@ -235,6 +236,20 @@ export default function Home() {
                     <p className="text-[10px] text-gray-500">Copy Trading</p>
                   </div>
                 </button>
+
+                {/* Blog / Edu */}
+                <a
+                  href="/blog"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-purple-500/[0.05] hover:bg-purple-500/[0.12] border border-purple-500/20 hover:border-purple-500/40 transition-all group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                    <BookOpen className="w-4 h-4 text-purple-400" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-white group-hover:text-purple-400 transition-colors">Education</p>
+                    <p className="text-[10px] text-gray-500">Trading Blog</p>
+                  </div>
+                </a>
 
                 {/* Admin (Only if Dev) */}
                 {user?.email === "dev@zenpips.com" ? (

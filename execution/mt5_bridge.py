@@ -167,18 +167,29 @@ def execute_trade(signal, risk_percent=1.0):
         return False
 
     # Map general crypto/forex tickers to broker-specific (e.g. BTCUSD vs BTC/USD vs BTCUSDm)
-    symbol = signal["pair"].replace("/", "")
-    if symbol == "XAUUSD":
-        symbol = "XAUUSD" # Some brokers use GOLD or XAUUSD.pro 
+    base_symbol = signal["pair"].replace("/", "")
     
-    # Select symbol
-    if not mt5.symbol_select(symbol, True):
-        logger.error(f"Failed to select symbol {symbol} in MT5. Broker might use different ticker.")
-        return False
-
-    symbol_info = mt5.symbol_info(symbol)
-    if not symbol_info.visible:
-        logger.error(f"Symbol {symbol} is not visible in Market Watch.")
+    # Common broker aliases/suffixes for metals and forex
+    symbol_variants = [base_symbol]
+    if base_symbol == "XAUUSD":
+        symbol_variants += ["GOLD", "XAUUSD.a", "XAUUSD.p", "XAUUSD.c", "XAUUSD_m"]
+    if base_symbol == "XAGUSD":
+        symbol_variants += ["SILVER", "XAGUSD.a", "XAGUSD.p", "XAGUSD.c", "XAGUSD_m"]
+    
+    symbol = None
+    symbol_info = None
+    
+    # Try all known variants until one succeeds
+    for variant in symbol_variants:
+        if mt5.symbol_select(variant, True):
+            info = mt5.symbol_info(variant)
+            if info and info.visible:
+                symbol = variant
+                symbol_info = info
+                break
+                
+    if not symbol_info:
+        logger.error(f"Failed to find and select symbol {base_symbol} (or any variants) in MT5. Broker might use different ticker.")
         return False
 
     # Dynamic Lot Size Calculation based on Account Equity and Risk
@@ -232,19 +243,18 @@ def execute_trade(signal, risk_percent=1.0):
             order_type = mt5.ORDER_TYPE_SELL
             
     # Set the price correctly depending on if it's pending or market execution
+    digits = symbol_info.digits
     if action == mt5.TRADE_ACTION_PENDING:
-        exec_price = requested_entry
+        exec_price = round(requested_entry, digits)
     else:
         exec_price = current_ask if "BUY" in signal["direction"].upper() else current_bid
     
-    sl = float(signal["sl"])
-    tp_levels = [float(signal["tp1"]), float(signal["tp2"]), float(signal["tp3"])]
+    sl = round(float(signal["sl"]), digits)
+    tp_levels = [round(float(signal["tp1"]), digits), round(float(signal["tp2"]), digits), round(float(signal["tp3"]), digits)]
     
-    # Divide lot size among 3 orders — DEFAULT 0.01 per order
+    # Divide lot size among 3 orders — STRICT 0.01 per order (0.03 total exposure)
+    # Dynamic logic disabled temporarily to maintain disciplined 0.01 testing across metals.
     lot_per_trade = 0.01
-    calculated_per = max(symbol_info.volume_min, round(lot / 3, 2))
-    if calculated_per > 0.01:
-        lot_per_trade = calculated_per
     
     # Manual Lot Override from Signal Confluence
     confluence = signal.get("confluence", "")
@@ -256,8 +266,8 @@ def execute_trade(signal, risk_percent=1.0):
         lot_per_trade = override_val
         
     tickets = []
-    filling_modes = [mt5.ORDER_FILLING_FOK, mt5.ORDER_FILLING_IOC, mt5.ORDER_FILLING_RETURN]
-    filling_names = ["FOK", "IOC", "RETURN"]
+    filling_modes = [mt5.ORDER_FILLING_RETURN, mt5.ORDER_FILLING_IOC, mt5.ORDER_FILLING_FOK]
+    filling_names = ["RETURN", "IOC", "FOK"]
     
     for idx, tp in enumerate(tp_levels):
         if tp == 0:
@@ -265,7 +275,7 @@ def execute_trade(signal, risk_percent=1.0):
             
         order_placed = False
         
-        for cycle in range(3):  # 3 full retry cycles
+        for cycle in range(2):  # Reduced retry cycles for better responsiveness
             for fm_idx, fm in enumerate(filling_modes):
                 request = {
                     "action": action,
@@ -300,7 +310,7 @@ def execute_trade(signal, risk_percent=1.0):
                         time.sleep(5)
                         break  # Break filling loop, retry next cycle
                     else:
-                        logger.error(f"Order TP{idx+1} failed: {comment} ({retcode})")
+                        logger.error(f"Order TP{idx+1} failed ({filling_names[fm_idx]}): {comment} ({retcode})")
                         continue
             
             if order_placed:
@@ -310,14 +320,7 @@ def execute_trade(signal, risk_percent=1.0):
                 time.sleep(3)
         
         if not order_placed:
-            logger.error(f"CRITICAL: Could not place TP{idx+1} after 9 attempts. Attempting terminal restart...")
-            mt5.shutdown()
-            time.sleep(10)
-            if mt5.initialize():
-                mt5.symbol_select(symbol, True)
-                logger.info("Terminal restarted. Will retry on next cycle.")
-            else:
-                logger.error("Terminal restart FAILED. Manual intervention required.")
+            logger.error(f"❌ CRITICAL: Could not place TP{idx+1}. Skipping this order stage.")
 
     return tickets
 
@@ -384,18 +387,26 @@ async def bridge_loop(mt5_account=None, mt5_password=None, mt5_server=None, risk
                 "direction": s["direction"]
             }
         else:
-            logger.warning(f"⚠️ No MT5 positions found for ACTIVE signal {s['pair']} (ID: {s['id']})")
-            # If it's a relatively new signal (e.g. within last 1 hour) or we just want robust behavior, 
-            # we should execute it now if it's not in our tracked list.
-            logger.info(f"🚀 RE-EXECUTING UNTRACKED SIGNAL: {s['direction']} {s['pair']} @ {s['entry']}")
-            tickets = execute_trade(s, risk_percent=risk_percent)
-            if tickets:
+            # Only re-execute if signal is truly fresh (no TPs hit yet)
+            if s.get("tp1_hit") or s.get("tp2_hit") or s.get("tp3_hit"):
+                logger.info(f"⏭ Skipping {s['pair']} — already has TP hits, no MT5 re-execution needed.")
                 active_trades[s["id"]] = {
-                    "tickets": tickets, 
+                    "tickets": [], 
                     "current_sl": float(s["current_sl"]),
                     "pair": s["pair"],
                     "direction": s["direction"]
                 }
+            else:
+                logger.warning(f"⚠️ No MT5 positions found for ACTIVE signal {s['pair']} (ID: {s['id']})")
+                logger.info(f"🚀 RE-EXECUTING UNTRACKED SIGNAL: {s['direction']} {s['pair']} @ {s['entry']}")
+                tickets = execute_trade(s, risk_percent=risk_percent)
+                if tickets:
+                    active_trades[s["id"]] = {
+                        "tickets": tickets, 
+                        "current_sl": float(s["current_sl"]),
+                        "pair": s["pair"],
+                        "direction": s["direction"]
+                    }
     
     logger.info(f"Bridge initialized & Synced. Monitoring Database for NEW Incoming Signals...")
     logger.info(f"Current Risk Parameter: {risk_percent}% per trade")
