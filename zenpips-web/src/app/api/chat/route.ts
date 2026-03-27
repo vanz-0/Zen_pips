@@ -2,19 +2,25 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const openaiApiKey = process.env.OPENAI_API_KEY!
-
-const supabase = createClient(supabaseUrl, supabaseKey)
-const openai = new OpenAI({ apiKey: openaiApiKey })
-
 // Master Limit: 10 queries per week
 const WEEKLY_LIMIT = 10;
 const ADMIN_USERNAME = process.env.ADMIN_TELEGRAM_USERNAME || 'MadDmakz';
 
+function getSupabase() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+    return createClient(supabaseUrl, supabaseKey)
+}
+
+function getOpenAI() {
+    return new OpenAI({ apiKey: process.env.OPENAI_API_KEY! })
+}
+
 export async function POST(req: Request) {
     try {
+        const supabase = getSupabase()
+        const openai = getOpenAI()
+
         const { message, userId } = await req.json()
         if (!message) return NextResponse.json({ error: "Empty" }, { status: 400 })
 
@@ -25,8 +31,8 @@ export async function POST(req: Request) {
             .eq('id', userId)
             .single()
 
-        const is_admin = profile?.telegram_id?.toString() === process.env.ADMIN_TELEGRAM_ID; 
-        
+        const is_admin = profile?.telegram_id?.toString() === process.env.ADMIN_TELEGRAM_ID;
+
         // Reset weekly count if it's been more than 7 days
         if (profile) {
             const lastReset = new Date(profile.last_chat_reset)
@@ -40,9 +46,9 @@ export async function POST(req: Request) {
 
         // Check Limit
         if (!is_admin && profile && profile.weekly_chat_count >= WEEKLY_LIMIT) {
-            return NextResponse.json({ 
+            return NextResponse.json({
                 reply: `🔴 UNLIMITED QUERIES REACHED. For further assistance, please contact @Zen_pips_bot and use the /help command to reach an admin directly.`,
-                limitReached: true 
+                limitReached: true
             })
         }
 
@@ -56,7 +62,7 @@ export async function POST(req: Request) {
         const context = documents?.map((d: any) => d.content).join("\n\n") || "No local data found.";
 
         // 3. AI Completion (Step-by-Step Institutional Mode)
-        const systemPrompt = `You are the Zen Pips Institutional AI Assistant. 
+        const systemPrompt = `You are the Zen Pips Institutional AI Assistant.
         Your primary knowledge comes from provided context (PDF strategies and business SOPs).
 
         DIRECTIONS:

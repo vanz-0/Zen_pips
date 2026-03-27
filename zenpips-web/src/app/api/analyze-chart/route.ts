@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
-const openaiApiKey = process.env.OPENAI_API_KEY!
-const openai = new OpenAI({ apiKey: openaiApiKey })
+function getOpenAIClient() {
+    const apiKey = process.env.OPENAI_API_KEY
+    if (!apiKey) {
+        throw new Error('OPENAI_API_KEY environment variable is not set')
+    }
+    return new OpenAI({ apiKey })
+}
 
 export async function POST(req: Request) {
     try {
@@ -34,6 +39,7 @@ export async function PUT(req: Request) {
 
         Maintain a professional, institutional Bloomberg-terminal tone.`;
 
+        const openai = getOpenAIClient()
         const response = await openai.chat.completions.create({
             model: "gpt-4o",
             messages: [
