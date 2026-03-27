@@ -181,6 +181,20 @@ export default function Home() {
                   </div>
                 </button>
 
+                {/* Edu Blog */}
+                <a
+                  href="/blog"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 hover:border-yellow-500/30 transition-all group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
+                    <BookOpen className="w-4 h-4 text-pink-400" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-white group-hover:text-yellow-500 transition-colors">Knowledge Base</p>
+                    <p className="text-[10px] text-gray-500">Read the Blog</p>
+                  </div>
+                </a>
+
                 {/* Setup Guide */}
                 <button
                   onClick={() => handleNavClick("help")}

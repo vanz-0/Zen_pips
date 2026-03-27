@@ -35,6 +35,7 @@ export function useSignals() {
       const { data, error } = await supabase
         .from("signals")
         .select("*")
+        .eq("closed", false)
         .order("created_at", { ascending: false })
         .order("entry", { ascending: false })
       
