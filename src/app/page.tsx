@@ -20,6 +20,7 @@ import { SignalControlPanel } from "@/components/admin/SignalControlPanel";
 import { OnboardingTab } from "@/components/dashboard/OnboardingTab";
 import { InnovationHubTab } from "@/components/dashboard/InnovationHubTab";
 import { LeadMagnetSection } from "@/components/marketing/LeadMagnetSection";
+import { ProfileSetupPopup } from "@/components/dashboard/ProfileSetupPopup";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 
@@ -392,6 +393,9 @@ function DashboardContent() {
             </motion.div>
           )}
         </AnimatePresence>
+        {/* Profile Setup / Trial Trigger Overlay */}
+        <ProfileSetupPopup />
+
       </nav>
 
       {/* Main Content Area */}
