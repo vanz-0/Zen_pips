@@ -506,7 +506,7 @@ function DashboardContent() {
             </FadeInSection>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-16">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-16 pb-20 md:pb-0">
               {[
                 { value: `+${grandTotalPips.toLocaleString()}`, label: "Grand Total Pips", color: "text-[#d4af37]" },
                 { value: `+${totalPipsToday.toLocaleString()}`, label: "Pips Today", color: "text-[var(--foreground)]" },

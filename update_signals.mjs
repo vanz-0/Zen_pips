@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import { sendTelegramMessage } from './telegram.mjs';
 dotenv.config();
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -28,7 +29,10 @@ async function formatAndExecute() {
       .eq('id', 'cdfce83f-b006-4572-aa1a-b352f43a1bad');
 
     if (err1) console.error("Error updating XAU", err1);
-    else console.log("XAU updated");
+    else {
+      console.log("XAU updated");
+      await sendTelegramMessage(`🏆 *TOTAL VICTORY: XAU/USD*\n\nAll Take Profit targets have been successfully reached.\n\n💰 *Total Pips: +1,148.5*\n🔥 Institutional validation complete.`);
+    }
 
     // 2. Update GBP/USD order 14f26a73-d4a6-4965-aa98-f3cf1af82009
     const { error: err2 } = await supabase
@@ -41,7 +45,10 @@ async function formatAndExecute() {
       .eq('id', '14f26a73-d4a6-4965-aa98-f3cf1af82009');
 
     if (err2) console.error("Error updating GBP", err2);
-    else console.log("GBP updated");
+    else {
+      console.log("GBP updated");
+      await sendTelegramMessage(`🏆 *TOTAL VICTORY: GBP/USD*\n\nDistribution phase finalized. All TP zones hit.\n\n💰 *Total Pips: +55*\n✅ Protocol executed.`);
+    }
 
     // 3. Find and Delete pending BTC/USD order
     const { data: btcOrders } = await supabase
@@ -89,7 +96,10 @@ async function formatAndExecute() {
     const { error: errIns } = await supabase.from('signals').insert([newSilver]);
 
     if (errIns) console.error("Error inserting Silver", errIns);
-    else console.log("New Silver inserted successfully");
+    else {
+      console.log("New Silver inserted successfully");
+      await sendTelegramMessage(`🚀 *NEW SIGNAL: XAG/USD (Silver)*\n\n*Direction:* BUY 📈\n*Entry:* 73.13\n\n*Targets:* \n🎯 TP1: 73.53\n🎯 TP2: 73.93\n🎯 TP3: 74.33\n\n*Stop Loss:* 72.72\n\n*Confluence:* SMC Liquidity Sweep & Displacement (M5). Wait for rebalance into FVG.`);
+    }
 
   } catch (err) {
     console.error("General error:", err);

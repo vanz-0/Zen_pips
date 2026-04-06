@@ -69,7 +69,7 @@ export default function ChatWidget() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
                         onClick={() => setIsOpen(true)}
-                        className={`fixed bottom-6 right-6 w-14 h-14 bg-[var(--panel-bg)] border border-[#d4af37]/50 rounded-full flex items-center justify-center text-[#d4af37] shadow-2xl hover:bg-[#d4af37] hover:text-black transition-all z-40`}
+                        className={`fixed bottom-24 right-6 w-14 h-14 bg-[var(--panel-bg)] border border-[#d4af37]/50 rounded-full flex items-center justify-center text-[#d4af37] shadow-2xl hover:bg-[#d4af37] hover:text-black transition-all z-40`}
                     >
                         <Bot className="w-6 h-6" />
                     </motion.button>
@@ -83,7 +83,7 @@ export default function ChatWidget() {
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="fixed bottom-6 right-6 w-[90vw] md:w-[400px] h-[600px] bg-[var(--panel-bg)] border border-[var(--border-color)] rounded-3xl shadow-2xl flex flex-col z-50 overflow-hidden font-outfit"
+                        className="fixed bottom-24 right-6 w-[90vw] md:w-[400px] h-[600px] bg-[var(--panel-bg)] border border-[var(--border-color)] rounded-3xl shadow-2xl flex flex-col z-50 overflow-hidden font-outfit"
                     >
                         {/* Header */}
                         <div className="p-4 border-b border-[var(--border-color)] bg-[var(--background)] flex items-center justify-between">

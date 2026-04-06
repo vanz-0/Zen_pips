@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import { sendTelegramMessage } from './telegram.mjs';
 dotenv.config();
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -32,7 +33,11 @@ Looking forward, we have isolated a new high-probability setup on **Silver (XAG/
       });
 
     if (err1) console.error("Error inserting message", err1);
-    else console.log("AI message inserted successfully!");
+    else {
+      console.log("AI message inserted successfully!");
+      // Send the high-fidelity message to Telegram Free Channel
+      await sendTelegramMessage(`📢 *COMMUNITY UPDATE: Institutional Execution*\n\n${aiMessage}`);
+    }
 
   } catch (err) {
     console.error("General error:", err);

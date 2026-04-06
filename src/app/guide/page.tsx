@@ -341,7 +341,7 @@ export default function GuidePage() {
             </main>
 
             {/* Float Menu for Print only visible on screen */}
-            <div className="fixed bottom-10 right-10 print:hidden">
+            <div className="fixed bottom-44 right-10 print:hidden">
                 <button 
                     onClick={() => window.print()}
                     className="w-16 h-16 bg-yellow-500 text-black rounded-full shadow-[0_0_50px_rgba(212,175,55,0.4)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
