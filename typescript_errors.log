@@ -1,0 +1,7 @@
+src/components/dashboard/JournalTab.tsx(437,66): error TS2345: Argument of type 'string | number | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/dashboard/JournalTab.tsx(438,58): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/components/dashboard/JournalTab.tsx(439,56): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/components/dashboard/JournalTab.tsx(440,56): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/components/dashboard/VaultTab.tsx(6,25): error TS2300: Duplicate identifier 'FileText'.
+src/components/dashboard/VaultTab.tsx(8,123): error TS2300: Duplicate identifier 'FileText'.

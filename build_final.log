@@ -1,0 +1,39 @@
+
+> zenpips-web@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+ΓÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 65s
+  Running TypeScript ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/13) ...
+  Generating static pages using 7 workers (3/13) 
+  Generating static pages using 7 workers (6/13) 
+  Generating static pages using 7 workers (9/13) 
+Γ£ô Generating static pages using 7 workers (13/13) in 5.7s
+  Finalizing page optimization ...
+
+Route (app)
+Γöî Γùï /
+Γö£ Γùï /_not-found
+Γö£ ╞Æ /api/analyze-chart
+Γö£ ╞Æ /api/chat
+Γö£ ╞Æ /api/leads
+Γö£ ╞Æ /api/prices
+Γö£ Γùï /auth
+Γö£ ╞Æ /auth/callback
+Γö£ Γùï /blog
+Γö£ Γùï /guide
+Γö£ Γùï /icon.png
+Γöö Γùï /tools-guide
+
+
+╞Æ Proxy (Middleware)
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+

@@ -1,0 +1,15 @@
+ce5546c UI: Revert circular logo, set favicon, and remove redundant nav text
+71799cb UI calibrations, Setup Chat fixes, Favicon update
+a807c56 feat: Zenith Branding, Dual-Theme UI, and MT5 Autoentry Signal Logic
+df20dc3 feat: Finalize Branding, Dual-Theme UI, and Institutional Signal Logic
+cc48dcf UI refinements: Journal orange glow, Community instant-load, and logo preparation
+8ec0b61 feat: finalize Community tab Discord layout, channel switching, setups-and-charts with institutional analysis images, fix tab-switch glitch
+5eaa376 Finalized Institutional Dashboard: Fixed Discipline Tracker calendar, refined mobile navigation z-indexing, and synchronized global pip performance analytics.
+681d512 Finalized Vault Progress Tracking, Certificates, and Video Player
+773ee26 feat: automated character community analysis and signal lifecycle management
+cedc6ed Update navigation and settings UI
+c529407 chore: optimize project structure, remove unused agentic workflows, implement lead generation, and strict agentic directives
+4dc6248 Deployment Fix: Root netlify configuration, mobile EDU links, and filtered signal feed sidebar
+9841015 Production: Enhanced MT5 bridge for HFM compatibility, integrated Education/Blog into dashboard, and fixed image loading for blog posts
+ac87900 fix: telegram bot URLs and HFM referral link updated to netlify and correct code
+c080515 chore: finalized institutional UI and domain transition, removed banner for fluent UX

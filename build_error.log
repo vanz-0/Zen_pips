@@ -1,0 +1,24 @@
+
+> zenpips-web@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+ΓÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 57s
+  Running TypeScript ...
+Failed to compile.
+
+./src/app/page.tsx:432:85
+Type error: Argument of type 'string' is not assignable to parameter of type 'SetStateAction<"profile" | "journal" | "vault" | "chartai" | "admin" | "help" | "community" | "innovation" | null>'.
+
+  430 |                   )
+  431 |                 )}
+> 432 |                 {activeTab === "vault" && <VaultTab onNavigate={(t) => setActiveTab(t)} />}
+      |                                                                                     ^
+  433 |                 {activeTab === "profile" && <ProfileTab />}
+  434 |                 {activeTab === "help" && <OnboardingTab />}
+  435 |                 {activeTab === "innovation" && <InnovationHubTab onNavigate={(t) => setActiveTab(t)} />}
+Next.js build worker exited with code: 1 and signal: null
