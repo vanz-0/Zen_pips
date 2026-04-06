@@ -26,7 +26,7 @@ async function formatAndExecute() {
         status: 'TOTAL VICTORY (ALL TPs HIT)',
         total_pips: 1148.5,
       })
-      .eq('id', 'cdfce83f-b006-4572-aa1a-b352f43a1bad');
+      .eq('id', '95f6d3df-bf69-4332-9a8f-f3baa51c56bf');
 
     if (err1) console.error("Error updating XAU", err1);
     else {
@@ -42,7 +42,7 @@ async function formatAndExecute() {
         status: 'TOTAL VICTORY (ALL TPs HIT)',
         total_pips: 55, // 1.32723 - 1.32173 = 55 pips
       })
-      .eq('id', '14f26a73-d4a6-4965-aa98-f3cf1af82009');
+      .eq('id', 'ea652318-1bdb-4ed3-8d8f-782da7fcb6e1');
 
     if (err2) console.error("Error updating GBP", err2);
     else {
