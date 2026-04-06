@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, BookOpen, Clock, Tag, ExternalLink } from "lucide-react";
 import Image from "next/image";
-import { Particles } from "@/components/ui/particles";
+
 import Link from "next/link";
 
 const POSTS = [
@@ -86,7 +86,7 @@ export default function BlogPage() {
         </div>
       </div>
 
-      <Particles className="absolute inset-0 z-0 pointer-events-none" quantity={50} color="#d4af37" />
+
 
       <div className="max-w-7xl mx-auto px-6 py-24 relative z-10">
         <header className="mb-16 text-center mt-8 space-y-8 flex flex-col items-center">

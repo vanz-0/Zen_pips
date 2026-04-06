@@ -2,42 +2,34 @@
 
 import Image from "next/image";
 import { BarChart2, Shield, TrendingUp, Zap, Target, Users, Clock, ExternalLink, Menu, X, LogIn, BookOpen, History, User, GraduationCap, MessageCircle, Home as HomeIcon, Lock, LogOut, Lightbulb, Sun, Moon } from "lucide-react";
-import { Particles } from "@/components/ui/particles";
+import dynamic from "next/dynamic";
 import { GlowCard } from "@/components/ui/glow-card";
-import { TradingTerminal } from "@/components/ui/trading-terminal";
+
+const TradingTerminal = dynamic(() => import("@/components/ui/trading-terminal").then(mod => mod.TradingTerminal), { ssr: false });
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, useMemo } from "react";
 import { SignalData } from "@/components/ui/trading-terminal";
 import { useSignals } from "@/hooks/useSignals";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
-import { ProfileTab } from "@/components/dashboard/ProfileTab";
-import { JournalTab } from "@/components/dashboard/JournalTab";
-import { VaultTab } from "@/components/dashboard/VaultTab";
-import { ChartAITab } from "@/components/dashboard/ChartAITab";
-import { CommunityTab } from "@/components/dashboard/CommunityTab";
-import { SignalControlPanel } from "@/components/admin/SignalControlPanel";
-import { OnboardingTab } from "@/components/dashboard/OnboardingTab";
-import { InnovationHubTab } from "@/components/dashboard/InnovationHubTab";
-import { LeadMagnetSection } from "@/components/marketing/LeadMagnetSection";
-import { ProfileSetupPopup } from "@/components/dashboard/ProfileSetupPopup";
+const ProfileTab = dynamic(() => import("@/components/dashboard/ProfileTab").then(mod => mod.ProfileTab));
+const JournalTab = dynamic(() => import("@/components/dashboard/JournalTab").then(mod => mod.JournalTab));
+const VaultTab = dynamic(() => import("@/components/dashboard/VaultTab").then(mod => mod.VaultTab));
+const ChartAITab = dynamic(() => import("@/components/dashboard/ChartAITab").then(mod => mod.ChartAITab));
+const CommunityTab = dynamic(() => import("@/components/dashboard/CommunityTab").then(mod => mod.CommunityTab), { ssr: false });
+const SignalControlPanel = dynamic(() => import("@/components/admin/SignalControlPanel").then(mod => mod.SignalControlPanel));
+const OnboardingTab = dynamic(() => import("@/components/dashboard/OnboardingTab").then(mod => mod.OnboardingTab));
+const InnovationHubTab = dynamic(() => import("@/components/dashboard/InnovationHubTab").then(mod => mod.InnovationHubTab));
+const LeadMagnetSection = dynamic(() => import("@/components/marketing/LeadMagnetSection").then(mod => mod.LeadMagnetSection));
+const ProfileSetupPopup = dynamic(() => import("@/components/dashboard/ProfileSetupPopup").then(mod => mod.ProfileSetupPopup), { ssr: false });
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 
-function FadeInSection({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2 });
-
+function FadeInSection({ children, className = "" }: { children: React.ReactNode; className?: string; delay?: number }) {
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 40 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-      transition={{ duration: 0.7, delay, ease: "easeOut" }}
-      className={className}
-    >
+    <div className={className}>
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -97,22 +89,8 @@ function DashboardContent() {
   return (
     <main className={`bg-[var(--background)] relative font-[family-name:var(--font-inter)] selection:bg-[#d4af37] selection:text-black flex flex-col ${activeTab ? 'h-screen overflow-hidden' : 'min-h-screen overflow-x-hidden'} transition-colors duration-300`}>
 
-      {/* Particle Background */}
-      <Particles
-        className="absolute inset-0 z-0"
-        quantity={80}
-        color="#d4af37"
-        size={0.6}
-        staticity={30}
-        ease={80}
-      />
-
       {/* Subtle Grid Overlay */}
       <div className="absolute inset-0 z-[1] bg-[linear-gradient(to_right,var(--border-color)_1px,transparent_1px),linear-gradient(to_bottom,var(--border-color)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30"></div>
-
-      {/* Grain Overlay */}
-      <div className="fixed inset-0 z-[2] opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")` }}></div>
-
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-[var(--background)]/80 backdrop-blur-xl border-b border-[var(--border-color)]">
         <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
