@@ -20,6 +20,15 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Valid email required' }, { status: 400 });
         }
 
+        // --- Check if guide was already sent ---
+        const { data: existingLead } = await supabase
+            .from('leads')
+            .select('guide_sent')
+            .eq('email', email.toLowerCase().trim())
+            .single();
+
+        const shouldSendEmail = !existingLead || !existingLead.guide_sent;
+
         const { data, error } = await supabase
             .from('leads')
             .upsert(
@@ -30,6 +39,7 @@ export async function POST(req: NextRequest) {
                     utm_source: utm_source || null,
                     utm_medium: utm_medium || null,
                     utm_campaign: utm_campaign || null,
+                    guide_sent: true, // Mark as sent for this (or next) attempt
                 },
                 { onConflict: 'email' }
             )
@@ -41,9 +51,9 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Failed to save lead' }, { status: 500 });
         }
 
-        // --- Brevo Email Integration ---
+        // --- Brevo Email Integration (Only if not sent) ---
         const brevoApiKey = process.env.BREVO_API_KEY;
-        if (brevoApiKey) {
+        if (brevoApiKey && shouldSendEmail) {
             try {
                 const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
                     method: 'POST',
@@ -72,6 +82,8 @@ export async function POST(req: NextRequest) {
             } catch (brevoErr) {
                 console.error('Error sending email through Brevo:', brevoErr);
             }
+        } else if (!shouldSendEmail) {
+            console.log('Guide already sent to', email, '- skipping Brevo.');
         } else {
             console.warn('BREVO_API_KEY is not set. Email was not sent.');
         }

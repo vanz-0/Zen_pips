@@ -210,7 +210,7 @@ function DashboardContent() {
               </div>
             ) : (
               <a href="/auth" className="hidden lg:flex px-6 py-2 rounded-xl bg-yellow-500 text-black font-bold text-sm hover:bg-yellow-400 transition-all">
-                GET ACCESS
+                GET STARTED FREE
               </a>
             )}
             <button

@@ -269,7 +269,7 @@ export default function GuidePage() {
                                 <p className="text-xs font-bold italic">Billed exclusively via USDT (TRC20/BEP20)</p>
                             </div>
                             <a href="https://t.me/MadDmakz" className="w-full bg-black text-white py-4 rounded-2xl font-black text-center uppercase tracking-widest shadow-2xl hover:scale-[1.02] transition-all">
-                                GET ACCESS NOW
+                                GET STARTED FREE
                             </a>
                         </div>
                     </div>
