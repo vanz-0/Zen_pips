@@ -69,6 +69,9 @@ const STATIC_FILLER: { member: number; content: string; minutesAgo: number }[] =
   { member: 10, content: "Quick question — when you guys say \"sweep\" do you mean the same thing as a stop hunt?", minutesAgo: 28 },
   { member: 7, content: "Essentially yes. A liquidity sweep is when price takes out a key level (previous highs/lows) where stop losses are clustered, then reverses. Smart money needs that liquidity to fill their orders.", minutesAgo: 25 },
   { member: 9, content: "Think of it like this: retail puts stops below support. Smart money drives price there to fill buy orders. Then price rockets up. The Liquidity PDF in the Vault explains it perfectly.", minutesAgo: 22 },
+  { member: 5, content: "🚨 XAU/USD TP1 SMASHED 🚀 +1500 Pips secured. Running to TP2 with SL at entry now. TEXTBOOK M5 entry.", minutesAgo: 15 },
+  { member: 0, content: "The Gold move was institutional precision. Euro follow suit too — TP1 hit. NY session looking prime for the BTC sell limit.", minutesAgo: 12 },
+  { member: 7, content: "Sitting on hands for BTC/USD. Sell limit at 68837.5. HTF bearish FVG rejection is the target. Patience > FOMO.", minutesAgo: 8 },
 ]
 
 // ─── Dynamic Filler (based on live signals) ───
