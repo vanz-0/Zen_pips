@@ -29,34 +29,51 @@ export function ChartAITab() {
   const [analysisResult, setAnalysisResult] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // 1. Fetch User Profile & Settings
-  const fetchProfile = useCallback(async () => {
-    if (!user) return
-    const { data, error } = await supabase
-      .from("client_trading_profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single()
+    const [history, setHistory] = useState<any[]>([])
+    const [loadingHistory, setLoadingHistory] = useState(false)
 
-    if (!error && data) {
-      setProfile(data)
-      setChartAiActive(data.chart_ai_active)
-      setLotSize(data.chart_ai_lot_size?.toString() || "0.01")
-    } else if (error && error.code === 'PGRST116') {
-        const { data: newProfile } = await supabase.from('client_trading_profiles').insert({
-            id: user.id,
-            chart_ai_active: false,
-            chart_ai_lot_size: 0.01,
-            risk_profile: 'Balanced',
-            ai_usage_total: 0
-        }).select().single()
-        if (newProfile) setProfile(newProfile)
-    }
-  }, [user])
+    // 1. Fetch User Profile & Settings
+    const fetchProfile = useCallback(async () => {
+        if (!user) return
+        const { data, error } = await supabase
+            .from("client_trading_profiles")
+            .select("*")
+            .eq("id", user.id)
+            .single()
 
-  useEffect(() => {
-    fetchProfile()
-  }, [fetchProfile])
+        if (!error && data) {
+            setProfile(data)
+            setChartAiActive(data.chart_ai_active)
+            setLotSize(data.chart_ai_lot_size?.toString() || "0.01")
+        } else if (error && error.code === 'PGRST116') {
+            const { data: newProfile } = await supabase.from('client_trading_profiles').insert({
+                id: user.id,
+                chart_ai_active: false,
+                chart_ai_lot_size: 0.01,
+                risk_profile: 'Balanced',
+                ai_usage_total: 0
+            }).select().single()
+            if (newProfile) setProfile(newProfile)
+        }
+    }, [user])
+
+    const fetchHistory = useCallback(async () => {
+        if (!user) return
+        setLoadingHistory(true)
+        const { data, error } = await supabase
+            .from("chart_analysis")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+
+        if (!error && data) setHistory(data)
+        setLoadingHistory(false)
+    }, [user])
+
+    useEffect(() => {
+        fetchProfile()
+        fetchHistory()
+    }, [fetchProfile, fetchHistory])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -101,7 +118,11 @@ export function ChartAITab() {
       const data = await response.json()
       if (data.analysis) {
         setAnalysisResult(data.analysis)
-        if (data.imageUrl) setLastImageUrl(data.imageUrl)
+        if (data.imageUrl) {
+            setLastImageUrl(data.imageUrl)
+            // Ensure it's saved in history state immediately
+            fetchHistory()
+        }
         fetchProfile() // Refresh count
       } else if (data.error === "NOT_A_CHART") {
         setAnalysisResult(`🔴 VERIFICATION FAILED: ${data.message || "This image does not appear to be a trading chart. Please upload a valid screenshot to maintain institutional data integrity."}`)
@@ -544,6 +565,55 @@ export function ChartAITab() {
                     </div>
                 ))}
             </div>
+        </div>
+
+        {/* Level 4: Analysis History */}
+        <div className="bg-[var(--panel-bg)] rounded-3xl border border-[var(--border-color)] p-8">
+            <div className="flex items-center justify-between mb-8">
+                <div>
+                    <h3 className="text-xl font-bold flex items-center gap-3 text-[var(--foreground)]">
+                        <FileText className="w-6 h-6 text-[var(--color-info)]" /> Institutional History
+                    </h3>
+                    <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-widest mt-1">Archived SMC Markups & Analysis</p>
+                </div>
+                {history.length > 0 && <span className="px-3 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-lg text-[10px] font-bold uppercase">{history.length} RECORDS</span>}
+            </div>
+
+            {loadingHistory ? (
+                <div className="py-20 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /></div>
+            ) : history.length === 0 ? (
+                <div className="py-20 flex flex-col items-center justify-center text-[var(--text-muted)] gap-4 opacity-30 border-2 border-dashed border-[var(--border-color)] rounded-3xl">
+                    <ImageIcon className="w-12 h-12" />
+                    <p className="font-bold text-sm uppercase">No archived markups found.</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {history.map((item) => (
+                        <div key={item.id} className="group relative bg-[var(--background)]/40 rounded-2xl border border-[var(--border-color)] overflow-hidden hover:border-blue-500/30 transition-all">
+                            <div className="aspect-video relative overflow-hidden bg-black">
+                                <img src={item.image_url} alt={item.pair} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end">
+                                    <div className="text-xs font-bold text-white mb-1 uppercase tracking-tighter italic">{item.pair}</div>
+                                    <div className="flex items-center justify-between">
+                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${item.verdict === 'BUY' ? 'bg-green-500/20 text-green-500' : item.verdict === 'SELL' ? 'bg-red-500/20 text-red-500' : 'bg-blue-500/20 text-blue-500'}`}>
+                                            {item.verdict}
+                                        </span >
+                                        <span className="text-[8px] text-white/40 uppercase font-bold">{new Date(item.created_at).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-4">
+                                <button 
+                                    onClick={() => { setAnalysisResult(item.analysis_text); setPreviewUrl(item.image_url); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                    className="w-full py-2 bg-[var(--panel-bg)] hover:bg-blue-500 hover:text-black rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all"
+                                >
+                                    RECALL DATA
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
       </div>
     </div>

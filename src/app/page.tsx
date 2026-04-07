@@ -371,9 +371,6 @@ function DashboardContent() {
             </motion.div>
           )}
         </AnimatePresence>
-        {/* Profile Setup / Trial Trigger Overlay */}
-        <ProfileSetupPopup />
-
       </nav>
 
       {/* Main Content Area */}
@@ -405,7 +402,7 @@ function DashboardContent() {
                 className="w-full bg-[var(--background)]"
               >
                 {activeTab === "journal" && (
-                  profile?.is_vip ? <JournalTab /> : (
+                  (profile?.is_vip || profile?.plan === 'Trial') ? <JournalTab /> : (
                     <div className="flex flex-col items-center justify-center p-8 sm:p-14 md:p-20 bg-[var(--card-bg)] rounded-3xl border border-[var(--border-color)] text-center">
                       <Lock className="w-12 h-12 sm:w-16 sm:h-16 text-yellow-500 mb-6 opacity-20" />
                       <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 text-[var(--foreground)]">Institutional Journaling</h2>
@@ -414,7 +411,33 @@ function DashboardContent() {
                     </div>
                   )
                 )}
-                {activeTab === "vault" && <VaultTab onNavigate={(t) => setActiveTab(t)} />}
+                {activeTab === "vault" && (
+                  (profile?.is_vip || profile?.plan === 'VIP' || profile?.plan === 'Premium') ? <VaultTab onNavigate={(t) => setActiveTab(t)} /> : (
+                    <div className="flex flex-col items-center justify-center p-8 sm:p-14 md:p-20 bg-[var(--card-bg)] rounded-3xl border border-[var(--border-color)] text-center h-full">
+                      <div className="bg-yellow-500/10 p-5 rounded-full mb-6 border border-yellow-500/20">
+                        <Lock className="w-10 h-10 text-yellow-500" />
+                      </div>
+                      <h2 className="text-3xl font-black italic uppercase tracking-tight text-[var(--foreground)]">Institutional Vault Locked</h2>
+                      <p className="text-[var(--text-muted)] mt-4 max-w-lg mx-auto text-sm leading-relaxed">
+                        The Dominator Vault contains **63+ institutional resources**, mentoring archives, and advanced SMC PDFs. This section is reserved for full Institutional Members only.
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-4 mt-10">
+                        <button 
+                          onClick={() => setActiveTab('profile')}
+                          className="bg-yellow-500 text-black px-8 py-3 rounded-xl font-bold hover:bg-yellow-400 transition-all shadow-[0_0_20px_rgba(234,179,8,0.3)]"
+                        >
+                          Upgrade to VIP Access
+                        </button>
+                        <button 
+                          onClick={() => setActiveTab('help')}
+                          className="bg-[var(--panel-bg)] text-[var(--foreground)] border border-[var(--border-color)] px-8 py-3 rounded-xl font-bold hover:bg-[var(--border-color)] transition-all"
+                        >
+                          Learn About Membership
+                        </button>
+                      </div>
+                    </div>
+                  )
+                )}
                 {activeTab === "profile" && <ProfileTab />}
                 {activeTab === "help" && <OnboardingTab />}
                 {activeTab === "innovation" && <InnovationHubTab onNavigate={(t) => setActiveTab(t)} />}
@@ -429,62 +452,62 @@ function DashboardContent() {
         {!activeTab && (
           <div className="flex-1">
             {/* Features Bento Grid */}
-            <section id="features" className="relative z-10 py-24 px-6 max-w-7xl mx-auto border-t border-[var(--border-color)]">
+            <section id="features" className="relative z-10 py-12 sm:py-16 md:py-24 px-4 sm:px-6 max-w-7xl mx-auto border-t border-[var(--border-color)]">
               <FadeInSection>
-                <div className="text-center md:text-left mb-16">
-                  <h2 className="font-[family-name:var(--font-outfit)] text-3xl md:text-5xl font-bold text-[var(--foreground)] mb-4">
+                <div className="text-center md:text-left mb-8 sm:mb-12 md:mb-16">
+                  <h2 className="font-[family-name:var(--font-outfit)] text-2xl sm:text-3xl md:text-5xl font-bold text-[var(--foreground)] mb-3 sm:mb-4">
                     The <span className="text-[#d4af37]">Advantage.</span>
                   </h2>
-                  <p className="text-[var(--text-muted)] max-w-xl text-lg">
+                  <p className="text-[var(--text-muted)] max-w-xl text-sm sm:text-base md:text-lg">
                     We strip away the noise and focus purely on high-probability setups, giving you the institutional edge.
                   </p>
                 </div>
               </FadeInSection>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
               <FadeInSection className="md:col-span-2" delay={0.1}>
-                <GlowCard glowColor="gold" className="h-full bg-black/80">
-                  <div className="w-12 h-12 bg-[#d4af37]/20 rounded-full flex items-center justify-center mb-6">
-                    <Zap className="w-6 h-6 text-yellow-400" />
+                <GlowCard glowColor="gold" className="h-full">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#d4af37]/20 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                    <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">Sniper Entries</h3>
-                  <p className="text-gray-300 leading-relaxed max-w-md">
+                  <h3 className="text-lg sm:text-2xl font-bold text-[var(--foreground)] mb-2 sm:mb-3">Sniper Entries</h3>
+                  <p className="text-[var(--text-muted)] text-sm sm:text-base leading-relaxed max-w-md">
                     We send pinpoint BUY/SELL targets directly to your Telegram. We only trade when the setup perfectly aligns with our confluence models during London/NY sessions.
                   </p>
                 </GlowCard>
               </FadeInSection>
 
               <FadeInSection delay={0.2}>
-                <GlowCard glowColor="blue" className="h-full bg-black/80">
-                  <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mb-6">
-                    <Shield className="w-6 h-6 text-blue-400" />
+                <GlowCard glowColor="blue" className="h-full">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                    <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">Capital Preservation</h3>
-                  <p className="text-gray-300 leading-relaxed">
+                  <h3 className="text-lg sm:text-2xl font-bold text-[var(--foreground)] mb-2 sm:mb-3">Capital Preservation</h3>
+                  <p className="text-[var(--text-muted)] text-sm sm:text-base leading-relaxed">
                     We advocate 1% max risk per trade. Our stop-losses are calculated mathematically to avoid market sweeps.
                   </p>
                 </GlowCard>
               </FadeInSection>
 
               <FadeInSection delay={0.3}>
-                <GlowCard glowColor="green" className="h-full bg-black/80">
-                  <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
-                    <TrendingUp className="w-6 h-6 text-green-400" />
+                <GlowCard glowColor="green" className="h-full">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">Compound Growth</h3>
-                  <p className="text-gray-300 leading-relaxed">
+                  <h3 className="text-lg sm:text-2xl font-bold text-[var(--foreground)] mb-2 sm:mb-3">Compound Growth</h3>
+                  <p className="text-[var(--text-muted)] text-sm sm:text-base leading-relaxed">
                     Consistency over gambling. Our monthly net pip targets are built to scale funded accounts steadily.
                   </p>
                 </GlowCard>
               </FadeInSection>
 
               <FadeInSection className="md:col-span-2" delay={0.4}>
-                <GlowCard glowColor="purple" className="h-full bg-black/80">
-                  <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mb-6">
-                    <BarChart2 className="w-6 h-6 text-purple-400" />
+                <GlowCard glowColor="purple" className="h-full">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500/20 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                    <BarChart2 className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">Daily Institutional Breakdown</h3>
-                  <p className="text-gray-300 leading-relaxed max-w-md">
+                  <h3 className="text-lg sm:text-2xl font-bold text-[var(--foreground)] mb-2 sm:mb-3">Daily Institutional Breakdown</h3>
+                  <p className="text-[var(--text-muted)] text-sm sm:text-base leading-relaxed max-w-md">
                     Before we ever place a trade, you receive our macro bias, liquidity zones, and structural markups. You aren&apos;t just copying; you are learning market dominance.
                   </p>
                 </GlowCard>
@@ -493,20 +516,20 @@ function DashboardContent() {
           </section>
 
           {/* Results / Social Proof Section */}
-          <section id="results" className="relative z-10 py-24 px-6 max-w-7xl mx-auto border-t border-[var(--border-color)]">
+          <section id="results" className="relative z-10 py-12 sm:py-16 md:py-24 px-4 sm:px-6 max-w-7xl mx-auto border-t border-[var(--border-color)]">
             <FadeInSection>
-              <div className="text-center mb-16">
-                <h2 className="font-[family-name:var(--font-outfit)] text-3xl md:text-5xl font-bold text-[var(--foreground)] mb-4">
+              <div className="text-center mb-8 sm:mb-12 md:mb-16">
+                <h2 className="font-[family-name:var(--font-outfit)] text-2xl sm:text-3xl md:text-5xl font-bold text-[var(--foreground)] mb-3 sm:mb-4">
                   Real <span className="text-[#d4af37]">Results.</span> No Filters.
                 </h2>
-                <p className="text-[var(--text-muted)] max-w-xl mx-auto text-lg">
+                <p className="text-[var(--text-muted)] max-w-xl mx-auto text-sm sm:text-base md:text-lg">
                   Verified pip counts from our live Telegram channel. Every number is backed by posted signals.
                 </p>
               </div>
             </FadeInSection>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-16 pb-20 md:pb-0">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8 sm:mb-12 md:mb-16 pb-8 md:pb-0">
               {[
                 { value: `+${grandTotalPips.toLocaleString()}`, label: "Grand Total Pips", color: "text-[#d4af37]" },
                 { value: `+${totalPipsToday.toLocaleString()}`, label: "Pips Today", color: "text-[var(--foreground)]" },
@@ -514,9 +537,9 @@ function DashboardContent() {
                 { value: activeCount > 0 ? "LIVE" : "MONITORING", label: activeCount > 0 ? "Active Now" : "Systems Check", color: activeCount > 0 ? "text-[var(--color-success)]" : "text-[var(--color-info)]", glow: activeCount > 0 },
               ].map((stat, i) => (
                 <FadeInSection key={stat.label} delay={0.1 * i}>
-                  <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-6 text-center hover:border-[#d4af37]/20 transition-colors">
-                    <div className={`text-lg sm:text-2xl md:text-4xl lg:text-5xl font-extrabold ${stat.color} font-mono mb-2 sm:mb-3 tracking-tight`}>{stat.value}</div>
-                    <div className="text-[10px] sm:text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">{stat.label}</div>
+                  <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 text-center">
+                    <div className={`text-base sm:text-xl md:text-3xl lg:text-4xl font-extrabold ${stat.color} font-mono mb-1 sm:mb-2 tracking-tight`}>{stat.value}</div>
+                    <div className="text-[9px] sm:text-xs md:text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">{stat.label}</div>
                   </div>
                 </FadeInSection>
               ))}
@@ -558,102 +581,109 @@ function DashboardContent() {
           <LeadMagnetSection />
 
           {/* Pricing Section */}
-          <section id="pricing" className="relative z-10 py-24 px-6 max-w-7xl mx-auto border-t border-[var(--border-color)]">
+          <section id="pricing" className="relative z-10 py-12 sm:py-16 md:py-24 px-4 sm:px-6 max-w-7xl mx-auto border-t border-[var(--border-color)]">
             <FadeInSection>
-              <div className="text-center mb-16">
-                <h2 className="font-[family-name:var(--font-outfit)] text-3xl md:text-5xl font-bold text-[var(--foreground)] mb-4">
+              <div className="text-center mb-8 sm:mb-12 md:mb-16">
+                <h2 className="font-[family-name:var(--font-outfit)] text-2xl sm:text-3xl md:text-5xl font-bold text-[var(--foreground)] mb-3 sm:mb-4">
                   Join the <span className="text-[#d4af37]">Inner Circle.</span>
                 </h2>
-                <p className="text-[var(--text-muted)] max-w-xl mx-auto text-lg">
+                <p className="text-[var(--text-muted)] max-w-xl mx-auto text-sm sm:text-base md:text-lg">
                   Automated crypto checkout. Instant access after validation.
                 </p>
               </div>
             </FadeInSection>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Mobile: Horizontal snap-scroll carousel. Desktop: 3-col grid */}
+            <div className="flex md:grid md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
               <FadeInSection delay={0.1}>
-                <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-3xl p-8 flex flex-col hover:-translate-y-2 transition-transform duration-300 h-full relative overflow-hidden group">
-                  <div className="absolute top-4 right-4 bg-yellow-500 text-black text-[10px] font-black px-2 py-1 rounded italic animate-pulse shadow-lg">50% OFF</div>
-                  <h3 className="text-xl font-bold text-[var(--foreground)] mb-2">1 Month Access</h3>
-                  <p className="text-[var(--text-muted)] mb-6 text-sm">New Recruit Protocol. Secure your edge today.</p>
-                  <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--foreground)] mb-8 flex items-baseline gap-2 flex-wrap">
-                    <span className="text-sm sm:text-lg line-through opacity-30 text-[var(--text-muted)] font-mono">$50</span>
-                    $25<span className="text-sm sm:text-lg text-[var(--text-muted)] font-normal">/mo</span>
+                <div className="min-w-[85vw] sm:min-w-[70vw] md:min-w-0 snap-center bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 flex flex-col md:hover:-translate-y-2 transition-transform duration-300 h-full relative overflow-hidden">
+                  <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-yellow-500 text-black text-[9px] sm:text-[10px] font-black px-2 py-1 rounded italic animate-pulse shadow-lg">50% OFF</div>
+                  <h3 className="text-lg sm:text-xl font-bold text-[var(--foreground)] mb-2">1 Month Access</h3>
+                  <p className="text-[var(--text-muted)] mb-4 sm:mb-6 text-xs sm:text-sm">New Recruit Protocol. Secure your edge today.</p>
+                  <div className="text-2xl sm:text-3xl font-bold text-[var(--foreground)] mb-6 sm:mb-8 flex items-baseline gap-2 flex-wrap">
+                    <span className="text-xs sm:text-lg line-through opacity-30 text-[var(--text-muted)] font-mono">$50</span>
+                    $25<span className="text-xs sm:text-lg text-[var(--text-muted)] font-normal">/mo</span>
                   </div>
-                  <ul className="space-y-4 mb-8 flex-1">
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37]"></div> Daily VIP Signals (XAU/BTC)</li>
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37]"></div> London/NY Analysis Breakdown</li>
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37]"></div> Institutional Community Access</li>
+                  <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 flex-1">
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Daily VIP Signals (XAU/BTC)</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> London/NY Analysis Breakdown</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Institutional Community Access</li>
                   </ul>
-                  <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="block text-center w-full py-4 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] font-bold hover:bg-yellow-500 hover:text-black transition-all">Start Now</a>
+                  <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="block text-center w-full py-3 sm:py-4 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] font-bold hover:bg-yellow-500 hover:text-black transition-all text-sm">Start Now</a>
                 </div>
               </FadeInSection>
 
               <FadeInSection delay={0.2}>
-                <div className="bg-[var(--card-bg)] border border-[#d4af37] shadow-[0_0_30px_rgba(212,175,55,0.15)] rounded-3xl p-8 flex flex-col relative transform hover:-translate-y-2 transition-transform duration-300 md:-translate-y-4 h-full">
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#d4af37] text-black text-xs font-bold uppercase tracking-wider py-1 px-4 rounded-full">Most Popular</div>
-                  <h3 className="text-xl font-bold text-[var(--foreground)] mb-2">6 Months Access</h3>
-                  <p className="text-[var(--text-muted)] mb-6 text-sm">The Commitment Phase. Full institutional access.</p>
-                  <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--foreground)] mb-8 flex items-baseline gap-2 flex-wrap">
-                    <span className="text-sm sm:text-lg line-through opacity-30 text-[var(--text-muted)] font-mono">$250</span>
-                    $100<span className="text-sm sm:text-lg text-[var(--text-muted)] font-normal ml-1 sm:ml-2"> ($16/mo)</span>
+                <div className="min-w-[85vw] sm:min-w-[70vw] md:min-w-0 snap-center bg-[var(--card-bg)] border border-[#d4af37] shadow-[0_0_30px_rgba(212,175,55,0.15)] rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 flex flex-col relative md:hover:-translate-y-2 transition-transform duration-300 md:-translate-y-4 h-full">
+                  <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2 bg-[#d4af37] text-black text-[10px] sm:text-xs font-bold uppercase tracking-wider py-1 px-3 sm:px-4 rounded-full">Most Popular</div>
+                  <h3 className="text-lg sm:text-xl font-bold text-[var(--foreground)] mb-2 mt-2 md:mt-0">6 Months Access</h3>
+                  <p className="text-[var(--text-muted)] mb-4 sm:mb-6 text-xs sm:text-sm">The Commitment Phase. Full institutional access.</p>
+                  <div className="text-2xl sm:text-3xl font-bold text-[var(--foreground)] mb-6 sm:mb-8 flex items-baseline gap-2 flex-wrap">
+                    <span className="text-xs sm:text-lg line-through opacity-30 text-[var(--text-muted)] font-mono">$250</span>
+                    $100<span className="text-xs sm:text-lg text-[var(--text-muted)] font-normal ml-1"> ($16/mo)</span>
                   </div>
-                  <ul className="space-y-4 mb-8 flex-1">
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37]"></div> Daily VIP Signals & Terminal</li>
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37]"></div> Risk Management Risk Planner</li>
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37]"></div> Educational Vault Access</li>
+                  <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 flex-1">
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Daily VIP Signals & Terminal</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Risk Management Risk Planner</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Educational Vault Access</li>
                   </ul>
-                  <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="block text-center w-full py-4 rounded-xl bg-[#d4af37] text-black font-bold hover:brightness-110 transition-colors shadow-lg">Secure Spot</a>
+                  <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="block text-center w-full py-3 sm:py-4 rounded-xl bg-[#d4af37] text-black font-bold hover:brightness-110 transition-colors shadow-lg text-sm">Secure Spot</a>
                 </div>
               </FadeInSection>
 
               <FadeInSection delay={0.3}>
-                <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-3xl p-8 flex flex-col hover:-translate-y-2 transition-transform duration-300 h-full">
-                  <h3 className="text-xl font-bold text-[var(--foreground)] mb-2">1 Year Access</h3>
-                  <p className="text-[var(--text-muted)] mb-6 text-sm">Become a Dominator. Annual mastery and support.</p>
-                  <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--foreground)] mb-8 flex items-baseline gap-2 flex-wrap">
-                    <span className="text-sm sm:text-lg line-through opacity-30 text-[var(--text-muted)] font-mono">$450</span>
-                    $200<span className="text-sm sm:text-lg text-[var(--text-muted)] font-normal ml-1 sm:ml-2"> ($16/mo)</span>
+                <div className="min-w-[85vw] sm:min-w-[70vw] md:min-w-0 snap-center bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 flex flex-col md:hover:-translate-y-2 transition-transform duration-300 h-full">
+                  <h3 className="text-lg sm:text-xl font-bold text-[var(--foreground)] mb-2">1 Year Access</h3>
+                  <p className="text-[var(--text-muted)] mb-4 sm:mb-6 text-xs sm:text-sm">Become a Dominator. Annual mastery and support.</p>
+                  <div className="text-2xl sm:text-3xl font-bold text-[var(--foreground)] mb-6 sm:mb-8 flex items-baseline gap-2 flex-wrap">
+                    <span className="text-xs sm:text-lg line-through opacity-30 text-[var(--text-muted)] font-mono">$450</span>
+                    $200<span className="text-xs sm:text-lg text-[var(--text-muted)] font-normal ml-1"> ($16/mo)</span>
                   </div>
-                  <ul className="space-y-4 mb-8 flex-1">
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37]"></div> Institutional Guide (Premium)</li>
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37]"></div> VIP Journal Analysis Tools</li>
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37]"></div> Priority Implementation Access</li>
+                  <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 flex-1">
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Institutional Guide (Premium)</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> VIP Journal Analysis Tools</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Priority Implementation Access</li>
                   </ul>
-                  <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="block text-center w-full py-4 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] font-bold hover:bg-yellow-500 hover:text-black transition-all">Go Annual</a>
+                  <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="block text-center w-full py-3 sm:py-4 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] font-bold hover:bg-yellow-500 hover:text-black transition-all text-sm">Go Annual</a>
                 </div>
               </FadeInSection>
+            </div>
+            {/* Mobile scroll indicator */}
+            <div className="flex md:hidden justify-center gap-1.5 mt-4">
+              <div className="w-6 h-1 rounded-full bg-[#d4af37]"></div>
+              <div className="w-6 h-1 rounded-full bg-[var(--border-color)]"></div>
+              <div className="w-6 h-1 rounded-full bg-[var(--border-color)]"></div>
             </div>
           </section>
 
           {/* Get Started / Broker Section */}
-          <section id="broker" className="relative z-10 py-24 px-6 max-w-7xl mx-auto border-t border-[var(--border-color)]">
+          <section id="broker" className="relative z-10 py-12 sm:py-16 md:py-24 px-4 sm:px-6 max-w-7xl mx-auto border-t border-[var(--border-color)]">
             <FadeInSection>
-              <div className="text-center mb-16">
-                <h2 className="font-[family-name:var(--font-outfit)] text-3xl md:text-5xl font-bold text-[var(--foreground)] mb-4">
+              <div className="text-center mb-8 sm:mb-12 md:mb-16">
+                <h2 className="font-[family-name:var(--font-outfit)] text-2xl sm:text-3xl md:text-5xl font-bold text-[var(--foreground)] mb-3 sm:mb-4">
                   Get <span className="text-[#d4af37]">Set Up.</span>
                 </h2>
-                <p className="text-[var(--text-muted)] max-w-xl mx-auto text-lg">
+                <p className="text-[var(--text-muted)] max-w-xl mx-auto text-sm sm:text-base md:text-lg">
                   Everything you need to start executing trades in under 10 minutes.
                 </p>
               </div>
             </FadeInSection>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-4xl mx-auto">
               <FadeInSection delay={0.1}>
                 <a href="https://www.hfm.com/ke/en/?refid=30508914" target="_blank" rel="noopener noreferrer"
-                  className="group bg-gradient-to-br from-[var(--card-bg)] to-transparent border border-[var(--border-color)] p-8 rounded-3xl hover:border-[#d4af37]/40 hover:shadow-[0_0_40px_rgba(212,175,55,0.1)] transition-all duration-300 flex flex-col items-start h-full">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-[#d4af37]/10 rounded-full flex items-center justify-center">
-                      <Target className="w-6 h-6 text-[#d4af37]" />
+                  className="group bg-gradient-to-br from-[var(--card-bg)] to-transparent border border-[var(--border-color)] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl transition-all duration-300 flex flex-col items-start h-full">
+                  <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#d4af37]/10 rounded-full flex items-center justify-center">
+                      <Target className="w-5 h-5 sm:w-6 sm:h-6 text-[#d4af37]" />
                     </div>
-                    <span className="text-xs bg-[#d4af37]/10 text-[#d4af37] px-3 py-1 rounded-full font-semibold uppercase tracking-wider">Step 1</span>
+                    <span className="text-[10px] sm:text-xs bg-[#d4af37]/10 text-[#d4af37] px-2 sm:px-3 py-1 rounded-full font-semibold uppercase tracking-wider">Step 1</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-[var(--foreground)] mb-3">Open Your Broker</h3>
-                  <p className="text-[var(--text-muted)] mb-6 leading-relaxed">
-                    We exclusively use <strong className="text-[var(--foreground)]">HFM</strong> for institutional-grade spreads on Gold and Bitcoin. Raw spreads. Fast execution. Regulated.
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[var(--foreground)] mb-2 sm:mb-3">Open Your Broker</h3>
+                  <p className="text-[var(--text-muted)] mb-4 sm:mb-6 leading-relaxed text-sm">
+                    We exclusively use <strong className="text-[var(--foreground)]">HFM</strong> for institutional-grade spreads on Gold and Bitcoin.
                   </p>
-                  <div className="mt-auto flex items-center gap-2 text-[#d4af37] font-semibold group-hover:gap-3 transition-all">
+                  <div className="mt-auto flex items-center gap-2 text-[#d4af37] font-semibold text-sm">
                     Open HFM Account <ExternalLink className="w-4 h-4" />
                   </div>
                 </a>
@@ -661,18 +691,18 @@ function DashboardContent() {
 
               <FadeInSection delay={0.2}>
                 <a href="https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?hl=en&ref=GRO_28502_E50OE&utm_source=default" target="_blank" rel="noopener noreferrer"
-                  className="group bg-gradient-to-br from-[var(--card-bg)] to-transparent border border-[var(--border-color)] p-8 rounded-3xl hover:border-yellow-500/40 hover:shadow-[0_0_40px_rgba(234,179,8,0.1)] transition-all duration-300 flex flex-col items-start h-full">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-yellow-500/10 rounded-full flex items-center justify-center">
-                      <Clock className="w-6 h-6 text-yellow-400" />
+                  className="group bg-gradient-to-br from-[var(--card-bg)] to-transparent border border-[var(--border-color)] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl transition-all duration-300 flex flex-col items-start h-full">
+                  <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500/10 rounded-full flex items-center justify-center">
+                      <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
                     </div>
-                    <span className="text-xs bg-yellow-500/10 text-yellow-400 px-3 py-1.5 rounded-full font-semibold uppercase tracking-wider">Step 2</span>
+                    <span className="text-[10px] sm:text-xs bg-yellow-500/10 text-yellow-400 px-2 sm:px-3 py-1 rounded-full font-semibold uppercase tracking-wider">Step 2</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-[var(--foreground)] mb-3">Get USDT via Binance</h3>
-                  <p className="text-[var(--text-muted)] mb-6 leading-relaxed">
-                    Purchase <strong className="text-[var(--foreground)]">USDT</strong> via card or bank transfer, then send it via TRC-20 to join our VIP room instantly.
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[var(--foreground)] mb-2 sm:mb-3">Get USDT via Binance</h3>
+                  <p className="text-[var(--text-muted)] mb-4 sm:mb-6 leading-relaxed text-sm">
+                    Purchase <strong className="text-[var(--foreground)]">USDT</strong> via card or bank transfer, then send via TRC-20 to join VIP.
                   </p>
-                  <div className="mt-auto flex items-center gap-2 text-yellow-400 font-semibold group-hover:gap-3 transition-all">
+                  <div className="mt-auto flex items-center gap-2 text-yellow-400 font-semibold text-sm">
                     Create Binance Account <ExternalLink className="w-4 h-4" />
                   </div>
                 </a>
@@ -680,11 +710,11 @@ function DashboardContent() {
             </div>
 
             <FadeInSection delay={0.3}>
-              <div className="mt-12 text-center">
-                <div className="inline-flex items-center gap-3 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-full px-8 py-4">
-                  <Users className="w-5 h-5 text-[#d4af37]" />
-                  <span className="text-[var(--text-muted)]">Step 3:</span>
-                  <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="text-[#d4af37] font-bold hover:underline">
+              <div className="mt-8 sm:mt-12 text-center">
+                <div className="inline-flex items-center gap-2 sm:gap-3 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-full px-4 sm:px-8 py-3 sm:py-4 flex-wrap justify-center">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-[#d4af37]" />
+                  <span className="text-[var(--text-muted)] text-sm">Step 3:</span>
+                  <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="text-[#d4af37] font-bold hover:underline text-sm">
                     Message @Zen_pips to unlock VIP
                   </a>
                 </div>
@@ -698,9 +728,9 @@ function DashboardContent() {
 
         {/* Footer — only shown if NOT community tab, placed at bottom of scrollable area */}
         {activeTab !== "community" && (
-          <footer className="relative z-10 border-t border-[var(--border-color)] py-16 px-6 bg-[var(--background)] min-h-[300px]">
+          <footer className="relative z-10 border-t border-[var(--border-color)] py-8 sm:py-12 md:py-16 px-4 sm:px-6 bg-[var(--background)]">
             <div className="max-w-7xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 md:gap-12 mb-8 sm:mb-12">
                 <div className="md:col-span-2">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="relative w-11 h-11 bg-[#d4af37] rounded-full p-0.5 shadow-md border border-yellow-600/30 flex items-center justify-center">
@@ -749,6 +779,7 @@ function DashboardContent() {
           </footer>
         )}
       </section>
+      <ProfileSetupPopup />
     </main>
   );
 }

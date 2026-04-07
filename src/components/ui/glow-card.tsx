@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, ReactNode } from "react";
+import React, { useEffect, useRef, useState, ReactNode } from "react";
 
 interface GlowCardProps {
     children: ReactNode;
@@ -22,31 +22,46 @@ const GlowCard: React.FC<GlowCardProps> = ({
     glowColor = "gold",
 }) => {
     const cardRef = useRef<HTMLDivElement>(null);
+    const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
+
+    useEffect(() => {
+        if (isMobile) return; // No pointer tracking on mobile/tablet
+
         const syncPointer = (e: PointerEvent) => {
             const { clientX: x, clientY: y } = e;
-
             if (cardRef.current) {
                 cardRef.current.style.setProperty("--x", x.toFixed(2));
-                cardRef.current.style.setProperty(
-                    "--xp",
-                    (x / window.innerWidth).toFixed(2)
-                );
+                cardRef.current.style.setProperty("--xp", (x / window.innerWidth).toFixed(2));
                 cardRef.current.style.setProperty("--y", y.toFixed(2));
-                cardRef.current.style.setProperty(
-                    "--yp",
-                    (y / window.innerHeight).toFixed(2)
-                );
+                cardRef.current.style.setProperty("--yp", (y / window.innerHeight).toFixed(2));
             }
         };
 
         document.addEventListener("pointermove", syncPointer);
         return () => document.removeEventListener("pointermove", syncPointer);
-    }, []);
+    }, [isMobile]);
 
     const { base, spread } = glowColorMap[glowColor];
 
+    // On mobile: render a simple themed card with no mouse-driven glow
+    if (isMobile) {
+        return (
+            <div
+                className={`rounded-2xl sm:rounded-3xl relative p-5 sm:p-8 border border-[var(--border-color)] bg-[var(--card-bg)] ${className}`}
+            >
+                {children}
+            </div>
+        );
+    }
+
+    // On desktop: full glow effect
     return (
         <>
             <style

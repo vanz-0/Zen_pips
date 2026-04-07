@@ -70,6 +70,9 @@ export function VaultTab({ onNavigate }: VaultProps) {
     const [showCertModal, setShowCertModal] = useState<string | null>(null)
     const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
     const [claimingCert, setClaimingCert] = useState(false)
+    const [showRewardModal, setShowRewardModal] = useState<{ broker: string; taskId: string } | null>(null)
+    const [submittingID, setSubmittingID] = useState(false)
+    const [isIdSubmitted, setIsIdSubmitted] = useState<Record<string, boolean>>({})
 
     const fetchResources = useCallback(async () => {
         const { data, error } = await supabase
@@ -158,6 +161,30 @@ export function VaultTab({ onNavigate }: VaultProps) {
             })
         }
         setClaimingCert(false)
+    }
+
+    const handleClaimReward = async (broker: string, accountId: string) => {
+        if (!user || !accountId) return
+        setSubmittingID(true)
+        
+        const { error } = await supabase.from("affiliate_verifications").insert({
+            user_id: user.id,
+            broker_name: broker,
+            submitted_key: accountId,
+            status: 'PENDING',
+            reward_amount: 20
+        })
+
+        if (!error) {
+            setIsIdSubmitted(prev => ({ ...prev, [broker]: true }))
+            setShowRewardModal(null)
+            confetti({
+                particleCount: 50,
+                spread: 50,
+                colors: ['#3B82F6', '#FFFFFF']
+            })
+        }
+        setSubmittingID(false)
     }
 
     // ─── Progress Calculations ───
@@ -422,7 +449,8 @@ export function VaultTab({ onNavigate }: VaultProps) {
                                     link: "https://www.hfm.com/ke/en/?refid=30508914", 
                                     icon: <Landmark className="w-6 h-6" />, 
                                     label: "Official Broker",
-                                    action: "Login Area"
+                                    action: "Claim Credits",
+                                    onClick: () => setShowRewardModal({ broker: 'HFM', taskId: 'hfm_signup' })
                                 },
                                 { 
                                     title: "Institutional Protocol", 
@@ -439,6 +467,15 @@ export function VaultTab({ onNavigate }: VaultProps) {
                                     icon: <Zap className="w-6 h-6" />, 
                                     label: "Technical Protocol",
                                     action: "Download PDF"
+                                },
+                                { 
+                                    title: "Binance Protocol", 
+                                    desc: "Access the world's most liquid exchange for your BTC/USD execution. Reward: 20 AI Credits.", 
+                                    link: "https://www.binance.com", 
+                                    icon: <Globe className="w-6 h-6" />, 
+                                    label: "Liquidity Hub",
+                                    action: "Claim Credits",
+                                    onClick: () => setShowRewardModal({ broker: 'Binance', taskId: 'binance_signup' })
                                 }
                             ].map((tool, i) => (
                             <motion.div
@@ -619,6 +656,56 @@ export function VaultTab({ onNavigate }: VaultProps) {
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowFullScreen
                             />
+                        </motion.div>
+                    </div>
+                )}
+
+                {/* Reward Claim Modal */}
+                {showRewardModal && (
+                    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            onClick={() => setShowRewardModal(null)}
+                            className="absolute inset-0 bg-black/90 backdrop-blur-md"
+                        />
+                        <motion.div 
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            className="relative w-full max-w-md bg-[var(--card-bg)] border border-blue-500/30 rounded-3xl p-8 overflow-hidden shadow-[0_0_50px_rgba(59,130,246,0.2)]"
+                        >
+                            <div className="relative z-10 space-y-6">
+                                <div className="flex items-center gap-2 text-blue-500 text-xs font-bold uppercase tracking-widest">
+                                    <Zap className="w-4 h-4" /> Affiliate Reward Protocol
+                                </div>
+                                <h3 className="text-2xl font-bold uppercase italic">Claim {showRewardModal.broker} Credits</h3>
+                                <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                                    Submit your **{showRewardModal.broker} Account ID** below. Once our team verifies your registration via our institutional link, **20 AI Execution Credits** will be added to your profile.
+                                </p>
+                                
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-[var(--text-muted)] uppercase font-black">Your {showRewardModal.broker} ID</label>
+                                        <input 
+                                            id="reward-account-id"
+                                            type="text" 
+                                            placeholder="Enter your ID here..."
+                                            className="w-full bg-black/40 border border-[var(--border-color)] p-4 rounded-xl text-sm font-mono text-blue-400 outline-none focus:border-blue-500/50"
+                                        />
+                                    </div>
+                                    <button 
+                                        disabled={submittingID}
+                                        onClick={() => {
+                                            const val = (document.getElementById('reward-account-id') as HTMLInputElement)?.value;
+                                            if (val) handleClaimReward(showRewardModal.broker, val);
+                                        }}
+                                        className="w-full py-4 bg-blue-500 text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-blue-400 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        {submittingID ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
+                                        Submit for Verification
+                                    </button>
+                                </div>
+                            </div>
                         </motion.div>
                     </div>
                 )}

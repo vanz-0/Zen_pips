@@ -143,17 +143,25 @@ export function OnboardingTab() {
                                         </li>
                                     </ul>
                                 </div>
-                                <div className="w-full md:w-64 space-y-3">
-                                    <a 
-                                        href="https://www.hfm.com/ke/en/?refid=30508914" 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="flex items-center justify-center gap-2 w-full py-4 bg-[#d4af37] text-black font-black rounded-xl hover:brightness-110 transition-all text-sm uppercase tracking-wider"
-                                    >
-                                        JOIN HFM <ExternalLink className="w-4 h-4" />
-                                    </a>
-                                    <p className="text-[10px] text-[var(--text-muted)] text-center uppercase font-bold tracking-tighter">Zen Pips Official Broker Affiliate Link</p>
-                                </div>
+                                    <div className="space-y-3">
+                                        <a 
+                                            href="https://www.hfm.com/ke/en/?refid=30508914" 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-center gap-2 w-full py-4 bg-[#d4af37] text-black font-black rounded-xl hover:brightness-110 transition-all text-sm uppercase tracking-wider"
+                                        >
+                                            JOIN HFM <ExternalLink className="w-4 h-4" />
+                                        </a>
+                                        <a 
+                                            href="/Zen_Pips_Institutional_Guidelines.pdf" 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-center gap-2 w-full py-3 bg-white/5 border border-white/10 text-white font-bold rounded-xl hover:bg-white/10 transition-all text-[10px] uppercase tracking-widest"
+                                        >
+                                            DOWNLOAD MANUAL <Download className="w-4 h-4 text-yellow-500" />
+                                        </a>
+                                        <p className="text-[10px] text-[var(--text-muted)] text-center uppercase font-bold tracking-tighter">Zen Pips Official Broker Affiliate Link</p>
+                                    </div>
                             </div>
                         </div>
                     </Step>

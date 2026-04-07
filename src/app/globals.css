@@ -94,3 +94,20 @@ body {
   background: #d4af37;
   color: #000;
 }
+
+/* Hide scrollbar for carousel on mobile */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Disable hover-driven transforms on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .group:hover,
+  [class*="hover\\:"]:hover {
+    transform: none !important;
+  }
+}
