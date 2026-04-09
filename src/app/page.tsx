@@ -524,20 +524,25 @@ function DashboardContent() {
             </div>
 
             {/* Recent Signal Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {signals.slice(0, 3).map((sig, i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
+              {signals.slice(0, 5).map((sig, i) => (
                 <FadeInSection key={sig.id} delay={0.1 * (i + 1)}>
-                  <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-6 hover:border-green-500/20 transition-all h-full">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-[#d4af37] font-bold text-lg">{sig.pair} <span className="text-xs text-[var(--text-muted)]">{sig.timeframe}</span></span>
-                      <span className={`text-[10px] font-mono px-3 py-1 rounded-full border ${sig.status === "ACTIVE"
-                        ? "bg-blue-500/10 text-[var(--color-info)] border-blue-500/20"
-                        : "bg-green-500/10 text-[var(--color-success)] border-green-500/20"
+                  <div 
+                    onClick={() => user ? handleNavClick("chartai") : router.push("/auth")}
+                    className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-6 hover:border-green-500/20 transition-all h-full cursor-pointer group"
+                  >
+                    <div className="flex items-center justify-between mb-3 sm:mb-4">
+                      <span className="text-[#d4af37] font-bold text-sm sm:text-lg">{sig.pair} <span className="text-[10px] text-[var(--text-muted)]">{sig.timeframe}</span></span>
+                      <span className={`text-[8px] sm:text-[10px] font-mono px-2 sm:px-3 py-1 rounded-full border ${sig.closed
+                        ? "bg-green-500/10 text-[var(--color-success)] border-green-500/20"
+                        : sig.tp1_hit
+                          ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+                          : "bg-blue-500/10 text-[var(--color-info)] border-blue-500/20"
                         }`}>
                         {sig.status}
                       </span>
                     </div>
-                    <div className="space-y-2 text-sm">
+                    <div className="space-y-2 text-xs sm:text-sm">
                       <div className="flex justify-between"><span className="text-[var(--text-muted)]">Entry</span><span className="text-[var(--foreground)] font-mono">{sig.entry.toLocaleString()}</span></div>
                       <div className="flex justify-between">
                         <span className="text-[var(--text-muted)]">Result</span>
@@ -549,6 +554,7 @@ function DashboardContent() {
                         <p className="text-[10px] text-[var(--text-muted)] italic leading-relaxed">{sig.confluence}</p>
                       </div>
                     </div>
+                    <div className="mt-3 text-[9px] text-[#d4af37] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">View in Chart AI →</div>
                   </div>
                 </FadeInSection>
               ))}
@@ -663,37 +669,57 @@ function DashboardContent() {
                 <p className="text-[var(--text-muted)]">Real feedback from verified copy-trading clients.</p>
               </div>
             </FadeInSection>
-            <div className="w-full pb-8">
+            <div className="relative overflow-hidden w-full pb-8">
               <div 
-                className="flex gap-4 sm:gap-6 overflow-x-auto snap-x snap-mandatory pb-4 px-4 scrollbar-hide" 
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                className="flex transition-transform duration-500 ease-in-out" 
+                style={{ transform: `translateX(-${activeReviewSlide * 100}%)` }}
               >
-                      {[
-                        { t: "The AI signal entry validation is unmatched. I no longer second guess my entries.", v: "VIP User", n: "Jason M.", r: 5 },
-                        { t: "Deep character analysis gives me the 'why' behind every trade. Setup took 5 mins.", v: "$25 Mastery", n: "Sarah K.", r: 5 },
-                        { t: "Copier works flawlessly on Vantage. 0 slippage. The institutional journal changed my mindset.", v: "$10 Commitment", n: "Alex T.", r: 5 },
-                        { t: "The U.S. index signals are incredibly precise. NAS100 execution is institutional grade.", v: "VIP User", n: "Marcus L.", r: 4 },
-                        { t: "Zero latency on the bridge. Gold (XAU/USD) hits TP before my manual chart even ticks.", v: "$25 Mastery", n: "Elena R.", r: 5 },
-                        { t: "Switched to Vantage per the guide. Best decision ever. The daily macroeconomic bias saves me from bad trades.", v: "$10 Commitment", n: "David W.", r: 5 },
-                        { t: "The community sentiment analysis is a game changer. I've never seen a group so focused on liquidity sweeps.", v: "VIP User", n: "Sarah J.", r: 5 },
-                        { t: "Zen Pips helped me pass my $100k prop firm challenge in just two weeks. Clear entries, logical stops.", v: "$25 Mastery", n: "Ahmed K.", r: 5 },
-                        { t: "Finally, a signal provider that actually cares about risk management. The journal tool alone is worth the sub.", v: "$10 Commitment", n: "Chris M.", r: 5 }
-                      ].map((review, i) => (
-                        <div key={i} className="min-w-[85vw] md:min-w-[calc(33.333vw-2rem)] max-w-sm shrink-0 snap-center p-6 sm:p-8 rounded-2xl bg-[var(--card-bg)] border border-[var(--border-color)] flex flex-col justify-between h-auto hover:border-[#d4af37]/30 transition-all duration-300 shadow-lg">
+                  {[0, 1, 2].map(slideIdx => {
+                    const reviews = [
+                      { t: "The AI signal entry validation is unmatched. I no longer second guess my entries.", v: "VIP User", n: "Jason M.", r: 5 },
+                      { t: "Deep character analysis gives me the 'why' behind every trade. Setup took 5 mins.", v: "$25 Mastery", n: "Sarah K.", r: 5 },
+                      { t: "Copier works flawlessly on Vantage. 0 slippage. The institutional journal changed my mindset.", v: "$10 Commitment", n: "Alex T.", r: 5 },
+                      { t: "The U.S. index signals are incredibly precise. NAS100 execution is institutional grade.", v: "VIP User", n: "Marcus L.", r: 5 },
+                      { t: "Zero latency on the bridge. Gold (XAU/USD) hits TP before my manual chart even ticks.", v: "$25 Mastery", n: "Elena R.", r: 5 },
+                      { t: "Switched to Vantage per the guide. Best decision ever. The daily macroeconomic bias saves me from bad trades.", v: "$10 Commitment", n: "David W.", r: 5 },
+                      { t: "The community sentiment analysis is a game changer. I've never seen a group so focused on liquidity sweeps.", v: "VIP User", n: "Sarah J.", r: 5 },
+                      { t: "Zen Pips helped me pass my $100k prop firm challenge in just two weeks. Clear entries, logical stops.", v: "$25 Mastery", n: "Ahmed K.", r: 5 },
+                      { t: "Finally, a signal provider that actually cares about risk management. The journal tool alone is worth the sub.", v: "$10 Commitment", n: "Chris M.", r: 5 }
+                    ];
+                    const slideReviews = reviews.slice(slideIdx * 3, slideIdx * 3 + 3);
+                    return (
+                    <div key={slideIdx} className="min-w-full flex-shrink-0 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 px-4">
+                      {slideReviews.map((review, i) => (
+                        <div key={i} className="p-5 sm:p-8 rounded-2xl bg-[var(--card-bg)] border border-[var(--border-color)] flex flex-col justify-between h-full hover:border-[#d4af37]/30 transition-all duration-300 shadow-lg">
                           <div>
                             <div className="flex items-center gap-1 mb-4 sm:mb-6">
                               {[...Array(review.r)].map((_, j) => (
                                 <Star key={j} className="w-4 h-4 sm:w-5 sm:h-5 fill-yellow-500 text-yellow-500" />
                               ))}
                             </div>
-                            <p className="text-[var(--foreground)] mb-6 text-base sm:text-lg tracking-tight font-medium italic leading-relaxed">"{review.t}"</p>
+                            <p className="text-[var(--foreground)] mb-6 text-sm sm:text-lg tracking-tight font-medium italic leading-relaxed">"{review.t}"</p>
                           </div>
-                          <div className="flex items-center justify-between border-t border-[var(--border-color)] mt-auto pt-4">
+                          <div className="flex items-center justify-between border-t border-[var(--border-color)] pt-4">
                             <span className="font-bold tracking-wide text-xs sm:text-sm">{review.n}</span>
                             <span className="text-[9px] font-bold uppercase tracking-widest bg-yellow-500/10 text-yellow-600 px-2 sm:px-3 py-1 rounded-full border border-yellow-500/20">{review.v}</span>
                           </div>
                         </div>
                       ))}
+                    </div>
+                    );
+                  })}
+              </div>
+              
+              {/* Pagination Dots */}
+              <div className="flex justify-center items-center gap-3 mt-8">
+                {[0, 1, 2].map(idx => (
+                  <button 
+                    key={idx}
+                    onClick={() => setActiveReviewSlide(idx)}
+                    className={`transition-all duration-300 rounded-full ${activeReviewSlide === idx ? 'w-8 h-2.5 bg-yellow-500' : 'w-2.5 h-2.5 bg-[var(--border-color)] hover:bg-yellow-500/50'}`}
+                    aria-label={`Go to review slide ${idx + 1}`}
+                  />
+                ))}
               </div>
             </div>
           </section>

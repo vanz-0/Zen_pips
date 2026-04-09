@@ -108,7 +108,7 @@ function SignalCard({ sig, onSelectSymbol, profile }: { sig: any; onSelectSymbol
     const now = new Date();
     const diffMs = now.getTime() - sigDate.getTime();
     const diffHours = diffMs / (1000 * 3600);
-    const isGated = !profile?.is_vip && diffHours < 2;
+    const isGated = false; // Platform is free — no signal gating
 
     const events: { icon: string; text: string; color: string; detail?: string }[] = [];
     events.push({ icon: "🎯", text: `Entry placed at ${sig.entry}`, color: "text-[#d4af37]", detail: sig.confluence });
