@@ -674,50 +674,44 @@ function DashboardContent() {
                 className="flex transition-transform duration-500 ease-in-out" 
                 style={{ transform: `translateX(-${activeReviewSlide * 100}%)` }}
               >
-                  {[0, 1, 2].map(slideIdx => {
-                    const reviews = [
-                      { t: "The AI signal entry validation is unmatched. I no longer second guess my entries.", v: "VIP User", n: "Jason M.", r: 5 },
-                      { t: "Deep character analysis gives me the 'why' behind every trade. Setup took 5 mins.", v: "$25 Mastery", n: "Sarah K.", r: 5 },
-                      { t: "Copier works flawlessly on Vantage. 0 slippage. The institutional journal changed my mindset.", v: "$10 Commitment", n: "Alex T.", r: 5 },
-                      { t: "The U.S. index signals are incredibly precise. NAS100 execution is institutional grade.", v: "VIP User", n: "Marcus L.", r: 5 },
-                      { t: "Zero latency on the bridge. Gold (XAU/USD) hits TP before my manual chart even ticks.", v: "$25 Mastery", n: "Elena R.", r: 5 },
-                      { t: "Switched to Vantage per the guide. Best decision ever. The daily macroeconomic bias saves me from bad trades.", v: "$10 Commitment", n: "David W.", r: 5 },
-                      { t: "The community sentiment analysis is a game changer. I've never seen a group so focused on liquidity sweeps.", v: "VIP User", n: "Sarah J.", r: 5 },
-                      { t: "Zen Pips helped me pass my $100k prop firm challenge in just two weeks. Clear entries, logical stops.", v: "$25 Mastery", n: "Ahmed K.", r: 5 },
-                      { t: "Finally, a signal provider that actually cares about risk management. The journal tool alone is worth the sub.", v: "$10 Commitment", n: "Chris M.", r: 5 }
-                    ];
-                    const slideReviews = reviews.slice(slideIdx * 3, slideIdx * 3 + 3);
-                    return (
-                    <div key={slideIdx} className="min-w-full flex-shrink-0 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 px-4">
-                      {slideReviews.map((review, i) => (
-                        <div key={i} className="p-5 sm:p-8 rounded-2xl bg-[var(--card-bg)] border border-[var(--border-color)] flex flex-col justify-between h-full hover:border-[#d4af37]/30 transition-all duration-300 shadow-lg">
-                          <div>
-                            <div className="flex items-center gap-1 mb-4 sm:mb-6">
-                              {[...Array(review.r)].map((_, j) => (
-                                <Star key={j} className="w-4 h-4 sm:w-5 sm:h-5 fill-yellow-500 text-yellow-500" />
-                              ))}
-                            </div>
-                            <p className="text-[var(--foreground)] mb-6 text-sm sm:text-lg tracking-tight font-medium italic leading-relaxed">"{review.t}"</p>
+                  {[
+                    { t: "The AI signal entry validation is unmatched. I no longer second guess my entries.", v: "VIP User", n: "Jason M.", r: 5 },
+                    { t: "Deep character analysis gives me the 'why' behind every trade. Setup took 5 mins.", v: "$25 Mastery", n: "Sarah K.", r: 5 },
+                    { t: "Copier works flawlessly on Vantage. 0 slippage. The institutional journal changed my mindset.", v: "$10 Commitment", n: "Alex T.", r: 5 },
+                    { t: "The U.S. index signals are incredibly precise. NAS100 execution is institutional grade.", v: "VIP User", n: "Marcus L.", r: 5 },
+                    { t: "Zero latency on the bridge. Gold (XAU/USD) hits TP before my manual chart even ticks.", v: "$25 Mastery", n: "Elena R.", r: 5 },
+                    { t: "Switched to Vantage per the guide. Best decision ever. The daily macroeconomic bias saves me from bad trades.", v: "$10 Commitment", n: "David W.", r: 5 },
+                    { t: "The community sentiment analysis is a game changer. I've never seen a group so focused on liquidity sweeps.", v: "VIP User", n: "Priya N.", r: 5 },
+                    { t: "Zen Pips helped me pass my $100k prop firm challenge in just two weeks. Clear entries, logical stops.", v: "$25 Mastery", n: "Ahmed K.", r: 5 },
+                    { t: "Finally, a signal provider that actually cares about risk management. The journal tool alone is worth the sub.", v: "$10 Commitment", n: "Chris M.", r: 5 }
+                  ].map((review, i) => (
+                    <div key={i} className="min-w-full flex-shrink-0 flex justify-center px-4">
+                      <div className="w-full max-w-2xl p-6 sm:p-10 rounded-2xl bg-[var(--card-bg)] border border-[var(--border-color)] flex flex-col justify-between hover:border-[#d4af37]/30 transition-all duration-300 shadow-lg">
+                        <div>
+                          <div className="flex items-center gap-1 mb-4 sm:mb-6">
+                            {[...Array(review.r)].map((_, j) => (
+                              <Star key={j} className="w-5 h-5 sm:w-6 sm:h-6 fill-yellow-500 text-yellow-500" />
+                            ))}
                           </div>
-                          <div className="flex items-center justify-between border-t border-[var(--border-color)] pt-4">
-                            <span className="font-bold tracking-wide text-xs sm:text-sm">{review.n}</span>
-                            <span className="text-[9px] font-bold uppercase tracking-widest bg-yellow-500/10 text-yellow-600 px-2 sm:px-3 py-1 rounded-full border border-yellow-500/20">{review.v}</span>
-                          </div>
+                          <p className="text-[var(--foreground)] mb-6 text-base sm:text-xl tracking-tight font-medium italic leading-relaxed">"{review.t}"</p>
                         </div>
-                      ))}
+                        <div className="flex items-center justify-between border-t border-[var(--border-color)] pt-4">
+                          <span className="font-bold tracking-wide text-sm sm:text-base">{review.n}</span>
+                          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest bg-yellow-500/10 text-yellow-600 px-3 py-1 rounded-full border border-yellow-500/20">{review.v}</span>
+                        </div>
+                      </div>
                     </div>
-                    );
-                  })}
+                  ))}
               </div>
               
-              {/* Pagination Dots */}
-              <div className="flex justify-center items-center gap-3 mt-8">
-                {[0, 1, 2].map(idx => (
+              {/* 9 Pagination Dots */}
+              <div className="flex justify-center items-center gap-2 mt-8">
+                {[0, 1, 2, 3, 4, 5, 6, 7, 8].map(idx => (
                   <button 
                     key={idx}
                     onClick={() => setActiveReviewSlide(idx)}
-                    className={`transition-all duration-300 rounded-full ${activeReviewSlide === idx ? 'w-8 h-2.5 bg-yellow-500' : 'w-2.5 h-2.5 bg-[var(--border-color)] hover:bg-yellow-500/50'}`}
-                    aria-label={`Go to review slide ${idx + 1}`}
+                    className={`transition-all duration-300 rounded-full ${activeReviewSlide === idx ? 'w-6 h-2.5 bg-yellow-500' : 'w-2.5 h-2.5 bg-[var(--border-color)] hover:bg-yellow-500/50'}`}
+                    aria-label={`Go to review ${idx + 1}`}
                   />
                 ))}
               </div>
