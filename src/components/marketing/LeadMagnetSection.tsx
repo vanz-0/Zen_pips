@@ -143,7 +143,7 @@ export function LeadMagnetSection() {
                                         <button
                                             type="submit"
                                             disabled={status === "loading"}
-                                            className="w-full bg-[#d4af37] hover:bg-yellow-400 text-black py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-[0_0_30px_rgba(212,175,55,0.2)] hover:shadow-[0_0_40px_rgba(212,175,55,0.3)]"
+                                            className="w-full bg-[#d4af37] hover:bg-yellow-400 text-black py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-[0_0_30px_rgba(212,175,55,0.2)] hover:shadow-[0_0_40px_rgba(212,175,55,0.3)]"
                                         >
                                             {status === "loading" ? (
                                                 <Loader2 className="w-5 h-5 animate-spin" />

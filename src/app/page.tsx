@@ -715,7 +715,7 @@ function DashboardContent() {
             </FadeInSection>
 
             {/* Mobile: Horizontal snap-scroll carousel. Desktop: 3-col grid */}
-            <div className="flex md:grid md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
+            <div className="flex md:grid md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory pt-10 md:pt-0 pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
               {/* FREE TIER */}
               <FadeInSection delay={0.1}>
                 <div className="min-w-[85vw] sm:min-w-[70vw] md:min-w-0 snap-center bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 flex flex-col md:hover:-translate-y-2 transition-transform duration-300 h-full">
