@@ -2,10 +2,16 @@
 
 import { useState, useEffect, useRef, useMemo } from "react"
 import { motion } from "framer-motion"
-import { Send, Users, Shield, Clock, Search, Hash, MessageSquare } from "lucide-react"
+import { Send, Users, Shield, Clock, Search, Hash, MessageSquare, Heart, Share2, Download, CornerUpLeft, Smile, Trash2, CheckCircle2 } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { supabase } from "@/lib/supabase"
 import { useSignals } from "@/hooks/useSignals"
+
+interface Reaction {
+  emoji: string
+  count: number
+  user_reacted: boolean
+}
 
 interface Message {
   id: string
@@ -15,9 +21,19 @@ interface Message {
   user_data?: {
     full_name: string
     is_vip: boolean
+    is_admin?: boolean
   }
   image?: string
+  parent_id?: string
+  reactions?: Reaction[]
+  replies?: Message[]
 }
+
+const TRADING_EMOJIS = [
+  "🚀", "🔥", "❤️", "💯", "🎉", "💰", "💵", "💹", "📊", "📈", 
+  "📉", "💎", "🎯", "🏦", "🌍", "🇺🇸", "🇪🇺", "🇬🇧", "🇯🇵", "₿", 
+  "🐂", "🐻", "⏳", "✅", "🚨"
+]
 
 // ─── Constants ───
 const COMMUNITY_MEMBERS = [
@@ -45,33 +61,36 @@ const COMMUNITY_RULES = [
 
 // ─── Static Filler Conversations (Trading Niche) ───
 const STATIC_FILLER: { member: number; content: string; minutesAgo: number }[] = [
-  { member: 5, content: "GM legends 🔥 Let's hunt some liquidity today", minutesAgo: 142 },
-  { member: 2, content: "That Asian session sweep on Gold was textbook. Buy side taken, displacement down. Classic AMD.", minutesAgo: 138 },
-  { member: 0, content: "Exactly what I was watching. The M15 FVG at 4530 got respected beautifully.", minutesAgo: 135 },
-  { member: 11, content: "Can someone explain what AMD means? I keep seeing it in the vault PDFs", minutesAgo: 132 },
-  { member: 7, content: "Accumulation → Manipulation → Distribution. It's the Power of 3. Smart money accumulates positions, manipulates price to trigger stops, then distributes. Read the ICT 2024 Mentorship notes in the Vault 📚", minutesAgo: 130 },
-  { member: 11, content: "Thank you! That makes so much more sense now. I was just looking at candles without context 😅", minutesAgo: 128 },
-  { member: 3, content: "The weekly profile on DXY is screaming reversal. If dollar drops, metals are going to FLY 🚀", minutesAgo: 120 },
-  { member: 9, content: "Been watching the same thing. Silver has been consolidating hard. That descending channel is ready to break.", minutesAgo: 117 },
-  { member: 4, content: "Patience > prediction. Let the market show you. Don't force entries.\n\n🧘 Trade with zen, not FOMO.", minutesAgo: 112 },
-  { member: 6, content: "Anyone else notice the order block on the H4 Gold chart? There's a massive imbalance sitting right above current price.", minutesAgo: 105 },
-  { member: 0, content: "Yes! That's exactly why I'm watching for a sell. If it taps into that OB and shows rejection, it's game over for the bulls short-term.", minutesAgo: 102 },
-  { member: 10, content: "What risk % are you guys running per trade? I've been doing 2% but the drawdowns feel heavy on metals", minutesAgo: 95 },
-  { member: 7, content: "1% max per idea. Remember you're splitting across 3 TPs so it's 0.33% per order. The compounding over time is what makes the difference, not individual trade size.", minutesAgo: 93 },
-  { member: 5, content: "☝️ This is the way. Consistency beats intensity every single time. Our system proves it — check the performance tab.", minutesAgo: 90 },
-  { member: 8, content: "Just joined this week and I'm blown away by the Vault resources. The CRT Method PDF changed my whole perspective on candle reading.", minutesAgo: 82 },
-  { member: 9, content: "Welcome! The CRT + FVG combo is deadly. Once you master those two concepts you'll see setups everywhere.", minutesAgo: 79 },
-  { member: 1, content: "Pro tip for new members: Don't trade every setup you see. Quality > Quantity.\n\nI used to take 10+ trades a day. Now I take 1-2 and my win rate went from 40% to 78%.", minutesAgo: 72 },
-  { member: 3, content: "Silver is starting to move. London session coming in hot 🔥", minutesAgo: 58 },
-  { member: 6, content: "That M15 break of structure on XAU was clean. Anyone catch the entry around the FVG?", minutesAgo: 45 },
-  { member: 0, content: "That's what the signal system caught. The automation is unreal — entry hit, SL placed, 3 TPs mapped. All hands-free. 🤖", minutesAgo: 42 },
-  { member: 4, content: "\"The market is a device for transferring money from the impatient to the patient.\"\n— Warren Buffett\n\n🧠 Stay disciplined.", minutesAgo: 35 },
-  { member: 10, content: "Quick question — when you guys say \"sweep\" do you mean the same thing as a stop hunt?", minutesAgo: 28 },
-  { member: 7, content: "Essentially yes. A liquidity sweep is when price takes out a key level (previous highs/lows) where stop losses are clustered, then reverses. Smart money needs that liquidity to fill their orders.", minutesAgo: 25 },
-  { member: 9, content: "Think of it like this: retail puts stops below support. Smart money drives price there to fill buy orders. Then price rockets up. The Liquidity PDF in the Vault explains it perfectly.", minutesAgo: 22 },
-  { member: 5, content: "🚨 XAU/USD TP1 SMASHED 🚀 +1500 Pips secured. Running to TP2 with SL at entry now. TEXTBOOK M5 entry.", minutesAgo: 15 },
-  { member: 0, content: "The Gold move was institutional precision. Euro follow suit too — TP1 hit. NY session looking prime for the BTC sell limit.", minutesAgo: 12 },
-  { member: 7, content: "Sitting on hands for BTC/USD. Sell limit at 68837.5. HTF bearish FVG rejection is the target. Patience > FOMO.", minutesAgo: 8 },
+  // ─── Tokyo Session (00:00 - 09:00 UTC / Early AM) ───
+  { member: 5, content: "GM legends 🔥 Tokyo session is opening. Let's see what Asia gives us today. Eyes on Silver and Gold for early displacement.", minutesAgo: 240 },
+  { member: 2, content: "XAG/USD already showing weakness in Tokyo. That sell signal at 75.36 is looking validated — price swept the Asian high and dumped. TP1 at 73.94 is within range.", minutesAgo: 225 },
+  { member: 0, content: "Agreed. Silver did exactly what the markup showed. The liquidity grab above 76.00 was the manipulation leg. Now we're in distribution.", minutesAgo: 220 },
+  { member: 7, content: "For newer members: Tokyo session typically sets up the liquidity pools. Smart money uses this low-volume window to position before London's displacement. The Vault PDF on 'Sessions & Killzones' covers this in depth 📚", minutesAgo: 210 },
+  { member: 11, content: "Thank you! I was wondering why some signals are placed during quiet hours. Makes sense now — they're positioning ahead of the move.", minutesAgo: 205 },
+  { member: 9, content: "XAU/USD sell limit at 4736.41 is still pending. Gold is consolidating in a tight range during Tokyo. London should provide the sweep into our entry zone.", minutesAgo: 195 },
+  { member: 3, content: "DXY is holding strong in the Asian session. If dollar stays bid, we could see metals continue lower. The sell bias on Gold and Silver aligns with this.", minutesAgo: 185 },
+
+  // ─── London Session Transition (07:00 - 12:00 UTC) ───
+  { member: 4, content: "🏦 London opens in 30 minutes. This is where the real volume kicks in.\n\n🧘 \"Patience is profitable. Impulsiveness is expensive.\"", minutesAgo: 160 },
+  { member: 6, content: "GBP/USD sell limit at 1.3385 — London session is the optimal killzone for Cable. Watching for a liquidity sweep above yesterday's high before entering.", minutesAgo: 150 },
+  { member: 0, content: "London open just displaced Gold to the upside. If it taps into the supply zone at 4736, our sell limit triggers. This is AMD textbook setup — Accumulation (Tokyo), Manipulation (London sweep), Distribution (the sell).", minutesAgo: 140 },
+  { member: 7, content: "EUR/USD sell at 1.1652 is our London-NY overlap play. Euro pairs move hardest during the overlap between 12:00-15:00 UTC. That's when we expect the entry to activate.", minutesAgo: 130 },
+  { member: 1, content: "Pro tip for new members: Don't trade every setup you see. Quality > Quantity.\n\nI used to take 10+ trades a day. Now I take 1-2 and my win rate went from 40% to 78%.", minutesAgo: 118 },
+  { member: 10, content: "What risk % are you guys running per trade? I've been doing 2% but the drawdowns feel heavy on metals", minutesAgo: 105 },
+  { member: 7, content: "1% max per idea. Remember you're splitting across 3 TPs so it's 0.33% per order. The compounding over time is what makes the difference, not individual trade size.", minutesAgo: 102 },
+  { member: 5, content: "☝️ This is the way. Consistency beats intensity every single time. Our system proves it — check the performance tab.", minutesAgo: 98 },
+  { member: 8, content: "Just joined this week and I'm blown away by the Vault resources. The CRT Method PDF changed my whole perspective on candle reading.", minutesAgo: 85 },
+
+  // ─── New York Session & Live Trade Updates ───
+  { member: 3, content: "🇺🇸 New York session is live. This is where the big money moves happen. All pending orders should be sharp. No chasing.", minutesAgo: 65 },
+  { member: 5, content: "🚨 XAG/USD TP1 HIT at 73.94! 🎯 SL moved to breakeven. Running for TP2 at 72.52. Silver is printing money today.", minutesAgo: 50 },
+  { member: 0, content: "Beautiful execution on Silver. Risk-free from here. Let the runners ride for TP2 and TP3. Institutional precision 💎", minutesAgo: 47 },
+  { member: 9, content: "GBP/USD entry zone approaching. London set the manipulation high, NY should deliver the distribution leg. Patience.", minutesAgo: 40 },
+  { member: 6, content: "The M15 break of structure on EUR/USD was clean. The FVG at 1.1660 got respected. If we get entry, TP1 at 1.1615 is the first target.", minutesAgo: 30 },
+  { member: 0, content: "That's exactly what the signal system caught. The automation is unreal — entry hit, SL placed, 3 TPs mapped. All hands-free. 🤖", minutesAgo: 25 },
+  { member: 4, content: "\"The market is a device for transferring money from the impatient to the patient.\"\n— Warren Buffett\n\n🧠 Stay disciplined. We close the day at 01:00 UTC.", minutesAgo: 18 },
+  { member: 7, content: "Sitting tight on Gold. Sell limit at 4736.41 hasn't triggered yet — that's fine. HTF bearish FVG rejection is the target. We don't chase, we wait.", minutesAgo: 12 },
+  { member: 5, content: "Great session everyone. Tokyo gave us the setup, London provided displacement, and NY is delivering the results. Stay sharp, stay zen. 🔥", minutesAgo: 5 },
 ]
 
 // ─── Dynamic Filler (based on live signals) ───
@@ -130,6 +149,8 @@ export function CommunityTab() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [replyTo, setReplyTo] = useState<Message | null>(null)
+  const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null) // Message ID
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -175,18 +196,33 @@ export function CommunityTab() {
     const fetchMessages = async () => {
       const { data, error } = await supabase
         .from("community_messages")
-        .select(`*, user_data:client_trading_profiles(full_name, is_vip)`)
+        .select(`*, user_data:client_trading_profiles(full_name, is_vip, is_admin), reactions:community_reactions(*)`)
         .eq('channel', activeChannel)
         .order("created_at", { ascending: true })
         .limit(100)
 
-      if (!error && data && data.length > 0) {
-        setMessages(data as any)
-        setDbHasMessages(true)
-      } else {
-        setDbHasMessages(false)
+      if (!error && data) {
+        // Group reactions and thread replies
+        const formatted = data.map((msg: any) => ({
+          ...msg,
+          reactions: formatReactions(msg.reactions || [], user?.id)
+        }))
+        
+        // Simple threading: nested within list if parent_id exists
+        setMessages(formatted as any)
+        setDbHasMessages(data.length > 0)
       }
       setLoading(false)
+    }
+
+    const formatReactions = (raw: any[], currentUserId?: string) => {
+      const groups: Record<string, { count: number; user_reacted: boolean }> = {}
+      raw.forEach(r => {
+        if (!groups[r.emoji]) groups[r.emoji] = { count: 0, user_reacted: false }
+        groups[r.emoji].count++
+        if (r.user_id === currentUserId) groups[r.emoji].user_reacted = true
+      })
+      return Object.entries(groups).map(([emoji, data]) => ({ emoji, ...data }))
     }
 
     const isLoungeRestricted = activeChannel === 'vip-lounge' && (profile?.plan !== 'VIP' && profile?.plan !== 'Lifetime')
@@ -216,10 +252,22 @@ export function CommunityTab() {
       )
       .subscribe()
 
+    const reactionSubscription = supabase
+      .channel(`public:community_reactions:${activeChannel}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "community_reactions" },
+        () => {
+          fetchMessages()
+        }
+      )
+      .subscribe()
+
     return () => {
       supabase.removeChannel(channelSubscription)
+      supabase.removeChannel(reactionSubscription)
     }
-  }, [activeChannel])
+  }, [activeChannel, user])
 
   const displayMessages = dbHasMessages ? messages : fillerMessages
 
@@ -255,22 +303,77 @@ export function CommunityTab() {
             }
         }
 
+        // Logic for auto-routing to setups-and-charts
+        let targetChannel = activeChannel
+        const isAdmin = profile?.is_admin
+        const isSignal = newMessage.toUpperCase().includes("SIGNAL") || newMessage.toUpperCase().includes("SETUP")
+        
+        if (selectedFile && isAdmin && isSignal && activeChannel === 'general-chat') {
+            targetChannel = 'setups-and-charts'
+        }
+
         const { error } = await supabase.from("community_messages").insert({
           user_id: user.id,
           content: newMessage.trim(),
           image: imageUrl,
-          channel: activeChannel
+          channel: targetChannel,
+          parent_id: replyTo?.id || null
         })
 
         if (!error) {
           setNewMessage("")
           setSelectedFile(null)
           setPreviewUrl(null)
+          setReplyTo(null)
         }
     } catch (err) {
         console.error("Chat upload error:", err)
     } finally {
         setIsUploading(false)
+    }
+  }
+
+  const handleReaction = async (messageId: string, emoji: string) => {
+    if (!user) return
+    
+    // Check if reacted already
+    const msg = messages.find(m => m.id === messageId)
+    const existing = msg?.reactions?.find(r => r.emoji === emoji && r.user_reacted)
+
+    if (existing) {
+        // Remove reaction
+        await supabase.from('community_reactions').delete().match({ message_id: messageId, user_id: user.id, emoji })
+    } else {
+        // Add reaction
+        await supabase.from('community_reactions').insert({ message_id: messageId, user_id: user.id, emoji })
+    }
+  }
+
+  const downloadImage = (url: string) => {
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `zenpips-chart-${Date.now()}.png`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  const shareContent = async (msg: Message) => {
+    const shareData = {
+        title: 'Zen Pips Trade Setup',
+        text: msg.content,
+        url: msg.image || window.location.href
+    }
+    
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData)
+        } else {
+            await navigator.clipboard.writeText(msg.image || window.location.href)
+            alert("Link copied to clipboard!")
+        }
+    } catch (err) {
+        console.error("Share failed:", err)
     }
   }
 
@@ -414,67 +517,144 @@ export function CommunityTab() {
                    </div>
                 )}
 
-                {displayMessages.map((msg, i) => {
+                {displayMessages.filter(msg => !msg.parent_id).map((msg, i) => {
                     const isSystem = !msg.user_id;
                     const isOfficial = msg.user_id === 'zen-official';
                     const initials = msg.user_data?.full_name?.substring(0,2)?.toUpperCase() || "ZP";
                     const isChartChannel = activeChannel === 'setups-and-charts';
+                    const replies = messages.filter(m => m.parent_id === msg.id);
                     
                     return (
-                        <motion.div 
-                            key={msg.id || i} 
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.05 }}
-                            className={`flex gap-4 ${isSystem ? 'justify-center py-4' : ''} ${isChartChannel ? 'bg-[var(--card-bg)] p-6 rounded-3xl border border-[var(--border-color)]' : ''} group`}
-                        >
-                            {!isSystem && !isChartChannel && (
-                                <div className={`w-9 h-9 rounded-full shrink-0 flex items-center justify-center bg-[var(--panel-bg)] border border-[var(--border-color)] text-[10px] font-bold shadow-md`}>
-                                    {initials}
-                                </div>
-                            )}
-                            <div className={`flex-1 space-y-2 ${isSystem ? 'text-center' : ''}`}>
-                                {!isSystem && (
-                                    <div className="flex items-center justify-between gap-2 mb-1">
-                                        <div className="flex items-center gap-2">
-                                            {isChartChannel && (
-                                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-[var(--panel-bg)] border border-[var(--border-color)] text-[9px] font-bold`}>
-                                                    {initials}
-                                                </div>
-                                            )}
-                                            <span className={`font-bold text-sm ${msg.user_data?.is_vip || isOfficial ? 'text-yellow-500' : 'text-gray-200'}`}>
-                                                {isOfficial ? "Zen Institutional Hub" : (msg.user_data?.full_name || "Anonymous Trader")}
-                                            </span>
-                                            {(msg.user_data?.is_vip || isOfficial) && (
-                                                <span className="text-[8px] bg-yellow-500/10 text-yellow-500 px-1.5 py-0.5 rounded border border-yellow-500/20 font-bold uppercase tracking-wider">OFFICIAL</span>
-                                            )}
-                                        </div>
-                                        <span className="text-[10px] text-[var(--text-muted)] font-mono">
-                                            {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
+                        <div key={msg.id || i} className="space-y-4">
+                            <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.05 }}
+                                className={`flex gap-4 ${isSystem ? 'justify-center py-4' : ''} ${isChartChannel ? 'bg-[var(--card-bg)] p-6 rounded-3xl border border-[var(--border-color)]' : ''} group relative`}
+                            >
+                                {!isSystem && !isChartChannel && (
+                                    <div className={`w-9 h-9 rounded-full shrink-0 flex items-center justify-center bg-[var(--panel-bg)] border border-[var(--border-color)] text-[10px] font-bold shadow-md`}>
+                                        {initials}
                                     </div>
                                 )}
-                                <div className={`text-sm leading-relaxed whitespace-pre-line ${isSystem ? 'bg-blue-500/10 text-[var(--color-info)] px-4 py-2 rounded-xl text-xs font-mono font-bold border border-blue-500/20 inline-block mx-auto' : 'text-[var(--foreground)]'}`}>
-                                    {msg.content}
-                                    {msg.image && (
-                                        <div className={`mt-4 rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-2xl bg-black ${isChartChannel ? 'aspect-video w-full' : 'max-w-2xl'}`}>
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img src={msg.image} alt="Institutional Chart Analysis" className="w-full h-full object-contain hover:scale-[1.01] transition-transform duration-500" />
+                                <div className={`flex-1 space-y-2 ${isSystem ? 'text-center' : ''}`}>
+                                    {!isSystem && (
+                                        <div className="flex items-center justify-between gap-2 mb-1">
+                                            <div className="flex items-center gap-2">
+                                                {isChartChannel && (
+                                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-[var(--panel-bg)] border border-[var(--border-color)] text-[9px] font-bold`}>
+                                                        {initials}
+                                                    </div>
+                                                )}
+                                                <span className={`font-bold text-sm ${msg.user_data?.is_vip || isOfficial ? 'text-yellow-500' : 'text-gray-200'}`}>
+                                                    {isOfficial ? "Zen Institutional Hub" : (msg.user_data?.full_name || "Anonymous Trader")}
+                                                </span>
+                                                {(msg.user_data?.is_vip || isOfficial) && (
+                                                    <span className="text-[8px] bg-yellow-500/10 text-yellow-500 px-1.5 py-0.5 rounded border border-yellow-500/20 font-bold uppercase tracking-wider">OFFICIAL</span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-[10px] text-[var(--text-muted)] font-mono">
+                                                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div className={`text-sm leading-relaxed whitespace-pre-line relative ${isSystem ? 'bg-blue-500/10 text-[var(--color-info)] px-4 py-2 rounded-xl text-xs font-mono font-bold border border-blue-500/20 inline-block mx-auto' : 'text-[var(--foreground)]'}`}>
+                                        {msg.content}
+                                        {msg.image && (
+                                            <div className={`mt-4 rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-2xl bg-black group/img relative ${isChartChannel ? 'aspect-video w-full' : 'max-w-2xl'}`}>
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img src={msg.image} alt="Institutional Chart Analysis" className="w-full h-full object-contain hover:scale-[1.01] transition-transform duration-500" />
+                                                
+                                                {/* Image specific tools */}
+                                                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover/img:opacity-100 transition-opacity">
+                                                    <button onClick={() => downloadImage(msg.image!)} className="p-2 bg-black/60 rounded-xl border border-white/10 text-white hover:bg-white/20 transition-colors">
+                                                        <Download className="w-4 h-4" />
+                                                    </button>
+                                                    <button onClick={() => shareContent(msg)} className="p-2 bg-black/60 rounded-xl border border-white/10 text-white hover:bg-white/20 transition-colors">
+                                                        <Share2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Action Bar (Hover only for non-system) */}
+                                        {!isSystem && (
+                                            <div className="absolute -top-10 right-0 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl py-1 px-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all shadow-xl z-20">
+                                                <button onClick={() => setReplyTo(msg)} className="p-2 hover:bg-white/5 rounded-lg text-[var(--text-muted)] hover:text-white" title="Reply">
+                                                    <CornerUpLeft className="w-4 h-4" />
+                                                </button>
+                                                <div className="relative">
+                                                    <button onClick={() => setShowEmojiPicker(showEmojiPicker === msg.id ? null : msg.id)} className="p-2 hover:bg-white/5 rounded-lg text-[var(--text-muted)] hover:text-yellow-500" title="React">
+                                                        <Smile className="w-4 h-4" />
+                                                    </button>
+                                                    {showEmojiPicker === msg.id && (
+                                                        <div className="absolute right-0 top-full mt-2 w-48 p-2 bg-[var(--background)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 grid grid-cols-5 gap-1 max-h-40 overflow-y-auto custom-scrollbar">
+                                                            {TRADING_EMOJIS.map(emoji => (
+                                                                <button key={emoji} onClick={() => { handleReaction(msg.id, emoji); setShowEmojiPicker(null); }} className="p-1.5 hover:bg-white/10 rounded-lg text-lg transition-colors">
+                                                                    {emoji}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <button onClick={() => shareContent(msg)} className="p-2 hover:bg-white/5 rounded-lg text-[var(--text-muted)] hover:text-blue-400" title="Share">
+                                                    <Share2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Real Reactions Display */}
+                                    {msg.reactions && msg.reactions.length > 0 && (
+                                        <div className="flex flex-wrap gap-1.5 pt-1">
+                                            {msg.reactions.map(r => (
+                                                <button 
+                                                    key={r.emoji} 
+                                                    onClick={() => handleReaction(msg.id, r.emoji)}
+                                                    className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold transition-all border ${r.user_reacted ? 'bg-yellow-500/20 border-yellow-500/40 text-yellow-500' : 'bg-white/5 border-white/5 text-[var(--text-muted)] hover:border-white/20'}`}
+                                                >
+                                                    <span>{r.emoji}</span>
+                                                    <span>{r.count}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {isChartChannel && !isSystem && (
+                                         <div className="pt-4 flex items-center gap-4 border-t border-[var(--border-color)] mt-4">
+                                            <button className="flex items-center gap-2 text-[10px] font-bold text-[var(--text-muted)] hover:text-yellow-500 transition-colors uppercase tracking-widest">
+                                                <CheckCircle2 className="w-3 h-3 text-green-500" /> VERIFIED SETUP
+                                            </button>
+                                            <button className="flex items-center gap-2 text-[10px] font-bold text-[var(--text-muted)] hover:text-blue-400 transition-colors uppercase tracking-widest">
+                                                <Clock className="w-3 h-3" /> {new Date(msg.created_at).toLocaleDateString()}
+                                            </button>
                                         </div>
                                     )}
                                 </div>
-                                {isChartChannel && !isSystem && (
-                                     <div className="pt-4 flex items-center gap-4 border-t border-[var(--border-color)] mt-4">
-                                        <button className="flex items-center gap-2 text-[10px] font-bold text-[var(--text-muted)] hover:text-yellow-500 transition-colors uppercase tracking-widest">
-                                            <Shield className="w-3 h-3" /> VERIFIED SETUP
-                                        </button>
-                                        <button className="flex items-center gap-2 text-[10px] font-bold text-[var(--text-muted)] hover:text-blue-400 transition-colors uppercase tracking-widest">
-                                            <Clock className="w-3 h-3" /> {new Date(msg.created_at).toLocaleDateString()}
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </motion.div>
+                            </motion.div>
+
+                            {/* Render Replies */}
+                            {replies.length > 0 && (
+                                <div className="ml-12 space-y-4 border-l-2 border-[var(--border-color)] pl-6">
+                                    {replies.map(reply => (
+                                        <div key={reply.id} className="flex gap-3 text-sm">
+                                            <div className="w-6 h-6 rounded-full bg-[var(--panel-bg)] border border-[var(--border-color)] flex items-center justify-center text-[8px] font-bold shrink-0">
+                                                {reply.user_data?.full_name?.substring(0,2).toUpperCase()}
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-bold text-xs text-gray-200">{reply.user_data?.full_name}</span>
+                                                    <span className="text-[9px] text-[var(--text-muted)]">{new Date(reply.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                </div>
+                                                <p className="text-[var(--text-muted)] text-xs">{reply.content}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     )
                 })}
                 </div>
@@ -482,7 +662,19 @@ export function CommunityTab() {
             <div ref={messagesEndRef} />
         </div>
 
-        {/* Input area */}
+        {/* Reply Bar */}
+        {replyTo && (
+            <div className="mb-2 px-4 py-2 bg-[var(--panel-bg)] border-l-4 border-yellow-500 flex items-center justify-between rounded-r-xl">
+                <div className="flex flex-col gap-0.5">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-yellow-500">Replying to {replyTo.user_data?.full_name}</span>
+                    <span className="text-xs text-[var(--text-muted)] truncate max-w-md">{replyTo.content}</span>
+                </div>
+                <button onClick={() => setReplyTo(null)} className="p-1 hover:bg-white/5 rounded-full">
+                    <X className="w-4 h-4 text-[var(--text-muted)]" />
+                </button>
+            </div>
+        )}
+
         <div className="px-4 py-3 bg-[var(--card-bg)] border-t border-[var(--border-color)] flex-shrink-0">
             {previewUrl && (
                 <div className="mb-3 relative group w-fit">

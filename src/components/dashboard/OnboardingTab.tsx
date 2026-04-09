@@ -117,7 +117,7 @@ export function OnboardingTab() {
                     {/* Step 1: Broker Setup */}
                     <Step 
                         number={1} 
-                        title="Establish Your Brokerage (HFM)" 
+                        title="Establish Your Brokerage (Vantage)" 
                         description="Access institutional-grade liquidity and raw spreads."
                         isOpen={openStep === 1}
                         onToggle={() => setOpenStep(1)}
@@ -126,16 +126,16 @@ export function OnboardingTab() {
                             <div className="flex flex-col md:flex-row gap-6 items-start">
                                 <div className="flex-1 space-y-4">
                                     <p className="text-[var(--text-muted)] leading-relaxed">
-                                        We exclusively use <strong className="text-[var(--foreground)]">HFM (HotForex)</strong> for our Copy Trader bridge. Their execution speed ensures all our members enter at the exact same price as the main institutional flow.
+                                        We exclusively use <strong className="text-[var(--foreground)]">Vantage (Vantage Markets)</strong> for our Copy Trader bridge. Their execution speed ensures all our members enter at the exact same price as the main institutional flow.
                                     </p>
                                     <ul className="space-y-3">
                                         <li className="flex items-start gap-3 text-sm text-[var(--text-muted)]">
                                             <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                                            <span>Click the button below to visit HFM.</span>
+                                            <span>Click the button below to visit Vantage.</span>
                                         </li>
                                         <li className="flex items-start gap-3 text-sm text-[var(--text-muted)]">
                                             <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                                            <span>Register an account and specifically choose an <strong className="text-[var(--foreground)]">MT5 Premium</strong> or <strong className="text-[var(--foreground)]">HFM Copy</strong> account.</span>
+                                            <span>Register an account and specifically choose an <strong className="text-[var(--foreground)]">MT5 Premium</strong> or <strong className="text-[var(--foreground)]">Vantage Copy</strong> account.</span>
                                         </li>
                                         <li className="flex items-start gap-3 text-sm text-[var(--text-muted)]">
                                             <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
@@ -145,12 +145,12 @@ export function OnboardingTab() {
                                 </div>
                                     <div className="space-y-3">
                                         <a 
-                                            href="https://www.hfm.com/ke/en/?refid=30508914" 
+                                            href="https://vigco.co/la-com-inv/TItFx2Oy" 
                                             target="_blank" 
                                             rel="noopener noreferrer"
                                             className="flex items-center justify-center gap-2 w-full py-4 bg-[#d4af37] text-black font-black rounded-xl hover:brightness-110 transition-all text-sm uppercase tracking-wider"
                                         >
-                                            JOIN HFM <ExternalLink className="w-4 h-4" />
+                                            JOIN Vantage <ExternalLink className="w-4 h-4" />
                                         </a>
                                         <a 
                                             href="/Zen_Pips_Institutional_Guidelines.pdf" 
@@ -184,7 +184,7 @@ export function OnboardingTab() {
                                     <ol className="space-y-3 text-sm text-[var(--text-muted)] list-decimal pl-4">
                                         <li>Open the MT5 App.</li>
                                         <li>Go to <strong className="text-[var(--foreground)]">Settings</strong> &gt; <strong className="text-[var(--foreground)]">New Account</strong>.</li>
-                                        <li>Select HFM as your broker and log in.</li>
+                                        <li>Select Vantage as your broker and log in.</li>
                                         <li>Your 8-digit Login ID will appear at the top of your Account profile.</li>
                                     </ol>
                                 </div>
@@ -204,7 +204,7 @@ export function OnboardingTab() {
                             <div className="mt-8 p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-xl flex items-start gap-4">
                                 <Info className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
                                 <p className="text-xs text-yellow-500/80 leading-relaxed font-medium">
-                                    <strong>IMPORTANT:</strong> You only need to provide the Login ID. <strong>NEVER</strong> share your MT5 Master Password with anyone, including us. Our bridge only requires the ID to route signals via the HFM server.
+                                    <strong>IMPORTANT:</strong> You only need to provide the Login ID. <strong>NEVER</strong> share your MT5 Master Password with anyone, including us. Our bridge only requires the ID to route signals via the Vantage server.
                                 </p>
                             </div>
                         </div>
@@ -214,7 +214,7 @@ export function OnboardingTab() {
                     <Step 
                         number={3} 
                         title="Capital Injection (Funding)" 
-                        description="Deposit your trading capital into your HFM Wallet."
+                        description="Deposit your trading capital into your Vantage Wallet."
                         isOpen={openStep === 3}
                         onToggle={() => setOpenStep(3)}
                     >
@@ -226,7 +226,7 @@ export function OnboardingTab() {
                                         Funding Options
                                     </h4>
                                     <p className="text-sm text-[var(--text-muted)]">
-                                        HfM provides multiple zero-fee deposit methods. Login to the myHF area on their site and click 'Deposit'.
+                                        Vantage provides multiple zero-fee deposit methods. Login to the Vantage Portal area on their site and click 'Deposit'.
                                     </p>
                                     <div className="grid grid-cols-2 gap-3 pb-2">
                                         {['Visa/Mastercard', 'Wire Transfer', 'Skrill/Neteller', 'Crypto (Bitcoin)'].map(m => (
@@ -332,7 +332,7 @@ export function OnboardingTab() {
                             <div className="space-y-2">
                                 <h4 className="text-xl font-bold">You're Ready to Dominate.</h4>
                                 <p className="text-sm text-[var(--text-muted)] max-w-lg mx-auto leading-relaxed">
-                                    Once you've done the above, go to the <strong className="text-[var(--foreground)] font-bold">Analytics</strong> tab and enter your HFM MT5 ID in the Connection Portal. Your copy trader will instantly switch to <strong className="text-[var(--foreground)]">ACTIVE</strong> mode.
+                                    Once you've done the above, go to the <strong className="text-[var(--foreground)] font-bold">Analytics</strong> tab and enter your Vantage MT5 ID in the Connection Portal. Your copy trader will instantly switch to <strong className="text-[var(--foreground)]">ACTIVE</strong> mode.
                                 </p>
                             </div>
                             <div className="flex gap-4">

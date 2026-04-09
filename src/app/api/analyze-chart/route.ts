@@ -36,14 +36,37 @@ export async function PUT(req: Request) {
                 .eq('id', userId)
                 .single()
 
-            const is_admin = profile?.telegram_id?.toString() === process.env.ADMIN_TELEGRAM_ID;
-            const is_vip = profile?.is_vip === true;
+            if (profile) {
+                const is_admin = profile.is_admin === true || profile.telegram_id?.toString() === process.env.ADMIN_TELEGRAM_ID;
+                const is_vip = profile.is_vip === true;
 
-            if (!is_admin && !is_vip && profile && (profile.ai_usage_total || 0) >= 10) {
-                return NextResponse.json({ 
-                    error: "LIMIT_REACHED",
-                    message: "🔴 UNLIMITED QUERIES REACHED. To continue using the Zen Vision Engine, please upgrade to a VIP plan." 
-                }, { status: 403 })
+                if (!is_admin && !is_vip) {
+                    const now = new Date();
+                    const lastReset = profile.last_ai_reset ? new Date(profile.last_ai_reset) : new Date(0);
+                    const isSameDay = now.toDateString() === lastReset.toDateString();
+
+                    let usageToday = isSameDay ? (profile.ai_usage_total || 0) : 0;
+                    let bonusToday = isSameDay ? (profile.bonus_credits || 0) : 0;
+                    const dailyLimit = 10 + bonusToday;
+
+                    if (usageToday >= dailyLimit) {
+                        return NextResponse.json({ 
+                            error: "LIMIT_REACHED",
+                            message: `🔴 DAILY LIMIT REACHED: You have used your ${dailyLimit} AI credits for today. ${bonusToday > 0 ? '' : 'Complete social tasks to earn 10 extra credits or '}upgrade to VIP for unlimited institutional analysis.` 
+                        }, { status: 403 });
+                    }
+
+                    // If it's a new day, reset the counter in the DB
+                    if (!isSameDay) {
+                        await supabase.from('client_trading_profiles')
+                            .update({ 
+                                ai_usage_total: 0, 
+                                bonus_credits: 0, 
+                                last_ai_reset: now.toISOString() 
+                            })
+                            .eq('id', userId);
+                    }
+                }
             }
         }
 
@@ -122,11 +145,17 @@ export async function PUT(req: Request) {
 
         // 4. Record Analysis & Increment Usage Counter
         if (userId) {
-            const { data: profile } = await supabase.from('client_trading_profiles').select('ai_usage_total').eq('id', userId).single();
+            const { data: currentProfile } = await supabase.from('client_trading_profiles').select('ai_usage_total, last_ai_reset').eq('id', userId).single();
+            const now = new Date();
+            const lastReset = currentProfile?.last_ai_reset ? new Date(currentProfile.last_ai_reset) : new Date(0);
+            const isSameDay = now.toDateString() === lastReset.toDateString();
             
             // Update profile usage
             await supabase.from('client_trading_profiles')
-                .update({ ai_usage_total: (profile?.ai_usage_total || 0) + 1 })
+                .update({ 
+                    ai_usage_total: (isSameDay ? (currentProfile?.ai_usage_total || 0) : 0) + 1,
+                    last_ai_reset: now.toISOString()
+                })
                 .eq('id', userId);
 
             // Store in history

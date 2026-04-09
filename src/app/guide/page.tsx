@@ -176,7 +176,7 @@ export default function GuidePage() {
                             </div>
                             <div className="space-y-2">
                                 <h3 className="text-xl font-bold">Bridge Analytics</h3>
-                                <p className="text-sm text-gray-500">Connect your HFM account via your 8-digit Login ID. 100% cloud-automated synchronization.</p>
+                                <p className="text-sm text-gray-500">Connect your Vantage account via your 8-digit Login ID. 100% cloud-automated synchronization.</p>
                             </div>
                         </div>
                     </div>

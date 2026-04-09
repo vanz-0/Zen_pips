@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { BarChart2, Shield, TrendingUp, Zap, Target, Users, Clock, ExternalLink, Menu, X, LogIn, BookOpen, History, User, GraduationCap, MessageCircle, Home as HomeIcon, Lock, LogOut, Lightbulb, Sun, Moon } from "lucide-react";
+import { BarChart2, Shield, TrendingUp, Zap, Target, Users, Clock, ExternalLink, Menu, X, LogIn, BookOpen, History, User, GraduationCap, MessageCircle, Home as HomeIcon, Lock, LogOut, Lightbulb, Sun, Moon, Star } from "lucide-react";
 import dynamic from "next/dynamic";
 import { GlowCard } from "@/components/ui/glow-card";
 
@@ -40,6 +40,7 @@ function DashboardContent() {
   const [activeTab, setActiveTab] = useState<"journal" | "vault" | "profile" | "chartai" | "admin" | "help" | "community" | "innovation" | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [activeReviewSlide, setActiveReviewSlide] = useState(0);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -577,6 +578,165 @@ function DashboardContent() {
             </div>
           </section>
 
+          
+          {/* Marquee Section */}
+          <section className="py-8 bg-[var(--panel-bg)] border-y border-[var(--border-color)] overflow-hidden relative flex flex-col gap-4">
+             <div className="absolute left-0 top-0 w-16 h-full bg-gradient-to-r from-[var(--background)] to-transparent z-10 pointer-events-none" />
+             <div className="absolute right-0 top-0 w-16 h-full bg-gradient-to-l from-[var(--background)] to-transparent z-10 pointer-events-none" />
+             
+             
+             <div className="flex whitespace-nowrap animate-marquee">
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">DATA-DRIVEN RESULTS</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">DEEP INSTITUTIONAL RESEARCH</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">SMART MONEY CONCEPTS</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">ALGORITHMIC EXECUTION</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">ORDER FLOW ANALYSIS</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">LIQUIDITY SWEEPS</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">MACRO FUNDAMENTALS</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">VOLUME PROFILING</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">DATA-DRIVEN RESULTS</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">DEEP INSTITUTIONAL RESEARCH</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">SMART MONEY CONCEPTS</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">ALGORITHMIC EXECUTION</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">ORDER FLOW ANALYSIS</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">LIQUIDITY SWEEPS</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">MACRO FUNDAMENTALS</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+<span className="mx-4 text-sm font-bold text-[var(--text-muted)] tracking-widest uppercase">VOLUME PROFILING</span>
+<span className="mx-4 text-sm font-bold text-[#d4af37] tracking-widest uppercase">•</span>
+             </div>
+             <div className="flex whitespace-nowrap animate-marquee-reverse opacity-70">
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">BTC/USD</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">EUR/USD</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">XAU/USD (GOLD)</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">XAG/USD (SILVER)</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">GBP/USD</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">US30 (DOW)</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">NAS100 (NASDAQ)</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">SPX500</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">WTI (OIL)</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">ETH/USD</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">SOL/USD</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">USD/JPY</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">BTC/USD</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">EUR/USD</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">XAU/USD (GOLD)</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">XAG/USD (SILVER)</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">GBP/USD</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">US30 (DOW)</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">NAS100 (NASDAQ)</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">SPX500</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">WTI (OIL)</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">ETH/USD</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">SOL/USD</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+<span className="mx-4 text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">USD/JPY</span>
+<span className="mx-4 text-xs font-bold text-blue-500 tracking-widest uppercase">•</span>
+             </div>
+
+             <style dangerouslySetInnerHTML={{ __html:`
+                @keyframes marquee { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
+                @keyframes marquee-reverse { 0% { transform: translateX(-50%); } 100% { transform: translateX(0%); } }
+                .animate-marquee { animation: marquee 90s linear infinite; width: max-content; }
+                .animate-marquee-reverse { animation: marquee-reverse 90s linear infinite; width: max-content; }
+             `}} />
+          </section>
+
+          {/* AI Reviews Section */}
+          <section className="relative z-10 py-16 px-4 max-w-7xl mx-auto">
+            <FadeInSection>
+              <div className="text-center mb-10">
+                <h2 className="text-2xl md:text-4xl font-bold text-[var(--foreground)] mb-3">What Traders Say</h2>
+                <p className="text-[var(--text-muted)]">Real feedback from verified copy-trading clients.</p>
+              </div>
+            </FadeInSection>
+                      <div className="relative overflow-hidden w-full pb-8">
+              <div 
+                className="flex transition-transform duration-500 ease-in-out" 
+                style={{ transform: `translateX(-${activeReviewSlide * 100}%)` }}
+              >
+                  {[0, 1, 2].map(slideIdx => (
+                    <div key={slideIdx} className="min-w-full flex-shrink-0 grid grid-cols-1 md:grid-cols-3 gap-6 px-1">
+                      {[
+                        { t: "The AI signal entry validation is unmatched. I no longer second guess my entries.", v: "VIP User", n: "Jason M.", r: 5 },
+                        { t: "Deep character analysis gives me the 'why' behind every trade. Setup took 5 mins.", v: "$25 Mastery", n: "Sarah K.", r: 5 },
+                        { t: "Copier works flawlessly on Vantage. 0 slippage. The institutional journal changed my mindset.", v: "$10 Commitment", n: "Alex T.", r: 5 },
+                        { t: "The U.S. index signals are incredibly precise. NAS100 execution is institutional grade.", v: "VIP User", n: "Marcus L.", r: 5 },
+                        { t: "Zero latency on the bridge. Gold (XAU/USD) hits TP before my manual chart even ticks.", v: "$25 Mastery", n: "Elena R.", r: 5 },
+                        { t: "Switched to Vantage per the guide. Best decision ever. The daily macroeconomic bias saves me from bad trades.", v: "$10 Commitment", n: "David W.", r: 5 },
+                        { t: "The community sentiment analysis is a game changer. I've never seen a group so focused on liquidity sweeps.", v: "VIP User", n: "Sarah J.", r: 5 },
+                        { t: "Zen Pips helped me pass my $100k prop firm challenge in just two weeks. Clear entries, logical stops.", v: "$25 Mastery", n: "Ahmed K.", r: 5 },
+                        { t: "Finally, a signal provider that actually cares about risk management. The journal tool alone is worth the sub.", v: "$10 Commitment", n: "Chris M.", r: 5 }
+                      ].slice(activeReviewSlide * 3, activeReviewSlide * 3 + 3).map((review, i) => (
+                        <div key={i} className="p-8 rounded-2xl bg-[var(--card-bg)] border border-[var(--border-color)] flex flex-col justify-between h-full hover:border-[#d4af37]/30 transition-all duration-300">
+                          <div>
+                            <div className="flex items-center gap-1 mb-6">
+                              {[...Array(review.r)].map((_, j) => (
+                                <Star key={j} className="w-5 h-5 fill-yellow-500 text-yellow-500" />
+                              ))}
+                            </div>
+                            <p className="text-[var(--foreground)] mb-6 text-lg tracking-tight font-medium italic leading-relaxed">"{review.t}"</p>
+                          </div>
+                          <div className="flex items-center justify-between border-t border-[var(--border-color)] pt-4">
+                            <span className="font-bold tracking-wide text-sm">{review.n}</span>
+                            <span className="text-[9px] font-bold uppercase tracking-widest bg-yellow-500/10 text-yellow-600 px-3 py-1 rounded-full border border-yellow-500/20">{review.v}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+              </div>
+              
+              {/* Pagination Dots */}
+              <div className="flex justify-center items-center gap-3 mt-8">
+                {[0, 1, 2].map(idx => (
+                  <button 
+                    key={idx}
+                    onClick={() => setActiveReviewSlide(idx)}
+                    className={`transition-all duration-300 rounded-full ${activeReviewSlide === idx ? 'w-8 h-2.5 bg-yellow-500' : 'w-2.5 h-2.5 bg-[var(--border-color)] hover:bg-yellow-500/50'}`}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+
           {/* Lead Magnet Section */}
           <LeadMagnetSection />
 
@@ -588,66 +748,82 @@ function DashboardContent() {
                   Join the <span className="text-[#d4af37]">Inner Circle.</span>
                 </h2>
                 <p className="text-[var(--text-muted)] max-w-xl mx-auto text-sm sm:text-base md:text-lg">
-                  Automated crypto checkout. Instant access after validation.
+                  Unlock all features with our flexible plans. Gain access to advanced scanners, AI-powered signals, expert academy lessons, and 24/7 updates designed to maximize your trading edge.
                 </p>
               </div>
             </FadeInSection>
 
             {/* Mobile: Horizontal snap-scroll carousel. Desktop: 3-col grid */}
             <div className="flex md:grid md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
+              {/* FREE TIER */}
               <FadeInSection delay={0.1}>
-                <div className="min-w-[85vw] sm:min-w-[70vw] md:min-w-0 snap-center bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 flex flex-col md:hover:-translate-y-2 transition-transform duration-300 h-full relative overflow-hidden">
-                  <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-yellow-500 text-black text-[9px] sm:text-[10px] font-black px-2 py-1 rounded italic animate-pulse shadow-lg">50% OFF</div>
-                  <h3 className="text-lg sm:text-xl font-bold text-[var(--foreground)] mb-2">1 Month Access</h3>
-                  <p className="text-[var(--text-muted)] mb-4 sm:mb-6 text-xs sm:text-sm">New Recruit Protocol. Secure your edge today.</p>
+                <div className="min-w-[85vw] sm:min-w-[70vw] md:min-w-0 snap-center bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 flex flex-col md:hover:-translate-y-2 transition-transform duration-300 h-full">
+                  <h3 className="text-lg sm:text-xl font-bold text-[var(--foreground)] mb-2">Free Access</h3>
+                  <p className="text-[var(--text-muted)] mb-4 sm:mb-6 text-xs sm:text-sm">Explore the ecosystem risk-free.</p>
                   <div className="text-2xl sm:text-3xl font-bold text-[var(--foreground)] mb-6 sm:mb-8 flex items-baseline gap-2 flex-wrap">
-                    <span className="text-xs sm:text-lg line-through opacity-30 text-[var(--text-muted)] font-mono">$50</span>
-                    $25<span className="text-xs sm:text-lg text-[var(--text-muted)] font-normal">/mo</span>
+                    $0<span className="text-xs sm:text-lg text-[var(--text-muted)] font-normal">/forever</span>
                   </div>
                   <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 flex-1">
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Daily VIP Signals (XAU/BTC)</li>
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> London/NY Analysis Breakdown</li>
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Institutional Community Access</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> 10 Daily AI Credits</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Free Community Channel</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Basic Learning Material</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Chart AI Preview</li>
                   </ul>
-                  <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="block text-center w-full py-3 sm:py-4 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] font-bold hover:bg-yellow-500 hover:text-black transition-all text-sm">Start Now</a>
+                  <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="block text-center w-full py-3 sm:py-4 rounded-xl border border-[var(--border-color)] text-[var(--text-muted)] font-bold hover:bg-white/5 transition-all text-sm">Join Free</a>
                 </div>
               </FadeInSection>
 
+              {/* $10 TIER - MOST POPULAR */}
               <FadeInSection delay={0.2}>
                 <div className="min-w-[85vw] sm:min-w-[70vw] md:min-w-0 snap-center bg-[var(--card-bg)] border border-[#d4af37] shadow-[0_0_30px_rgba(212,175,55,0.15)] rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 flex flex-col relative md:hover:-translate-y-2 transition-transform duration-300 md:-translate-y-4 h-full">
                   <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2 bg-[#d4af37] text-black text-[10px] sm:text-xs font-bold uppercase tracking-wider py-1 px-3 sm:px-4 rounded-full">Most Popular</div>
-                  <h3 className="text-lg sm:text-xl font-bold text-[var(--foreground)] mb-2 mt-2 md:mt-0">6 Months Access</h3>
-                  <p className="text-[var(--text-muted)] mb-4 sm:mb-6 text-xs sm:text-sm">The Commitment Phase. Full institutional access.</p>
+                  <h3 className="text-lg sm:text-xl font-bold text-[var(--foreground)] mb-2 mt-2 md:mt-0">The Commitment</h3>
+                  <p className="text-[var(--text-muted)] mb-4 sm:mb-6 text-xs sm:text-sm">Start building real discipline and edge.</p>
                   <div className="text-2xl sm:text-3xl font-bold text-[var(--foreground)] mb-6 sm:mb-8 flex items-baseline gap-2 flex-wrap">
-                    <span className="text-xs sm:text-lg line-through opacity-30 text-[var(--text-muted)] font-mono">$250</span>
-                    $100<span className="text-xs sm:text-lg text-[var(--text-muted)] font-normal ml-1"> ($16/mo)</span>
+                    $10<span className="text-xs sm:text-lg text-[var(--text-muted)] font-normal">/mo</span>
                   </div>
                   <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 flex-1">
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Daily VIP Signals & Terminal</li>
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Risk Management Risk Planner</li>
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Educational Vault Access</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Daily VIP Signals (XAU/XAG/Forex)</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> VIP Journal & Risk Manager</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Learning Material & Educational Vault</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Institutional Community Access</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Innovation Hub Tools</li>
                   </ul>
-                  <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="block text-center w-full py-3 sm:py-4 rounded-xl bg-[#d4af37] text-black font-bold hover:brightness-110 transition-colors shadow-lg text-sm">Secure Spot</a>
+                  <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="block text-center w-full py-3 sm:py-4 rounded-xl bg-[#d4af37] text-black font-bold hover:brightness-110 transition-colors shadow-lg text-sm">Get Started</a>
                 </div>
               </FadeInSection>
 
+              {/* $25 TIER */}
               <FadeInSection delay={0.3}>
                 <div className="min-w-[85vw] sm:min-w-[70vw] md:min-w-0 snap-center bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 flex flex-col md:hover:-translate-y-2 transition-transform duration-300 h-full">
-                  <h3 className="text-lg sm:text-xl font-bold text-[var(--foreground)] mb-2">1 Year Access</h3>
-                  <p className="text-[var(--text-muted)] mb-4 sm:mb-6 text-xs sm:text-sm">Become a Dominator. Annual mastery and support.</p>
+                  <h3 className="text-lg sm:text-xl font-bold text-[var(--foreground)] mb-2">The Mastery</h3>
+                  <p className="text-[var(--text-muted)] mb-4 sm:mb-6 text-xs sm:text-sm">Full institutional access. Automated execution.</p>
                   <div className="text-2xl sm:text-3xl font-bold text-[var(--foreground)] mb-6 sm:mb-8 flex items-baseline gap-2 flex-wrap">
-                    <span className="text-xs sm:text-lg line-through opacity-30 text-[var(--text-muted)] font-mono">$450</span>
-                    $200<span className="text-xs sm:text-lg text-[var(--text-muted)] font-normal ml-1"> ($16/mo)</span>
+                    $25<span className="text-xs sm:text-lg text-[var(--text-muted)] font-normal">/mo</span>
                   </div>
                   <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 flex-1">
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Institutional Guide (Premium)</li>
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> VIP Journal Analysis Tools</li>
-                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Priority Implementation Access</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Everything in The Commitment</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> VIP Institutional Toolkit</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Automatic Trade Copier & Copy Trading Bot</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Signal Entry & Signal Analysis (Chart AI)</li>
+                    <li className="flex items-center gap-3 text-[var(--text-muted)] text-xs sm:text-sm"><div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] flex-shrink-0"></div> Priority Implementation & VIP Lounge</li>
                   </ul>
-                  <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="block text-center w-full py-3 sm:py-4 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] font-bold hover:bg-yellow-500 hover:text-black transition-all text-sm">Go Annual</a>
+                  <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="block text-center w-full py-3 sm:py-4 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] font-bold hover:bg-yellow-500 hover:text-black transition-all text-sm">Secure Spot</a>
                 </div>
               </FadeInSection>
             </div>
+
+            {/* Enterprise Partner CTA */}
+            <FadeInSection delay={0.4}>
+              <div className="max-w-5xl mx-auto mt-8 sm:mt-10 p-5 sm:p-6 rounded-2xl bg-[var(--card-bg)] border border-[var(--border-color)] text-center">
+                <h4 className="text-sm sm:text-base font-bold text-[var(--foreground)] mb-2">Want more? <span className="text-[#d4af37]">Become a Partner.</span></h4>
+                <p className="text-[var(--text-muted)] text-xs sm:text-sm max-w-lg mx-auto mb-4 leading-relaxed">
+                  Full unrestricted access to every service, platform, resource, and AI tool we offer. Enterprise-grade partnerships for serious institutional traders.
+                </p>
+                <a href="https://t.me/Zen_pips_bot?start=PARTNER" target="_blank" rel="noopener noreferrer" className="inline-block text-xs sm:text-sm px-6 py-2.5 rounded-xl border border-[#d4af37]/30 text-[#d4af37] font-bold uppercase tracking-wider hover:bg-[#d4af37] hover:text-black transition-all">Contact Us</a>
+              </div>
+            </FadeInSection>
+
             {/* Mobile scroll indicator */}
             <div className="flex md:hidden justify-center gap-1.5 mt-4">
               <div className="w-6 h-1 rounded-full bg-[#d4af37]"></div>
@@ -671,20 +847,20 @@ function DashboardContent() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-4xl mx-auto">
               <FadeInSection delay={0.1}>
-                <a href="https://www.hfm.com/ke/en/?refid=30508914" target="_blank" rel="noopener noreferrer"
+                <a href="https://vigco.co/la-com-inv/TItFx2Oy" target="_blank" rel="noopener noreferrer"
                   className="group bg-gradient-to-br from-[var(--card-bg)] to-transparent border border-[var(--border-color)] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl transition-all duration-300 flex flex-col items-start h-full">
                   <div className="flex items-center gap-3 mb-4 sm:mb-6">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#d4af37]/10 rounded-full flex items-center justify-center">
-                      <Target className="w-5 h-5 sm:w-6 sm:h-6 text-[#d4af37]" />
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="40,60 150,60 260,340 150,340" fill="#024D56" /><polygon points="180,60 360,60 260,260 220,200" fill="#E24E24" /></svg>
                     </div>
                     <span className="text-[10px] sm:text-xs bg-[#d4af37]/10 text-[#d4af37] px-2 sm:px-3 py-1 rounded-full font-semibold uppercase tracking-wider">Step 1</span>
                   </div>
                   <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[var(--foreground)] mb-2 sm:mb-3">Open Your Broker</h3>
                   <p className="text-[var(--text-muted)] mb-4 sm:mb-6 leading-relaxed text-sm">
-                    We exclusively use <strong className="text-[var(--foreground)]">HFM</strong> for institutional-grade spreads on Gold and Bitcoin.
+                    We exclusively use <strong className="text-[var(--foreground)]">Vantage Markets</strong> for prop-firm friendly raw spreads.
                   </p>
                   <div className="mt-auto flex items-center gap-2 text-[#d4af37] font-semibold text-sm">
-                    Open HFM Account <ExternalLink className="w-4 h-4" />
+                    Connect Vantage <ExternalLink className="w-4 h-4" />
                   </div>
                 </a>
               </FadeInSection>
@@ -694,7 +870,7 @@ function DashboardContent() {
                   className="group bg-gradient-to-br from-[var(--card-bg)] to-transparent border border-[var(--border-color)] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl transition-all duration-300 flex flex-col items-start h-full">
                   <div className="flex items-center gap-3 mb-4 sm:mb-6">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500/10 rounded-full flex items-center justify-center">
-                      <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="#F3BA2F" xmlns="http://www.w3.org/2000/svg"><path d="M16.624 13.9202l2.7175 2.7154-7.3415 7.353-7.3415-7.353 2.7175-2.7154 4.624 4.6595 4.624-4.6595zm4.6366-4.6366L24 12l-2.7394 2.7154-2.7394-2.7154 2.7394-2.7154zM7.376 10.0798L4.6585 7.3644 12 .0115l7.3415 7.3529-2.7175 2.7154-4.624-4.6595-4.624 4.6595zM2.7394 9.2846L0 12l2.7394 2.7154 2.7394-2.7154-2.7394-2.7154zM12 15.2154l-2.7175-2.7154L12 9.7846l2.7175 2.7154L12 15.2154z"/></svg>
                     </div>
                     <span className="text-[10px] sm:text-xs bg-yellow-500/10 text-yellow-400 px-2 sm:px-3 py-1 rounded-full font-semibold uppercase tracking-wider">Step 2</span>
                   </div>
@@ -753,7 +929,7 @@ function DashboardContent() {
                   <h4 className="text-sm font-semibold text-[var(--foreground)] uppercase tracking-wider mb-4">Quick Links</h4>
                   <ul className="space-y-3 text-sm text-[var(--text-muted)]">
                     <li><a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Join VIP</a></li>
-                    <li><a href="https://www.hfm.com/ke/en/?refid=30508914" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Open Broker (HFM)</a></li>
+                    <li><a href="https://www.hfm.com/ke/en/?refid=30508914" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Open Broker (Vantage)</a></li>
                     <li><a href="https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?hl=en&ref=GRO_28502_E50OE&utm_source=default" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Buy USDT (Binance)</a></li>
                   </ul>
                 </div>
@@ -785,6 +961,7 @@ function DashboardContent() {
 }
 
 export default function Home() {
+  const [activeReviewSlide, setActiveReviewSlide] = useState(0);
   return (
     <Suspense fallback={
         <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">

@@ -55,9 +55,9 @@ export default function ToolsGuidePage() {
             action: "View Stats"
         },
         { 
-            title: "HFM Broker Portal", 
+            title: "Vantage Broker Portal", 
             desc: "Our recommended institutional-grade liquidity provider.", 
-            link: "https://www.hfm.com/ke/en/?refid=30508914", 
+            link: "https://vigco.co/la-com-inv/TItFx2Oy", 
             icon: <Landmark className="w-8 h-8" />, 
             category: "BROKERAGE",
             features: ["Raw Spreads (0.0 Pips)", "Instant Withdrawals", "MT5 Premium Access"],

@@ -444,13 +444,13 @@ export function VaultTab({ onNavigate }: VaultProps) {
                                     action: "Check News"
                                 },
                                 { 
-                                    title: "HFM Broker Portal", 
+                                    title: "Vantage Broker Portal", 
                                     desc: "Access your funding, withdrawals, and institutional MT5 server settings.", 
-                                    link: "https://www.hfm.com/ke/en/?refid=30508914", 
+                                    link: "https://vigco.co/la-com-inv/TItFx2Oy", 
                                     icon: <Landmark className="w-6 h-6" />, 
                                     label: "Official Broker",
                                     action: "Claim Credits",
-                                    onClick: () => setShowRewardModal({ broker: 'HFM', taskId: 'hfm_signup' })
+                                    onClick: () => setShowRewardModal({ broker: 'Vantage', taskId: 'vantage_signup' })
                                 },
                                 { 
                                     title: "Institutional Protocol", 

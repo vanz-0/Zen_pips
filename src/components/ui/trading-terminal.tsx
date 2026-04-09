@@ -325,7 +325,7 @@ export function TradingTerminal() {
                                 <span className="text-xs font-semibold text-[#d4af37] uppercase tracking-wider">⚡ Signals</span>
                             </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar">
                             {signals.map((sig: any) => (
                                 <SignalCard key={sig.id} sig={sig} onSelectSymbol={setSelectedSymbol} profile={profile} />
                             ))}

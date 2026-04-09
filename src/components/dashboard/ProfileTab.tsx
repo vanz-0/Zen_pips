@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { motion } from "framer-motion"
 import { User, Shield, CreditCard, History, Settings, LogOut, ArrowLeft, Save, Loader2, Mail, AtSign, CheckCircle2, Link, Zap } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
@@ -10,7 +10,7 @@ import { useSignals } from "@/hooks/useSignals"
 import Image from "next/image"
 
 export function ProfileTab() {
-  const { user, loading: authLoading, signOut } = useAuth()
+  const { user, profile, loading: authLoading, signOut } = useAuth()
   const { signals } = useSignals()
   const router = useRouter()
 
@@ -32,10 +32,30 @@ export function ProfileTab() {
     }
   }, [user])
 
-  // Derived stats from signals
-  const totalPips = signals.reduce((acc, s) => acc + (s.total_pips || 0), 0)
-  const winCount = signals.filter(s => s.total_pips > 0).length
-  const winRate = signals.length > 0 ? Math.round((winCount / signals.length) * 100) : 0
+  const [timeframe, setTimeframe] = useState<"day" | "week" | "month">("day")
+
+  // Derived stats from signals based on timeframe
+  const filteredSignals = useMemo(() => {
+    const now = new Date();
+    return signals.filter(s => {
+      const createdDate = new Date(s.created_at);
+      if (timeframe === "day") {
+        return createdDate.toDateString() === now.toDateString();
+      } else if (timeframe === "week") {
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        return createdDate >= startOfWeek;
+      } else if (timeframe === "month") {
+        return createdDate.getMonth() === now.getMonth() && createdDate.getFullYear() === now.getFullYear();
+      }
+      return true;
+    });
+  }, [signals, timeframe]);
+
+  const totalPips = filteredSignals.reduce((acc: number, s: any) => acc + (s.total_pips || 0), 0)
+  const grandTotalPips = signals.reduce((acc: number, s: any) => acc + (s.total_pips || 0), 0)
+  const winCount = filteredSignals.filter((s: any) => s.total_pips > 0).length
+  const winRate = filteredSignals.length > 0 ? Math.round((winCount / filteredSignals.length) * 100) : 0
 
   const handleSave = async () => {
     if (!user) return
@@ -117,7 +137,7 @@ export function ProfileTab() {
               <p className="font-semibold text-[var(--foreground)] text-lg">{fullName || "Dominator"}</p>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] bg-yellow-500/10 text-yellow-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-yellow-500/20">
-                  VIP MEMBER
+                  {profile?.is_admin ? "ELITE ADMIN" : "VIP MEMBER"}
                 </span>
                 <span className="text-[10px] text-[var(--text-muted)]">Since {memberSince}</span>
               </div>
@@ -136,6 +156,25 @@ export function ProfileTab() {
             Profile updated successfully!
           </motion.div>
         )}
+
+        {/* Timeframe Toggle */}
+        <div className="flex justify-start">
+          <div className="inline-flex p-1 bg-[var(--panel-bg)] border border-[var(--border-color)] rounded-xl shadow-lg">
+            {(["day", "week", "month"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTimeframe(t)}
+                className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+                  timeframe === t
+                    ? "bg-yellow-500 text-black shadow-lg"
+                    : "text-[var(--text-muted)] hover:text-[var(--foreground)]"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -175,11 +214,14 @@ export function ProfileTab() {
             <div className="space-y-1">
               <p className="text-3xl font-bold font-mono">
                 <span className={totalPips >= 0 ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}>
-                  {totalPips > 0 ? "+" : ""}{totalPips.toLocaleString()}
+                  {totalPips > 0 ? "+" : ""}{Math.round(totalPips).toLocaleString()}
                 </span>
                 <span className="text-lg text-[var(--text-muted)] ml-1">Pips</span>
               </p>
-              <p className="text-green-500 text-sm font-semibold">{winRate}% Win Rate · {signals.length} Signals</p>
+              <div className="flex flex-col gap-1">
+                <p className="text-green-500 text-sm font-semibold">{winRate}% Win Rate · {filteredSignals.length} {timeframe} Signals</p>
+                <p className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-wider">Total Lifetime: +{Math.round(grandTotalPips).toLocaleString()} Pips</p>
+              </div>
             </div>
             <button
               onClick={() => router.push("/journal")}
@@ -218,102 +260,91 @@ export function ProfileTab() {
           </motion.div>
         </div>
 
-        {/* HFM Copy Trader Integration */}
+        {/* Broker Integrations */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
           className="bg-gradient-to-br from-[var(--card-bg)] to-[var(--background)] rounded-2xl border border-[#d4af37]/30 overflow-hidden relative shadow-[0_0_40px_rgba(212,175,55,0.05)]"
         >
-          {/* subtle gold glow behind */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/10 rounded-full blur-[80px] -mr-10 -mt-10 pointer-events-none" />
           
           <div className="p-8 md:p-10 flex flex-col md:flex-row gap-10 items-center">
             <div className="flex-1 space-y-6 relative z-10">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs font-bold uppercase tracking-wider">
-                <Zap className="w-3.5 h-3.5 fill-yellow-500" /> Auto-Pilot Mode
+                <img src="/vantage-logo.svg" alt="Vantage" className="w-3.5 h-3.5" /> Multi-Broker Copier
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-[var(--foreground)] leading-tight">
                 Automate Your Edge <br />
-                <span className="text-[#d4af37]">with HFM.</span>
+                <span className="text-[#d4af37]">with Institutional Liquidity.</span>
               </h2>
               <p className="text-[var(--text-muted)] text-lg leading-relaxed max-w-xl">
-                Stop manually punching in trades. Connect your account to our institutional Trade Copier and let the Zen Pips Bridge duplicate our sniper entries directly into your portfolio—with zero latency.
+                The Zen Pips Bridge supports Vantage Markets. Link your preferred broker to activate zero-latency institutional trade synchronization.
               </p>
               
-              <div className="space-y-5 pt-2">
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 rounded-full bg-[var(--panel-bg)] flex items-center justify-center shrink-0 border border-[var(--border-color)] text-sm font-bold mt-0.5">1</div>
-                  <div>
-                    <p className="font-semibold text-[var(--foreground)]">Open Your HFM Account</p>
-                    <p className="text-sm text-[var(--text-muted)] mt-1">We exclusively partner with HFM (HotForex Markets) to ensure our members get raw, institutional-grade spreads on Gold (XAUUSD) and elite execution speeds. If your broker slips, our precision is useless.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 rounded-full bg-[var(--panel-bg)] flex items-center justify-center shrink-0 border border-[var(--border-color)] text-sm font-bold mt-0.5">2</div>
-                  <div>
-                    <p className="font-semibold text-[var(--foreground)]">Fund your Account</p>
-                    <p className="text-sm text-[var(--text-muted)] mt-1">Start with a minimum of $100. We highly recommend $500+ for optimal risk management to safely match our 1% per trade model.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center shrink-0 border border-yellow-500/30 text-yellow-500 text-sm font-bold mt-0.5">3</div>
-                  <div>
-                    <p className="font-semibold text-[var(--foreground)]">Link MT5 ID</p>
-                    <p className="text-sm text-[var(--text-muted)] mt-1">Save your MT5 ID to activate the copier.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-4 flex flex-wrap gap-4">
-                <a href="https://www.hfm.com/ke/en/?refid=30508914" target="_blank" rel="noopener noreferrer" className="bg-[#d4af37] text-black px-8 py-3.5 rounded-xl font-bold hover:brightness-110 transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)]">
-                  Create HFM Account
+              <div className="pt-4">
+                <a href="https://vigco.co/la-com-inv/TItFx2Oy" target="_blank" rel="noopener noreferrer" className="inline-block bg-[#d4af37]/10 text-[#d4af37] border border-[#d4af37]/30 px-8 py-3 rounded-xl font-bold hover:bg-[#d4af37] hover:text-black transition-all text-center text-sm shadow-lg hover:-translate-y-1">
+                  Connect Vantage Account
                 </a>
               </div>
             </div>
             
-            {/* Right side input box */}
-            <div className="w-full md:w-[380px] bg-[var(--card-bg)]/60 rounded-2xl p-6 border border-[var(--border-color)] backdrop-blur-xl relative z-10 shrink-0 shadow-2xl">
-               <div className="mb-6">
+            <div className="w-full md:w-[380px] bg-[var(--card-bg)]/60 rounded-2xl p-6 border border-[var(--border-color)] backdrop-blur-xl relative z-10 shrink-0 shadow-2xl space-y-6">
+               <div>
                  <h3 className="text-lg font-bold text-[var(--foreground)] mb-2 flex items-center gap-2">
                    <Link className="w-5 h-5 text-[var(--text-muted)]" />
                    Connection Portal
                  </h3>
-                 <p className="text-sm text-[var(--text-muted)]">Enter your live MT5 Account ID to route signals dynamically.</p>
+                 <p className="text-xs text-[var(--text-muted)]">Input your MT5 ID to route signals dynamically.</p>
                </div>
 
                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-xs text-[var(--text-muted)] uppercase tracking-wider font-bold">HFM MT5 Account ID</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-extrabold">Vantage MT5 ID</label>
                     <input
                       type="text"
                       value={mt5AccountId}
                       onChange={(e) => setMt5AccountId(e.target.value)}
-                      className="w-full bg-[var(--background)] p-3.5 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] focus:border-yellow-500/50 outline-none transition-colors font-mono"
+                      className="w-full bg-[var(--background)] p-3 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] focus:border-yellow-500/50 outline-none transition-colors font-mono text-sm"
                       placeholder="e.g. 86213984"
                     />
                   </div>
-                  
+
+                  {/* PLACEHOLDERS FOR CLOUD MAM ARCHITECTURE */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-extrabold">MT5 Password (Cloud Beta)</label>
+                    <input
+                      type="password"
+                      className="w-full bg-[var(--background)] p-3 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] focus:border-yellow-500/50 outline-none transition-colors font-mono text-sm opacity-50 cursor-not-allowed"
+                      placeholder="••••••••••••"
+                      disabled
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-extrabold">Broker Server Info</label>
+                    <input
+                      type="text"
+                      className="w-full bg-[var(--background)] p-3 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] focus:border-yellow-500/50 outline-none transition-colors font-mono text-sm opacity-50 cursor-not-allowed"
+                      placeholder="e.g. VantageInternational-Live"
+                      disabled
+                    />
+                  </div>
+
                   <button
                     onClick={handleSave}
                     disabled={saving || !mt5AccountId}
-                    className="w-full py-3.5 bg-[var(--panel-bg)] text-[var(--foreground)] rounded-xl font-semibold hover:bg-[var(--border-color)] transition-colors border border-[var(--border-color)] flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full py-3 bg-[var(--panel-bg)] text-[var(--foreground)] rounded-xl font-bold hover:bg-yellow-500 hover:text-black transition-colors border border-[var(--border-color)] flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
                   >
                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Connection ID"}
                   </button>
 
                   {mt5AccountId && (
-                    <div className="mt-4 p-3 rounded-xl bg-green-500/10 border border-green-500/20 flex flex-col gap-2">
-                      <div className="flex items-center gap-3">
-                        <div className="mt-0.5">
-                          <span className="relative flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                          </span>
-                        </div>
-                        <p className="text-sm text-[var(--color-success)] font-semibold">Active Connection</p>
+                    <div className="p-3 rounded-xl bg-green-500/5 border border-green-500/10">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        <p className="text-[10px] text-[var(--color-success)] font-bold uppercase tracking-widest">Active Linkage</p>
                       </div>
-                      <p className="text-xs text-[var(--color-success)]/80 leading-relaxed font-medium pl-6">Copier linked to <span className="font-mono text-[var(--foreground)] bg-[var(--background)] px-1 rounded">{mt5AccountId}</span>. Listening for Zen Pips broadcasts.</p>
                     </div>
                   )}
                </div>
