@@ -243,7 +243,7 @@ export function CommunityTab() {
         { event: "INSERT", schema: "public", table: "community_messages", filter: `channel=eq.${activeChannel}` },
         (payload: any) => {
           supabase.from("client_trading_profiles").select("full_name, is_vip").eq("id", payload.new.user_id).single()
-            .then(({ data }) => {
+            .then(({ data }: any) => {
                 const newMsg = { ...payload.new, user_data: data }
                 setMessages((prev) => [...prev, newMsg as any])
                 setDbHasMessages(true)
