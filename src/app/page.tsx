@@ -669,10 +669,16 @@ function DashboardContent() {
                 <p className="text-[var(--text-muted)]">Real feedback from verified copy-trading clients.</p>
               </div>
             </FadeInSection>
-            <div className="relative overflow-hidden w-full pb-8">
+            <div className="relative w-full group">
               <div 
-                className="flex transition-transform duration-500 ease-in-out" 
-                style={{ transform: `translateX(-${activeReviewSlide * 100}%)` }}
+                id="testimonial-carousel"
+                className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide transition-all duration-500 ease-in-out scroll-smooth"
+                onScroll={(e) => {
+                  const scrollLeft = (e.target as HTMLDivElement).scrollLeft;
+                  const width = (e.target as HTMLDivElement).offsetWidth;
+                  const index = Math.round(scrollLeft / width);
+                  if (index !== activeReviewSlide) setActiveReviewSlide(index);
+                }}
               >
                   {[
                     { t: "The AI signal entry validation is unmatched. I no longer second guess my entries.", v: "VIP User", n: "Jason M.", r: 5 },
@@ -685,8 +691,8 @@ function DashboardContent() {
                     { t: "Zen Pips helped me pass my $100k prop firm challenge in just two weeks. Clear entries, logical stops.", v: "$25 Mastery", n: "Ahmed K.", r: 5 },
                     { t: "Finally, a signal provider that actually cares about risk management. The journal tool alone is worth the sub.", v: "$10 Commitment", n: "Chris M.", r: 5 }
                   ].map((review, i) => (
-                    <div key={i} className="min-w-full flex-shrink-0 flex justify-center px-4">
-                      <div className="w-full max-w-2xl p-6 sm:p-10 rounded-2xl bg-[var(--card-bg)] border border-[var(--border-color)] flex flex-col justify-between hover:border-[#d4af37]/30 transition-all duration-300 shadow-lg">
+                    <div key={i} className="min-w-full flex-shrink-0 flex justify-center px-4 snap-center py-4">
+                      <div className="w-full max-w-2xl p-6 sm:p-10 rounded-2xl bg-[var(--card-bg)] border border-[var(--border-color)] flex flex-col justify-between hover:border-[#d4af37]/30 transition-all duration-300 shadow-xl scale-[0.98] hover:scale-100">
                         <div>
                           <div className="flex items-center gap-1 mb-4 sm:mb-6">
                             {[...Array(review.r)].map((_, j) => (
@@ -696,8 +702,11 @@ function DashboardContent() {
                           <p className="text-[var(--foreground)] mb-6 text-base sm:text-xl tracking-tight font-medium italic leading-relaxed">"{review.t}"</p>
                         </div>
                         <div className="flex items-center justify-between border-t border-[var(--border-color)] pt-4">
-                          <span className="font-bold tracking-wide text-sm sm:text-base">{review.n}</span>
-                          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest bg-yellow-500/10 text-yellow-600 px-3 py-1 rounded-full border border-yellow-500/20">{review.v}</span>
+                          <div className="flex flex-col">
+                            <span className="font-bold tracking-wide text-sm sm:text-base">{review.n}</span>
+                            <span className="text-[10px] text-[var(--text-muted)]">Verified Trader</span>
+                          </div>
+                          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest bg-[#d4af37]/10 text-[#d4af37] px-3 py-1 rounded-full border border-[#d4af37]/20">{review.v}</span>
                         </div>
                       </div>
                     </div>
@@ -705,12 +714,21 @@ function DashboardContent() {
               </div>
               
               {/* 9 Pagination Dots */}
-              <div className="flex justify-center items-center gap-2 mt-8">
+              <div className="flex justify-center items-center gap-2 mt-4 sm:mt-8">
                 {[0, 1, 2, 3, 4, 5, 6, 7, 8].map(idx => (
                   <button 
                     key={idx}
-                    onClick={() => setActiveReviewSlide(idx)}
-                    className={`transition-all duration-300 rounded-full ${activeReviewSlide === idx ? 'w-6 h-2.5 bg-yellow-500' : 'w-2.5 h-2.5 bg-[var(--border-color)] hover:bg-yellow-500/50'}`}
+                    onClick={() => {
+                        const container = document.getElementById('testimonial-carousel');
+                        if (container) {
+                            container.scrollTo({
+                                left: idx * container.offsetWidth,
+                                behavior: 'smooth'
+                            });
+                        }
+                        setActiveReviewSlide(idx);
+                    }}
+                    className={`transition-all duration-300 rounded-full h-2.5 ${activeReviewSlide === idx ? 'w-8 bg-[#d4af37]' : 'w-2.5 bg-[var(--border-color)] hover:bg-[#d4af37]/50'}`}
                     aria-label={`Go to review ${idx + 1}`}
                   />
                 ))}
