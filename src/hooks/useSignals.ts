@@ -55,7 +55,7 @@ export function useSignals() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "signals" },
-        (payload) => {
+        (payload: any) => {
           if (payload.eventType === "INSERT") {
             setSignals((prev) => [payload.new as Signal, ...prev])
           } else if (payload.eventType === "UPDATE") {
