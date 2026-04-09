@@ -585,10 +585,12 @@ export function CommunityTab() {
                                             </div>
                                         </div>
                                     )}
-                                    <div className={`text-sm leading-relaxed whitespace-pre-line relative ${isSystem ? 'bg-blue-500/10 text-[var(--color-info)] px-4 py-2 rounded-xl text-xs font-mono font-bold border border-blue-500/20 inline-block mx-auto' : 'text-[var(--foreground)]'}`}>
-                                        {msg.content}
+                                    <div className={`leading-relaxed whitespace-pre-line relative ${isSystem ? 'bg-blue-500/10 text-[var(--color-info)] px-4 py-2 rounded-xl text-xs font-mono font-bold border border-blue-500/20 inline-block mx-auto' : 'text-[var(--foreground)]'}`}>
+                                        <div className="max-h-32 sm:max-h-48 overflow-y-auto custom-scrollbar pr-2 mb-2 text-xs sm:text-sm">
+                                            {msg.content}
+                                        </div>
                                         {msg.image && (
-                                            <div className={`mt-4 rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-2xl bg-black group/img relative ${isChartChannel ? 'aspect-video w-full' : 'max-w-2xl'}`}>
+                                            <div className={`mt-2 rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-2xl bg-black group/img relative ${isChartChannel ? 'aspect-video w-full' : 'max-w-2xl'}`}>
                                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                                 <img src={msg.image} alt="Institutional Chart Analysis" className="w-full h-full object-contain hover:scale-[1.01] transition-transform duration-500" />
                                                 

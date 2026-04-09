@@ -60,11 +60,12 @@ function DashboardContent() {
     : 100;
   const activeCount = signals.filter(s => !s.closed).length;
 
-  // Sync tab with URL
   useEffect(() => {
     const tab = searchParams.get('tab') as any;
     if (tab && ["journal", "vault", "profile", "chartai", "admin", "help", "community", "innovation"].includes(tab)) {
       setActiveTab(tab);
+      setMenuOpen(false);
+      setProfileMenuOpen(false);
     }
   }, [searchParams]);
 
