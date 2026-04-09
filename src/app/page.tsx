@@ -673,8 +673,8 @@ function DashboardContent() {
              <style dangerouslySetInnerHTML={{ __html:`
                 @keyframes marquee { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
                 @keyframes marquee-reverse { 0% { transform: translateX(-50%); } 100% { transform: translateX(0%); } }
-                .animate-marquee { animation: marquee 90s linear infinite; width: max-content; }
-                .animate-marquee-reverse { animation: marquee-reverse 90s linear infinite; width: max-content; }
+                .animate-marquee { animation: marquee 300s linear infinite; width: max-content; }
+                .animate-marquee-reverse { animation: marquee-reverse 300s linear infinite; width: max-content; }
              `}} />
           </section>
 

@@ -163,7 +163,9 @@ export function ChartAITab() {
     const { data: req, error: insError } = await supabase.from('copy_events').insert({
       signal_id: sig.id,
       subscriber_id: user?.id,
-      status: 'PENDING'
+      status: 'PENDING',
+      mt5_account_id: profile?.mt5_account_id,
+      lot_size: profile?.chart_ai_lot_size || 0.01
     }).select().single()
 
     if (insError) {
