@@ -241,7 +241,7 @@ export function CommunityTab() {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "community_messages", filter: `channel=eq.${activeChannel}` },
-        (payload) => {
+        (payload: any) => {
           supabase.from("client_trading_profiles").select("full_name, is_vip").eq("id", payload.new.user_id).single()
             .then(({ data }) => {
                 const newMsg = { ...payload.new, user_data: data }
