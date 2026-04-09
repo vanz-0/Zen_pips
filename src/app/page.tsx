@@ -413,7 +413,7 @@ function DashboardContent() {
                   )
                 )}
                 {activeTab === "vault" && (
-                  (profile?.is_vip || profile?.plan === 'VIP' || profile?.plan === 'Premium') ? <VaultTab onNavigate={(t) => setActiveTab(t)} /> : (
+                  (profile?.is_vip || profile?.plan === 'VIP' || profile?.plan === 'Premium') ? <VaultTab onNavigate={(t) => setActiveTab(t as any)} /> : (
                     <div className="flex flex-col items-center justify-center p-8 sm:p-14 md:p-20 bg-[var(--card-bg)] rounded-3xl border border-[var(--border-color)] text-center h-full">
                       <div className="bg-yellow-500/10 p-5 rounded-full mb-6 border border-yellow-500/20">
                         <Lock className="w-10 h-10 text-yellow-500" />
@@ -441,7 +441,7 @@ function DashboardContent() {
                 )}
                 {activeTab === "profile" && <ProfileTab />}
                 {activeTab === "help" && <OnboardingTab />}
-                {activeTab === "innovation" && <InnovationHubTab onNavigate={(t) => setActiveTab(t)} />}
+                {activeTab === "innovation" && <InnovationHubTab onNavigate={(t) => setActiveTab(t as any)} />}
                 {activeTab === "chartai" && <ChartAITab />}
                 {activeTab === "admin" && <SignalControlPanel />}
               </motion.div>

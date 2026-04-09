@@ -36,7 +36,7 @@ interface ToolProposal {
 }
 
 interface InnovationHubProps {
-    onNavigate?: (tab: "journal" | "vault" | "profile" | "chartai" | "admin" | "help" | "community" | "innovation" | null) => void
+    onNavigate?: (tab: "profile" | "journal" | "vault" | "chartai" | "admin" | "help" | "community" | "innovation" | null) => void
 }
 
 export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
@@ -104,7 +104,7 @@ export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
                 {/* Header */}
                 <div className="flex flex-col items-center text-center space-y-6 mb-12">
                      <motion.button 
-                        onClick={() => onNavigate?.('journal')}
+                        onClick={() => onNavigate?.(null)}
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         className="relative w-24 h-24 bg-[#d4af37] rounded-full p-1 shadow-[0_0_30px_rgba(212,175,55,0.2)] border border-yellow-600/30 flex items-center justify-center transition-transform hover:scale-105 mx-auto"

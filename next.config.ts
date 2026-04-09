@@ -11,11 +11,10 @@ const nextConfig: NextConfig = {
   },
   // @ts-ignore - Ignore lint/type errors to ensure deployment
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
-  // @ts-ignore - Ignore lint/type errors to ensure deployment
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 };
 
