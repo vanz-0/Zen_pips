@@ -5,6 +5,13 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
 
 export async function createClient() {
+    if (!supabaseUrl || !supabaseAnonKey) {
+        return {
+            auth: {},
+            from: () => ({ select: () => ({ data: [], error: null }) }),
+        } as any;
+    }
+
     const cookieStore = await cookies()
 
     return createServerClient(

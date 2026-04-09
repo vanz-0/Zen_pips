@@ -7,14 +7,11 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'cablmdyiymmkhseqfhxq.supabase.co',
+      }
     ],
-  },
-  // @ts-ignore - Ignore lint/type errors to ensure deployment
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
-  typescript: {
-    ignoreBuildErrors: false,
   },
 };
 
