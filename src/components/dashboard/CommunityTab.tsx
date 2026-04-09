@@ -447,9 +447,34 @@ export function CommunityTab() {
       </div>
 
       {/* ─── Main Chat Area ─── */}
-      <div className="flex-1 bg-[var(--background)] flex flex-col overflow-hidden">
-        {/* Channel Header */}
-        <div className="px-5 py-3 border-b border-[var(--border-color)] bg-[var(--panel-bg)] flex items-center justify-between flex-shrink-0">
+      <div className="flex-1 bg-[var(--background)] flex flex-col overflow-hidden w-full relative">
+        {/* Mobile Channel Switcher */}
+        <div className="md:hidden flex overflow-x-auto border-b border-[var(--border-color)] bg-[var(--panel-bg)] hide-scrollbar shrink-0">
+            {['general-chat', 'setups-and-charts', 'vip-lounge'].map(ch => (
+                <button
+                    key={ch}
+                    onClick={() => {
+                        if (ch === 'vip-lounge') {
+                            const isPremium = profile?.is_vip && profile?.plan !== 'Trial';
+                            if (isPremium) {
+                                setActiveChannel('vip-lounge');
+                            } else {
+                                alert("💎 PREMIUM EXCLUSIVE: Upgrade your plan to enter the VIP Lounge. (Not available for Free Trials)");
+                            }
+                        } else {
+                            setActiveChannel(ch as any);
+                        }
+                    }}
+                    className={`px-4 py-3 text-[10px] sm:text-xs font-bold whitespace-nowrap border-b-2 flex items-center gap-1.5 transition-colors ${activeChannel === ch ? 'border-yellow-500 text-yellow-500 bg-yellow-500/5' : 'border-transparent text-[var(--text-muted)]'}`}
+                >
+                    <Hash className="w-3 h-3" />
+                    {ch.replace(/-/g, ' ').toUpperCase()}
+                    {ch === 'vip-lounge' && !(profile?.is_vip && profile?.plan !== 'Trial') && <Lock className="w-2.5 h-2.5 ml-1" />}
+                </button>
+            ))}
+        </div>
+        {/* Channel Header (Hidden on small mobile if needed, or kept) */}
+        <div className="hidden sm:flex px-5 py-3 border-b border-[var(--border-color)] bg-[var(--panel-bg)] items-center justify-between flex-shrink-0">
             <div>
                 <h1 className="text-lg font-bold flex items-center gap-2">
                     <Hash className="w-5 h-5 text-[var(--text-muted)]" /> {activeChannel}

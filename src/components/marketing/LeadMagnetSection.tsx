@@ -52,31 +52,31 @@ export function LeadMagnetSection() {
                                 <Sparkles className="w-4 h-4" />
                                 FREE DOWNLOAD
                             </div>
-                            <h2 className="font-[family-name:var(--font-outfit)] text-3xl md:text-4xl font-bold text-white leading-tight">
-                                The Institutional<br />
+                            <h2 className="font-[family-name:var(--font-outfit)] text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">
+                                The Institutional<br className="hidden sm:block" />
                                 <span className="text-[#d4af37]">Market Structure</span> Guide
                             </h2>
-                            <p className="text-gray-400 leading-relaxed">
+                            <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
                                 Master the exact framework our team uses to identify institutional order flow,
                                 liquidity sweeps, and high-probability entry points. This is the same methodology
                                 behind our 80%+ win rate.
                             </p>
-                            <ul className="space-y-3 text-sm text-gray-300">
-                                <li className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-[#d4af37]" />
-                                    Order Block identification & validation
+                            <ul className="space-y-3 text-xs sm:text-sm text-gray-300">
+                                <li className="flex items-start gap-3">
+                                    <div className="w-1.5 h-1.5 mt-1.5 rounded-full bg-[#d4af37] flex-shrink-0" />
+                                    <span>Order Block identification & validation</span>
                                 </li>
-                                <li className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-[#d4af37]" />
-                                    Fair Value Gap trading setups
+                                <li className="flex items-start gap-3">
+                                    <div className="w-1.5 h-1.5 mt-1.5 rounded-full bg-[#d4af37] flex-shrink-0" />
+                                    <span>Fair Value Gap trading setups</span>
                                 </li>
-                                <li className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-[#d4af37]" />
-                                    Liquidity sweep patterns (Turtle Soup)
+                                <li className="flex items-start gap-3">
+                                    <div className="w-1.5 h-1.5 mt-1.5 rounded-full bg-[#d4af37] flex-shrink-0" />
+                                    <span>Liquidity sweep patterns (Turtle Soup)</span>
                                 </li>
-                                <li className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-[#d4af37]" />
-                                    London & New York session timing
+                                <li className="flex items-start gap-3">
+                                    <div className="w-1.5 h-1.5 mt-1.5 rounded-full bg-[#d4af37] flex-shrink-0" />
+                                    <span>London & New York session timing</span>
                                 </li>
                             </ul>
                         </div>

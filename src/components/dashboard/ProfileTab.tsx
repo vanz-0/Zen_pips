@@ -274,11 +274,11 @@ export function ProfileTab() {
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs font-bold uppercase tracking-wider">
                 <img src="/vantage-logo.svg" alt="Vantage" className="w-3.5 h-3.5" /> Multi-Broker Copier
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-[var(--foreground)] leading-tight">
-                Automate Your Edge <br />
+              <h2 className="text-2xl md:text-4xl font-bold text-[var(--foreground)] leading-tight">
+                Automate Your Edge <br className="hidden sm:block" />
                 <span className="text-[#d4af37]">with Institutional Liquidity.</span>
               </h2>
-              <p className="text-[var(--text-muted)] text-lg leading-relaxed max-w-xl">
+              <p className="text-[var(--text-muted)] text-sm md:text-lg leading-relaxed max-w-xl">
                 The Zen Pips Bridge supports Vantage Markets. Link your preferred broker to activate zero-latency institutional trade synchronization.
               </p>
               

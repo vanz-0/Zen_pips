@@ -53,10 +53,12 @@ const ALL_CATEGORIES = ["All", "Smart Money Concepts", "ICT", "Strategy", "Psych
 
 interface VaultProps {
     onNavigate?: (tab: "journal" | "vault" | "profile" | "chartai" | "admin" | "help" | "community" | "innovation" | null) => void
+    profile?: any
 }
 
-export function VaultTab({ onNavigate }: VaultProps) {
-    const { user, profile, loading: authLoading } = useAuth()
+export function VaultTab({ onNavigate, profile: initialProfile }: VaultProps) {
+    const { user, profile: authProfile } = useAuth()
+    const profile = initialProfile || authProfile;
     const router = useRouter()
     const [resources, setResources] = useState<VaultResource[]>(DEFAULT_RESOURCES)
     const [loading, setLoading] = useState(true)
@@ -294,7 +296,22 @@ export function VaultTab({ onNavigate }: VaultProps) {
                                         {levelResources.map((resource, i) => {
                                             const TypeIcon = TYPE_ICONS[resource.type] || FileText
                                             const isVIP = profile?.is_vip || profile?.plan === 'VIP'
-                                            const isFinallyLocked = !isVIP && (resource.level === 'Intermediate' || resource.level === 'Advanced')
+                                            const credits = profile?.bonus_credits || 0
+                                            
+                                            let isFinallyLocked = false
+                                            let lockMsg = "Unlock with VIP"
+                                            
+                                            if (!isVIP) {
+                                                if (resource.level === 'Intermediate' && credits < 1000) {
+                                                    isFinallyLocked = true
+                                                    lockMsg = "Req. 1000 Credits"
+                                                }
+                                                if (resource.level === 'Advanced' && credits < 5000) {
+                                                    isFinallyLocked = true
+                                                    lockMsg = "Req. 5000 Credits"
+                                                }
+                                            }
+                                            
                                             const isCompleted = completedIds.has(resource.id)
 
                                             return (
@@ -303,7 +320,7 @@ export function VaultTab({ onNavigate }: VaultProps) {
                                                     initial={{ opacity: 0, y: 20 }}
                                                     animate={{ opacity: 1, y: 0 }}
                                                     transition={{ delay: i * 0.05 }}
-                                                    className={`group relative bg-[var(--panel-bg)] p-6 rounded-2xl border transition-all cursor-pointer overflow-hidden ${
+                                                    className={`group relative bg-[var(--panel-bg)] p-4 sm:p-6 rounded-2xl border transition-all cursor-pointer overflow-hidden ${
                                                         isCompleted ? 'border-green-500/20' : 'border-[var(--border-color)] hover:border-yellow-500/30'
                                                     }`}
                                                 >
@@ -314,8 +331,8 @@ export function VaultTab({ onNavigate }: VaultProps) {
                                                                 <CheckCircle2 className="w-4 h-4" />
                                                             </div>
                                                         ) : isFinallyLocked ? (
-                                                            <div className="bg-[var(--panel-bg)] p-1.5 rounded-full border border-[var(--border-color)]">
-                                                                <Lock className="w-4 h-4 text-[var(--text-muted)]" />
+                                                            <div className="bg-[var(--background)] p-1.5 rounded-full border border-[var(--border-color)] shadow-sm">
+                                                                <Lock className="w-3 h-3 sm:w-4 sm:h-4 text-[var(--text-muted)]" />
                                                             </div>
                                                         ) : null}
                                                     </div>
@@ -367,7 +384,7 @@ export function VaultTab({ onNavigate }: VaultProps) {
                                                             }`}
                                                         >
                                                             {isFinallyLocked ? (
-                                                                <>Unlock with VIP</>
+                                                                <>{lockMsg}</>
                                                             ) : resource.type === 'Video' ? (
                                                                 <><Play className="w-4 h-4" /> Watch Lesson</>
                                                             ) : isCompleted ? (

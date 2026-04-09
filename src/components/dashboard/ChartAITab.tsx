@@ -169,7 +169,8 @@ export function ChartAITab() {
     }).select().single()
 
     if (insError) {
-      alert(`❌ FAILED: Could not transmit signal.`)
+      console.error("Signal insertion error:", insError);
+      alert(`❌ FAILED: Could not transmit signal. ${insError.message || ""}`)
       setExecutingId(null)
       return
     }

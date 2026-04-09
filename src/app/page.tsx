@@ -403,7 +403,7 @@ function DashboardContent() {
                 className="w-full bg-[var(--background)]"
               >
                 {activeTab === "journal" && (
-                  (profile?.is_vip || profile?.plan === 'Trial') ? <JournalTab /> : (
+                  (profile) ? <JournalTab /> : (
                     <div className="flex flex-col items-center justify-center p-8 sm:p-14 md:p-20 bg-[var(--card-bg)] rounded-3xl border border-[var(--border-color)] text-center">
                       <Lock className="w-12 h-12 sm:w-16 sm:h-16 text-yellow-500 mb-6 opacity-20" />
                       <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 text-[var(--foreground)]">Institutional Journaling</h2>
@@ -413,31 +413,7 @@ function DashboardContent() {
                   )
                 )}
                 {activeTab === "vault" && (
-                  (profile?.is_vip || profile?.plan === 'VIP' || profile?.plan === 'Premium') ? <VaultTab onNavigate={(t) => setActiveTab(t as any)} /> : (
-                    <div className="flex flex-col items-center justify-center p-8 sm:p-14 md:p-20 bg-[var(--card-bg)] rounded-3xl border border-[var(--border-color)] text-center h-full">
-                      <div className="bg-yellow-500/10 p-5 rounded-full mb-6 border border-yellow-500/20">
-                        <Lock className="w-10 h-10 text-yellow-500" />
-                      </div>
-                      <h2 className="text-3xl font-black italic uppercase tracking-tight text-[var(--foreground)]">Institutional Vault Locked</h2>
-                      <p className="text-[var(--text-muted)] mt-4 max-w-lg mx-auto text-sm leading-relaxed">
-                        The Dominator Vault contains **63+ institutional resources**, mentoring archives, and advanced SMC PDFs. This section is reserved for full Institutional Members only.
-                      </p>
-                      <div className="flex flex-col sm:flex-row gap-4 mt-10">
-                        <button 
-                          onClick={() => setActiveTab('profile')}
-                          className="bg-yellow-500 text-black px-8 py-3 rounded-xl font-bold hover:bg-yellow-400 transition-all shadow-[0_0_20px_rgba(234,179,8,0.3)]"
-                        >
-                          Upgrade to VIP Access
-                        </button>
-                        <button 
-                          onClick={() => setActiveTab('help')}
-                          className="bg-[var(--panel-bg)] text-[var(--foreground)] border border-[var(--border-color)] px-8 py-3 rounded-xl font-bold hover:bg-[var(--border-color)] transition-all"
-                        >
-                          Learn About Membership
-                        </button>
-                      </div>
-                    </div>
-                  )
+                  <VaultTab onNavigate={(t) => setActiveTab(t as any)} profile={profile} />
                 )}
                 {activeTab === "profile" && <ProfileTab />}
                 {activeTab === "help" && <OnboardingTab />}
@@ -692,7 +668,7 @@ function DashboardContent() {
                 style={{ transform: `translateX(-${activeReviewSlide * 100}%)` }}
               >
                   {[0, 1, 2].map(slideIdx => (
-                    <div key={slideIdx} className="min-w-full flex-shrink-0 grid grid-cols-1 md:grid-cols-3 gap-6 px-1">
+                    <div key={slideIdx} className="min-w-full flex-shrink-0 grid grid-cols-1 md:grid-cols-3 gap-6 px-4">
                       {[
                         { t: "The AI signal entry validation is unmatched. I no longer second guess my entries.", v: "VIP User", n: "Jason M.", r: 5 },
                         { t: "Deep character analysis gives me the 'why' behind every trade. Setup took 5 mins.", v: "$25 Mastery", n: "Sarah K.", r: 5 },
@@ -744,10 +720,10 @@ function DashboardContent() {
           <section id="pricing" className="relative z-10 py-12 sm:py-16 md:py-24 px-4 sm:px-6 max-w-7xl mx-auto border-t border-[var(--border-color)]">
             <FadeInSection>
               <div className="text-center mb-8 sm:mb-12 md:mb-16">
-                <h2 className="font-[family-name:var(--font-outfit)] text-2xl sm:text-3xl md:text-5xl font-bold text-[var(--foreground)] mb-3 sm:mb-4">
+                <h2 className="font-[family-name:var(--font-outfit)] text-xl sm:text-2xl md:text-5xl font-bold text-[var(--foreground)] mb-3 sm:mb-4">
                   Join the <span className="text-[#d4af37]">Inner Circle.</span>
                 </h2>
-                <p className="text-[var(--text-muted)] max-w-xl mx-auto text-sm sm:text-base md:text-lg">
+                <p className="text-[var(--text-muted)] max-w-xl mx-auto text-xs sm:text-base md:text-lg px-4 sm:px-0">
                   Unlock all features with our flexible plans. Gain access to advanced scanners, AI-powered signals, expert academy lessons, and 24/7 updates designed to maximize your trading edge.
                 </p>
               </div>
