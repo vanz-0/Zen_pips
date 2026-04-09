@@ -378,7 +378,7 @@ export function ChartAITab() {
                     No signals.
                   </div>
                 ) : (
-                  activeSignals.map(sig => {
+                  activeSignals.map((sig: any) => {
                     const isTpPassed = sig.tp1_hit || sig.status?.includes("HIT") || sig.status?.includes("TP")
                     return (
                         <div key={sig.id} className="bg-black/40 rounded-2xl border border-zinc-800 p-4 relative overflow-hidden group hover:border-yellow-500/30 transition-all">

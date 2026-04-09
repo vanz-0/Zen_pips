@@ -78,7 +78,7 @@ export function JournalTab() {
     const daysInMonth = getDaysInMonth(currentDate.getMonth(), currentDate.getFullYear());
     const firstDay = getFirstDayOfMonth(currentDate.getMonth(), currentDate.getFullYear());
     
-    const journaledDates = new Set(entries.map(e => e.date));
+    const journaledDates = new Set(entries.map((e: any) => e.date));
 
     // ─── Institutional Performance Report Logic ───
     const currentMonthEntries = entries.filter(e => {
@@ -90,9 +90,9 @@ export function JournalTab() {
         return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
     });
 
-    const monthPips = [...currentMonthEntries.map(e => e.pips), ...currentMonthSignals.map(s => s.total_pips || 0)].reduce((a, b) => a + b, 0);
+    const monthPips = [...currentMonthEntries.map((e: any) => e.pips), ...currentMonthSignals.map((s: any) => s.total_pips || 0)].reduce((a: number, b: number) => a + b, 0);
     const monthWinRate = (currentMonthEntries.length + currentMonthSignals.length) > 0
-        ? Math.round(([...currentMonthEntries, ...currentMonthSignals].filter(x => (x as any).pips > 0 || (x as any).total_pips > 0).length / (currentMonthEntries.length + currentMonthSignals.length)) * 100)
+        ? Math.round(([...currentMonthEntries, ...currentMonthSignals].filter((x: any) => (x as any).pips > 0 || (x as any).total_pips > 0).length / (currentMonthEntries.length + currentMonthSignals.length)) * 100)
         : 100;
 
     const topPair = currentMonthEntries.reduce((acc, e) => {
@@ -260,7 +260,7 @@ export function JournalTab() {
                         { label: "Total Pips", value: totalPips > 0 ? `+${totalPips}` : `${totalPips}`, icon: BarChart3, color: totalPips >= 0 ? "text-green-500" : "text-red-500" },
                         { label: "Total Logs", value: `${entries.length + signals.length}`, icon: Book, color: "text-[var(--color-info)]" },
                         { label: "Top Mistake", value: topMistake, icon: Brain, color: "text-yellow-500" },
-                    ].map((stat, i) => (
+                    ].map((stat, i: number) => (
                         <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="bg-[var(--panel-bg)] p-4 rounded-xl border border-[var(--border-color)] space-y-2 hover:border-yellow-500/20 transition-colors">
                             <div className="flex items-center gap-2 text-[var(--text-muted)]">
                                 <stat.icon className="w-4 h-4" />
@@ -321,7 +321,7 @@ export function JournalTab() {
                                             <div className="space-y-1">
                                                 {[{ label: 'TP1', value: sig.tp1, hit: sig.tp1_hit },
                                                   { label: 'TP2', value: sig.tp2, hit: sig.tp2_hit },
-                                                  { label: 'TP3', value: sig.tp3, hit: sig.tp3_hit }].map(tp => (
+                                                  { label: 'TP3', value: sig.tp3, hit: sig.tp3_hit }].map((tp: any) => (
                                                     <div key={tp.label} className="flex items-center gap-2 text-xs">
                                                         <span className={`w-12 font-bold ${tp.hit ? 'text-green-500' : 'text-[var(--text-muted)]'}`}>{tp.label}</span>
                                                         <div className="flex-1 h-1.5 bg-[var(--panel-bg)] rounded-full overflow-hidden">
@@ -382,7 +382,7 @@ export function JournalTab() {
                     </div>
 
                     <div className="grid grid-cols-7 gap-3">
-                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d: string) => (
                             <div key={d} className="text-[10px] text-[var(--text-muted)] uppercase font-black text-center mb-2 tracking-widest">{d}</div>
                         ))}
                         {Array.from({ length: firstDay }).map((_, i) => (
@@ -566,7 +566,7 @@ export function JournalTab() {
                             <h2 className="text-xl font-bold">Awaiting Your Analysis</h2>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {pendingJournalSignals.map(sig => (
+                            {pendingJournalSignals.map((sig: any) => (
                                 <motion.div
                                     key={sig.id}
                                     whileHover={{ y: -2 }}
@@ -735,7 +735,7 @@ export function JournalTab() {
                                         <label className="text-xs text-[var(--text-muted)] uppercase font-bold">Link to Signal (Optional)</label>
                                         <select value={form.signal_id} onChange={(e) => setForm({ ...form, signal_id: e.target.value })} className="w-full bg-[var(--panel-bg)] dark:[color-scheme:dark] [color-scheme:light] border border-[var(--border-color)] rounded-lg p-2.5 focus:border-yellow-500 outline-none text-[var(--foreground)]">
                                             <option value="">No linked signal</option>
-                                            {signals.map(s => (
+                                            {signals.map((s: any) => (
                                                 <option key={s.id} value={s.id}>{s.pair} {s.direction} — {s.status}</option>
                                             ))}
                                         </select>

@@ -97,7 +97,7 @@ export function VaultTab({ onNavigate, profile: initialProfile }: VaultProps) {
             .select("resource_id")
             .eq("user_id", user.id)
             
-        if (progress) setCompletedIds(new Set(progress.map(p => p.resource_id)))
+        if (progress) setCompletedIds(new Set(progress.map((p: any) => p.resource_id)))
         
         // 2. Fetch Awarded Certificates
         const { data: certs } = await supabase
@@ -105,7 +105,7 @@ export function VaultTab({ onNavigate, profile: initialProfile }: VaultProps) {
             .select("level")
             .eq("user_id", user.id)
             
-        if (certs) setAwardedCerts(new Set(certs.map(c => c.level)))
+        if (certs) setAwardedCerts(new Set(certs.map((c: any) => c.level)))
     }, [user])
 
     useEffect(() => {
@@ -231,7 +231,7 @@ export function VaultTab({ onNavigate, profile: initialProfile }: VaultProps) {
                     </div>
                     <div className="flex gap-2">
                         <select value={category} onChange={(e) => setCategory(e.target.value)} className="bg-[var(--panel-bg)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:border-yellow-500/50 outline-none text-[var(--foreground)]">
-                            {ALL_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                            {ALL_CATEGORIES.map((c: string) => <option key={c}>{c}</option>)}
                         </select>
                         <select value={level} onChange={(e) => setLevel(e.target.value)} className="bg-[var(--panel-bg)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:border-yellow-500/50 outline-none text-[var(--foreground)]">
                             <option>All</option>

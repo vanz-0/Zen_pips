@@ -105,7 +105,7 @@ export function ProfileTab() {
   }
 
   const initials = fullName
-    ? fullName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+    ? fullName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
     : user.email?.[0]?.toUpperCase() || "ZP"
 
   const memberSince = new Date(user.created_at).toLocaleDateString("en-US", {

@@ -450,7 +450,7 @@ export function CommunityTab() {
       <div className="flex-1 bg-[var(--background)] flex flex-col overflow-hidden w-full relative">
         {/* Mobile Channel Switcher */}
         <div className="md:hidden flex overflow-x-auto border-b border-[var(--border-color)] bg-[var(--panel-bg)] hide-scrollbar shrink-0">
-            {['general-chat', 'setups-and-charts', 'vip-lounge'].map(ch => (
+            {['general-chat', 'setups-and-charts', 'vip-lounge'].map((ch: string) => (
                 <button
                     key={ch}
                     onClick={() => {
@@ -618,7 +618,7 @@ export function CommunityTab() {
                                                     </button>
                                                     {showEmojiPicker === msg.id && (
                                                         <div className="absolute right-0 top-full mt-2 w-48 p-2 bg-[var(--background)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 grid grid-cols-5 gap-1 max-h-40 overflow-y-auto custom-scrollbar">
-                                                            {TRADING_EMOJIS.map(emoji => (
+                                                            {TRADING_EMOJIS.map((emoji: string) => (
                                                                 <button key={emoji} onClick={() => { handleReaction(msg.id, emoji); setShowEmojiPicker(null); }} className="p-1.5 hover:bg-white/10 rounded-lg text-lg transition-colors">
                                                                     {emoji}
                                                                 </button>
@@ -636,7 +636,7 @@ export function CommunityTab() {
                                     {/* Real Reactions Display */}
                                     {msg.reactions && msg.reactions.length > 0 && (
                                         <div className="flex flex-wrap gap-1.5 pt-1">
-                                            {msg.reactions.map(r => (
+                                            {msg.reactions.map((r: any) => (
                                                 <button 
                                                     key={r.emoji} 
                                                     onClick={() => handleReaction(msg.id, r.emoji)}
@@ -665,7 +665,7 @@ export function CommunityTab() {
                             {/* Render Replies */}
                             {replies.length > 0 && (
                                 <div className="ml-12 space-y-4 border-l-2 border-[var(--border-color)] pl-6">
-                                    {replies.map(reply => (
+                                    {replies.map((reply: any) => (
                                         <div key={reply.id} className="flex gap-3 text-sm">
                                             <div className="w-6 h-6 rounded-full bg-[var(--panel-bg)] border border-[var(--border-color)] flex items-center justify-center text-[8px] font-bold shrink-0">
                                                 {reply.user_data?.full_name?.substring(0,2).toUpperCase()}

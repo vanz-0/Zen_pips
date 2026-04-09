@@ -90,7 +90,7 @@ export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
     const handleVote = async (id: string, currentVotes: number) => {
         if (!user) return
         // Optimistic update
-        setProposals(prev => prev.map(p => p.id === id ? { ...p, votes: p.votes + 1 } : p))
+        setProposals(prev => prev.map((p: any) => p.id === id ? { ...p, votes: p.votes + 1 } : p))
         
         await supabase.from("tool_proposals")
             .update({ votes: currentVotes + 1 })
