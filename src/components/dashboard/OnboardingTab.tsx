@@ -148,9 +148,9 @@ export function OnboardingTab() {
                                             href="https://vigco.co/la-com-inv/TItFx2Oy" 
                                             target="_blank" 
                                             rel="noopener noreferrer"
-                                            className="flex items-center justify-center gap-2 w-full py-4 bg-[#d4af37] text-black font-black rounded-xl hover:brightness-110 transition-all text-sm uppercase tracking-wider"
+                                            className="flex items-center justify-center gap-2 w-full py-4 bg-white/5 border border-white/10 text-white font-black rounded-xl hover:bg-white/10 transition-all text-sm uppercase tracking-wider"
                                         >
-                                            JOIN Vantage <ExternalLink className="w-4 h-4" />
+                                            <div className="w-6 h-6 relative mr-1"><Image src="/vantage-logo.svg" alt="Vantage" fill className="object-contain" /></div> JOIN Vantage <ExternalLink className="w-4 h-4" />
                                         </a>
                                         <a 
                                             href="/Zen_Pips_Institutional_Guidelines.pdf" 
@@ -264,7 +264,9 @@ export function OnboardingTab() {
                             <div className="flex items-center justify-between p-6 bg-gradient-to-r from-yellow-500/10 to-transparent rounded-2xl border border-yellow-500/20">
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-3">
-                                        <Bitcoin className="w-8 h-8 text-yellow-500" />
+                                        <div className="w-10 h-10 relative">
+                                            <Image src="/binance-logo.svg" alt="Binance" fill className="object-contain" />
+                                        </div>
                                         <div>
                                             <p className="text-xs text-[var(--text-muted)] font-bold uppercase tracking-widest">Crypto Checkout</p>
                                             <h4 className="text-2xl font-black text-[var(--foreground)]">$50 / Month - VIP ACCESS</h4>
