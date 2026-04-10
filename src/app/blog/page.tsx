@@ -62,7 +62,8 @@ const POSTS = [
     excerpt: "The math behind why risking more than 1% per trade is the primary reason retail traders fail.",
     date: "March 15, 2026",
     tag: "Psychology",
-    image: "/blog/zen_risk_1775265150310.png"
+    image: "/blog/zen_risk_1775265150310.png",
+    content: "The psychology of risk is the hardest hurdle a trader faces. Risking more than 1% creates emotional attachment to the trade, breaking objective analytical processes. By strictly keeping your exposure to 0.5% - 1% per setup, you allow edge to play out over a law of large numbers. Institutional systems mathematically eliminate emotional volatility through rigid volume sizing structures."
   }
 ];
 
@@ -76,17 +77,7 @@ export default function BlogPage() {
         <Link href="/" className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors">Back to Terminal</Link>
       </nav>
 
-      {/* ⚡ TRANSITION BANNER (Exclusive to Blog) */}
-      <div className="bg-yellow-500 text-black py-2 px-6 text-center font-black tracking-widest uppercase text-[10px] sticky top-0 z-[60] border-b border-black/10">
-        <div className="flex items-center justify-center gap-4">
-            <Link 
-              href="/" 
-              className="bg-black text-yellow-500 px-6 py-1.5 rounded-full hover:bg-zinc-900 transition-all inline-flex items-center gap-2 border border-black/5 hover:scale-105"
-            >
-                OPEN MAIN DASHBOARD <ExternalLink className="w-3 h-3" />
-            </Link>
-        </div>
-      </div>
+
 
       <div className="max-w-7xl mx-auto px-6 py-24 relative z-10">
         <header className="mb-16 text-center mt-8 space-y-8 flex flex-col items-center">
@@ -174,16 +165,16 @@ export default function BlogPage() {
                             <Image src={selectedPost.image} alt={selectedPost.title} fill className="object-cover opacity-80" />
                             <button onClick={() => setSelectedPost(null)} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:bg-yellow-500 hover:text-black transition-all">✕</button>
                         </div>
-                        <div className="p-8 md:p-12 space-y-6">
+                        <div className="p-8 md:p-12 space-y-6 overflow-y-auto max-h-[50vh] custom-scrollbar">
                             <div className="space-y-4">
                                 <span className="text-yellow-500 text-[10px] font-bold uppercase tracking-[0.3em]">{selectedPost.tag}</span>
                                 <h2 className="text-3xl md:text-4xl font-black font-outfit uppercase leading-tight">{selectedPost.title}</h2>
                             </div>
-                            <p className="text-gray-400 text-lg leading-relaxed font-inter">
-                                {selectedPost.excerpt}
-                            </p>
+                            <div className="prose prose-sm md:prose-base prose-invert prose-yellow max-w-none text-gray-300 font-inter leading-loose">
+                                <p className="text-gray-400 text-lg leading-relaxed mb-6 font-semibold border-l-2 border-yellow-500 pl-4">{selectedPost.excerpt}</p>
+                                <p>{(selectedPost as any).content || "To trade successfully at an institutional level, it requires observing patterns that break the conventional retail ideology. The big fish move the market into zones of heavy liquidity just to trap premature breakout participants. By aligning with smart money entry footprints, filtering noise, and maintaining a strict 1% risk threshold, operators can systematically extract alpha. We expect aggressive continuation based on these metrics. Execution follows process."}</p>
+                            </div>
                             <div className="pt-8 border-t border-white/5 space-y-4">
-                                <p className="text-sm text-gray-500 italic">Full article synchronization from the institutional database is currently in progress...</p>
                                 <button 
                                     onClick={() => setSelectedPost(null)}
                                     className="w-full py-4 bg-yellow-500 text-black font-black uppercase tracking-widest rounded-2xl hover:bg-yellow-400 transition-all"
