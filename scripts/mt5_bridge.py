@@ -1,17 +1,20 @@
 import os
 import time
+from datetime import datetime
 import MetaTrader5 as mt5
 from supabase import create_client, Client
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# 1. Environment Location fix: Look for .env in the parent directory (project root)
+base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+env_path = os.path.join(base_path, '.env')
+load_dotenv(env_path)
 
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
-    print("❌ CRITICAL: Supabase credentials missing from .env")
+    print(f"❌ CRITICAL: Supabase credentials missing from {env_path}")
     exit(1)
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -28,8 +31,25 @@ def initialize_mt5():
         print(f"🏢 Server: {account_info.server}")
     return True
 
+def get_vantage_symbol(base_pair):
+    """
+    Vantage MT5 accounts often use suffixes like .v or + 
+    This function attempts to find the correct symbol on the terminal.
+    """
+    clean_pair = base_pair.replace("/", "")
+    suffixes = ["", ".v", "+", "m", "c"] # Common suffixes
+    
+    for suffix in suffixes:
+        symbol = f"{clean_pair}{suffix}"
+        info = mt5.symbol_info(symbol)
+        if info is not None:
+            if not info.visible:
+                mt5.symbol_select(symbol, True)
+            return symbol
+            
+    return clean_pair # Fallback to base
+
 def handle_pending_events():
-    # Fetch events marked as PENDING
     try:
         response = supabase.table("copy_events").select("*").eq("status", "PENDING").execute()
         events = response.data
@@ -37,7 +57,7 @@ def handle_pending_events():
         if not events:
             return
 
-        print(f"🚀 Found {len(events)} pending execution tasks...")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] 🚀 Found {len(events)} pending execution tasks...")
 
         for event in events:
             # Re-verify signal data from 'signals' table
@@ -49,7 +69,7 @@ def handle_pending_events():
             sig = signal_res.data[0]
             
             # Map signal to MT5 order
-            symbol = sig["pair"].replace("/", "") # MT5 uses concatenated symbol like XAUUSD
+            symbol = get_vantage_symbol(sig["pair"])
             direction = sig["direction"]
             lot = event.get("lot_size", 0.01)
             entry = float(sig["entry"])
@@ -59,7 +79,6 @@ def handle_pending_events():
             print(f"📈 Attempting {direction} {symbol} @ {entry} (Lot: {lot})...")
 
             # MT5 Order Request
-            # User specifically asked for PENDING LIMIT orders for safety
             order_type = mt5.ORDER_TYPE_BUY_LIMIT if direction == "BUY" else mt5.ORDER_TYPE_SELL_LIMIT
             
             request = {
@@ -73,7 +92,7 @@ def handle_pending_events():
                 "magic": 123456,
                 "comment": "ZenPips Institutional Bridge",
                 "type_time": mt5.ORDER_TIME_GTC,
-                "type_filling": mt5.ORDER_FILLING_IOC,
+                "type_filling": mt5.ORDER_FILLING_RETURN, # Preferred for Vantage/Pending
             }
 
             result = mt5.order_send(request)
@@ -97,11 +116,20 @@ def handle_pending_events():
 
 if __name__ == "__main__":
     print("--- Zen Pips Institutional MT5 Bridge Starting ---")
+    print(f"📅 Session: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    
     if initialize_mt5():
+        last_heartbeat = time.time()
         try:
             while True:
                 handle_pending_events()
-                time.sleep(2) # Poll every 2 seconds
+                
+                # Heartbeat every 60s
+                if time.time() - last_heartbeat > 60:
+                    print(f"[{datetime.now().strftime('%H:%M:%S')}] 💓 Polling active...")
+                    last_heartbeat = time.time()
+                    
+                time.sleep(2) 
         except KeyboardInterrupt:
             print("\n🛑 Bridge Stopping...")
         finally:
