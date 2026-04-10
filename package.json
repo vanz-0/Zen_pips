@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "bridge": "python scripts/mt5_bridge.py"
+    "bridge": "python scripts/mt5_bridge.py",
+    "check": "python systemcheck.py",
+    "cron": "python maintenance_cron.py"
   },
   "dependencies": {
     "@next/third-parties": "^16.1.6",

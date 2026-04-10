@@ -40,20 +40,17 @@ export default function AuthPage() {
                 router.push("/")
                 router.refresh()
             } else {
-                const { error: signUpError } = await supabase.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        data: {
-                            full_name: fullName,
-                        },
-                        emailRedirectTo: `${window.location.origin}/auth/callback`,
-                    },
-                })
-                if (signUpError) throw signUpError
-                alert("Check your email to confirm your account!")
-                router.push("/")
-                router.refresh()
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, full_name: fullName })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Registration failed');
+
+                alert("Account created! Check your email for your institutional access key and verification link.");
+                router.push("/auth/login") // Optional: redirect to login
             }
         } catch (err: any) {
             setError(err.message || "An error occurred during authentication")
