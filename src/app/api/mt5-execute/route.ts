@@ -5,12 +5,24 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-const METAAPI_TOKEN = process.env.METAAPI_TOKEN;
+let METAAPI_TOKEN = process.env.METAAPI_TOKEN;
 const METAAPI_ACCOUNT_ID = process.env.METAAPI_ACCOUNT_ID;
 
 export async function POST(req: Request) {
   try {
     const { signal_id, pair, direction, entry, sl, tp, lot_size } = await req.json();
+
+    // Fallback: Fetch token from DB if ENV is missing (Netlify size optimization)
+    if (!METAAPI_TOKEN) {
+        const { data: configData } = await supabase
+            .from('system_config')
+            .select('value')
+            .eq('key', 'METAAPI_TOKEN')
+            .single();
+        if (configData?.value) {
+            METAAPI_TOKEN = configData.value;
+        }
+    }
 
     if (!METAAPI_TOKEN || !METAAPI_ACCOUNT_ID) {
       return NextResponse.json({ error: 'MetaAPI not configured' }, { status: 500 });
