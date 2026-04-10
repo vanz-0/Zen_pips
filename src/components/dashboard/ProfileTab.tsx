@@ -310,26 +310,7 @@ export function ProfileTab() {
                     />
                   </div>
 
-                  {/* PLACEHOLDERS FOR CLOUD MAM ARCHITECTURE */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-extrabold">MT5 Password (Cloud Beta)</label>
-                    <input
-                      type="password"
-                      className="w-full bg-[var(--background)] p-3 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] focus:border-yellow-500/50 outline-none transition-colors font-mono text-sm opacity-50 cursor-not-allowed"
-                      placeholder="••••••••••••"
-                      disabled
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-extrabold">Broker Server Info</label>
-                    <input
-                      type="text"
-                      className="w-full bg-[var(--background)] p-3 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] focus:border-yellow-500/50 outline-none transition-colors font-mono text-sm opacity-50 cursor-not-allowed"
-                      placeholder="e.g. VantageInternational-Live"
-                      disabled
-                    />
-                  </div>
+                  {/* Removed Cloud MAM placeholders as password collection is explicitly forbidden. */}
 
                   <button
                     onClick={handleSave}
