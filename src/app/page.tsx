@@ -41,6 +41,7 @@ function DashboardContent() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [activeReviewSlide, setActiveReviewSlide] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -61,6 +62,7 @@ function DashboardContent() {
   const activeCount = signals.filter(s => !s.closed).length;
 
   useEffect(() => {
+    setMounted(true);
     const tab = searchParams.get('tab') as any;
     if (tab && ["journal", "vault", "profile", "chartai", "admin", "help", "community", "innovation"].includes(tab)) {
       setActiveTab(tab);
@@ -99,10 +101,11 @@ function DashboardContent() {
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-[var(--background)]/80 backdrop-blur-xl border-b border-[var(--border-color)]">
         <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3" suppressHydrationWarning>
             <button 
               onClick={() => handleNavClick(null)}
               className="relative w-11 h-11 bg-[#d4af37] rounded-full p-0.5 shadow-md border border-yellow-600/30 flex items-center justify-center transition-transform hover:scale-105 outline-none"
+              suppressHydrationWarning
             >
               <div className="w-full h-full bg-[#0a0a0a] rounded-full overflow-hidden relative">
                 <Image 
@@ -519,8 +522,10 @@ function DashboardContent() {
                 { value: activeCount > 0 ? "LIVE" : "MONITORING", label: activeCount > 0 ? "Active Now" : "Systems Check", color: activeCount > 0 ? "text-[var(--color-success)]" : "text-[var(--color-info)]", glow: activeCount > 0 },
               ].map((stat, i) => (
                 <FadeInSection key={stat.label} delay={0.1 * i}>
-                  <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 text-center">
-                    <div className={`text-base sm:text-xl md:text-3xl lg:text-4xl font-extrabold ${stat.color} font-mono mb-1 sm:mb-2 tracking-tight`}>{stat.value}</div>
+                  <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 text-center" suppressHydrationWarning>
+                    <div className={`text-base sm:text-xl md:text-3xl lg:text-4xl font-extrabold ${stat.color} font-mono mb-1 sm:mb-2 tracking-tight`}>
+                      {mounted ? stat.value : "--"}
+                    </div>
                     <div className="text-[9px] sm:text-xs md:text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">{stat.label}</div>
                   </div>
                 </FadeInSection>
