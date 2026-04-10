@@ -17,26 +17,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // 1. Create User in Supabase (Service Role bypasses email auto-send if configured)
-    const { data: userData, error: createError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: false,
-      user_metadata: { full_name }
-    });
-
-    if (createError) throw createError;
-
-    // 2. Generate Confirmation Link
+    // 1. Generate Confirmation Link & Create User
+    // Use generateLink with type: 'signup' to create the user and get the link in one step
+    // This prevents Supabase from sending its own confirmation email automatically
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'signup',
       email,
-      options: { redirectTo: `${new URL(req.url).origin}/dashboard` }
+      password,
+      options: { 
+        redirectTo: `${new URL(req.url).origin}/dashboard`,
+        data: { full_name } // Include metadata
+      }
     });
 
     if (linkError) throw linkError;
 
-    // 3. Load Institutional Email Template
+    // 2. Load Institutional Email Template
     const templatePath = path.join(process.cwd(), 'public/emails/welcome.html');
     let htmlContent = fs.readFileSync(templatePath, 'utf8');
 
@@ -47,7 +43,7 @@ export async function POST(req: Request) {
       .replace('{{PASSWORD}}', password)
       .replace('{{CONFIRMATION_URL}}', linkData.properties.action_link);
 
-    // 4. Send via Brevo API
+    // 3. Send via Brevo API
     const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
