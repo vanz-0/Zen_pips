@@ -159,13 +159,13 @@ export default function BlogPage() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
                         onClick={(e) => e.stopPropagation()}
-                        className="bg-[#0a0a0a] border border-yellow-500/20 rounded-[32px] w-full max-w-2xl overflow-hidden shadow-[0_0_100px_rgba(212,175,55,0.1)]"
+                        className="bg-[#0a0a0a] border border-yellow-500/20 rounded-[32px] w-full max-w-2xl overflow-hidden shadow-[0_0_100px_rgba(212,175,55,0.1)] flex flex-col max-h-[90vh]"
                     >
-                        <div className="relative h-64 w-full">
+                        <div className="relative h-48 md:h-64 w-full flex-shrink-0">
                             <Image src={selectedPost.image} alt={selectedPost.title} fill className="object-cover opacity-80" />
-                            <button onClick={() => setSelectedPost(null)} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:bg-yellow-500 hover:text-black transition-all">✕</button>
+                            <button onClick={() => setSelectedPost(null)} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:bg-yellow-500 hover:text-black transition-all z-[99999] cursor-pointer">✕</button>
                         </div>
-                        <div className="p-8 md:p-12 space-y-6 overflow-y-auto max-h-[50vh] custom-scrollbar">
+                        <div className="p-8 md:p-12 space-y-6 overflow-y-auto custom-scrollbar flex-1">
                             <div className="space-y-4">
                                 <span className="text-yellow-500 text-[10px] font-bold uppercase tracking-[0.3em]">{selectedPost.tag}</span>
                                 <h2 className="text-3xl md:text-4xl font-black font-outfit uppercase leading-tight">{selectedPost.title}</h2>

@@ -677,7 +677,7 @@ function DashboardContent() {
             <div className="relative w-full group">
               <div 
                 id="testimonial-carousel"
-                className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide transition-all duration-500 ease-in-out scroll-smooth"
+                className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide w-full transition-all duration-500 ease-in-out scroll-smooth"
                 onScroll={(e) => {
                   const scrollLeft = (e.target as HTMLDivElement).scrollLeft;
                   const width = (e.target as HTMLDivElement).offsetWidth;
@@ -696,8 +696,8 @@ function DashboardContent() {
                     { t: "Zen Pips helped me pass my $100k prop firm challenge in just two weeks. Clear entries, logical stops.", v: "$25 Mastery", n: "Ahmed K.", r: 5 },
                     { t: "Finally, a signal provider that actually cares about risk management. The journal tool alone is worth the sub.", v: "$10 Commitment", n: "Chris M.", r: 5 }
                   ].map((review, i) => (
-                    <div key={i} className="min-w-full flex-shrink-0 flex justify-center px-4 snap-center py-4">
-                        <div className="w-full max-w-2xl p-6 sm:p-10 rounded-2xl bg-[var(--card-bg)] border border-[var(--border-color)] flex flex-col hover:border-[#d4af37]/30 transition-all duration-300 shadow-xl scale-[0.98] hover:scale-100 h-auto min-h-[250px]">
+                    <div key={i} className="w-full flex-none snap-center flex justify-center pb-6 px-1 sm:px-4">
+                        <div className="w-full max-w-2xl p-6 sm:p-10 rounded-2xl bg-[var(--card-bg)] border border-[var(--border-color)] flex flex-col hover:border-[#d4af37]/30 transition-all duration-300 shadow-xl scale-[0.98] hover:scale-100 h-auto min-h-[250px] relative w-[95vw] sm:w-auto overflow-hidden">
                           <div className="flex-1">
                             <div className="flex items-center gap-1 mb-4 sm:mb-6">
                               {[...Array(review.r)].map((_, j) => (
