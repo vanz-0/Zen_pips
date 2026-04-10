@@ -71,12 +71,15 @@ function DashboardContent() {
 
   // Handle manual navigation
   const handleNavClick = (tab: "journal" | "vault" | "profile" | "chartai" | "admin" | "help" | "community" | "innovation" | null) => {
+    // Always close menus first, regardless of auth state
+    setMenuOpen(false);
+    setProfileMenuOpen(false);
+
     if (tab && !user) {
       router.push("/auth");
       return;
     }
     setActiveTab(tab);
-    setMenuOpen(false);
     
     // URL update without jumping scroll
     if (tab) {
