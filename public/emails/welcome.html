@@ -7,71 +7,156 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to Zenpips</title>
     <style type="text/css">
-        body { margin: 0; padding: 0; width: 100% !important; background-color: #ffffff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 0; overflow: hidden; }
-        .header { background-color: #000000; padding: 40px 20px; text-align: center; border-bottom: 3px solid #d4af37; }
-        .logo-circle { display: inline-block; width: 90px; height: 90px; background-color: #000000; border: 2px solid #d4af37; border-radius: 50%; padding: 10px; box-sizing: border-box; }
-        .logo-circle img { width: 100%; height: 100%; object-fit: contain; }
-        .content { padding: 50px 40px; color: #000000; line-height: 1.6; }
-        h1 { font-size: 32px; font-weight: bold; color: #000000; margin: 0 0 20px 0; letter-spacing: -0.5px; }
-        .creds { background-color: #f7f7f7; border-left: 4px solid #d4af37; padding: 25px; margin: 30px 0; border-radius: 4px; }
-        .cred-item { margin: 8px 0; font-size: 15px; }
-        .cred-label { color: #888; text-transform: uppercase; font-size: 11px; font-weight: bold; letter-spacing: 1px; width: 100px; display: inline-block; }
-        .cta-container { text-align: left; margin: 40px 0; }
-        .btn { background-color: #000000; color: #d4af37 !important; padding: 18px 40px; text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 16px; display: inline-block; border: 2px solid #d4af37; }
-        .footer { background-color: #1a1a1a; padding: 50px 40px; color: #ffffff; font-size: 13px; line-height: 1.8; }
-        .footer a { color: #d4af37; text-decoration: none; }
-        .footer-cols { display: flex; justify-content: space-between; flex-wrap: wrap; }
-        .footer-col { min-width: 200px; margin-bottom: 20px; }
+        body { 
+            margin: 0; 
+            padding: 0; 
+            width: 100% !important; 
+            background-color: #f6f9fc; 
+            background-image: url('https://images.pexels.com/photos/10925757/pexels-photo-10925757.jpeg');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+        }
+        .overlay {
+            background-color: rgba(246, 249, 252, 0.85);
+            padding: 50px 20px;
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background-color: rgba(255, 255, 255, 0.95); 
+            border-radius: 16px; 
+            overflow: hidden; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .header { 
+            background-color: #000000; 
+            padding: 40px 20px; 
+            text-align: center; 
+            border-bottom: 3px solid #d4af37; 
+        }
+        .logo-circle { 
+            display: inline-block; 
+            width: 90px; 
+            height: 90px; 
+            background-color: #000000; 
+            border: 2px solid #d4af37; 
+            border-radius: 50%; 
+            padding: 10px; 
+            box-sizing: border-box; 
+        }
+        .logo-circle img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; 
+        }
+        .content { 
+            padding: 50px 40px; 
+            color: #000000; 
+            line-height: 1.6; 
+        }
+        h1 { 
+            font-size: 32px; 
+            font-weight: bold; 
+            color: #000000; 
+            margin: 0 0 20px 0; 
+            letter-spacing: -0.5px; 
+            text-align: center;
+        }
+        .creds { 
+            background-color: #f7f7f7; 
+            border-left: 4px solid #d4af37; 
+            padding: 25px; 
+            margin: 30px 0; 
+            border-radius: 4px; 
+        }
+        .cred-item { 
+            margin: 8px 0; 
+            font-size: 15px; 
+            color: #000000;
+        }
+        .cred-label { 
+            color: #666; 
+            text-transform: uppercase; 
+            font-size: 11px; 
+            font-weight: bold; 
+            letter-spacing: 1px; 
+            width: 100px; 
+            display: inline-block; 
+        }
+        .cta-container { 
+            text-align: center; 
+            margin: 40px 0; 
+        }
+        .btn { 
+            background-color: #000000; 
+            color: #d4af37 !important; 
+            padding: 18px 40px; 
+            text-decoration: none; 
+            border-radius: 30px; 
+            font-weight: bold; 
+            font-size: 16px; 
+            display: inline-block; 
+            border: 2px solid #d4af37; 
+        }
+        .footer { 
+            background-color: #1a1a1a; 
+            padding: 50px 40px; 
+            color: #ffffff; 
+            font-size: 13px; 
+            line-height: 1.8; 
+            text-align: center;
+        }
+        .footer a { 
+            color: #d4af37; 
+            text-decoration: none; 
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo-circle">
-                <img src="https://zenpips.netlify.app/logo.png" alt="Zen Pips">
-            </div>
-        </div>
-        
-        <div class="content">
-            <h1>Welcome on board, {{NAME}}!</h1>
-            
-            <p>Your institutional trading portal is now active. You have successfully stepped into an environment designed for professional market participants.</p>
-            
-            <div class="creds">
-                <div class="cred-item">
-                    <span class="cred-label">Login Email</span>
-                    <span style="font-weight: bold;">{{EMAIL}}</span>
-                </div>
-                <div class="cred-item">
-                    <span class="cred-label">Access Pass</span>
-                    <span style="font-family: monospace; font-weight: bold;">{{PASSWORD}}</span>
+    <div class="overlay">
+        <div class="container">
+            <div class="header">
+                <div class="logo-circle">
+                    <img src="https://zenpips.netlify.app/logo.png" alt="Zen Pips">
                 </div>
             </div>
+            
+            <div class="content">
+                <h1>Welcome on board, {{NAME}}!</h1>
+                
+                <p>Your institutional portal access has been set up successfully. We have provisioned your dedicated environment, giving you direct access to the Zen Pips liquidity maps and advanced institutional flow.</p>
+                
+                <div class="creds">
+                    <div class="cred-item">
+                        <span class="cred-label">Login Email</span>
+                        <span style="font-weight: bold;">{{EMAIL}}</span>
+                    </div>
+                    <div class="cred-item">
+                        <span class="cred-label">Access Pass</span>
+                        <span style="font-family: monospace; font-weight: bold;">{{PASSWORD}}</span>
+                    </div>
+                </div>
 
-            <p>Use the secure link below to verify your account and access your real-time signal terminal.</p>
+                <p>Use the secure button below to confirm your institutional access and launch your terminal.</p>
 
-            <div class="cta-container">
-                <a href="{{CONFIRMATION_URL}}" class="btn">MANAGE MY ACCOUNT</a>
+                <div class="cta-container">
+                    <a href="{{CONFIRMATION_URL}}" class="btn">MANAGE MY ACCOUNT</a>
+                </div>
+
+                <p style="font-size: 14px; color: #444; text-align: center;">Everything you need to enhance your trading strategy is now at your fingertips.</p>
             </div>
 
-            <p style="font-size: 14px; color: #666;">Everything you need to enhance your trading strategy is now at your fingertips.</p>
-        </div>
-
-        <div class="footer">
-            <div style="margin-bottom: 20px;">
+            <div class="footer">
                 <strong style="color: #d4af37; font-size: 18px;">Zenpips</strong><br>
-                Professional Institutional Trading Performance
+                Professional Institutional Trading Performance<br><br>
+                Nairobi / Kenya<br>
+                Support: <a href="mailto:zenithbrainiac@gmail.com">zenithbrainiac@gmail.com</a><br>
+                <div style="margin-top: 15px; color: #666; font-size: 11px;">
+                    Privacy | Imprint | Unsubscribe
+                </div>
             </div>
-            
-            <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                <tr>
-                    <td style="color: #888; font-size: 12px; padding-top: 20px; border-top: 1px solid #333;">
-                        Support: <a href="mailto:zenithbrainiac@gmail.com">zenithbrainiac@gmail.com</a><br>
-                        Privacy | Imprint | Unsubscribe
-                    </td>
-                </tr>
-            </table>
         </div>
     </div>
 </body>
