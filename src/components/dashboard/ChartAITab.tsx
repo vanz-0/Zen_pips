@@ -158,14 +158,26 @@ export function ChartAITab() {
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
+  const [lotSize, setLotSize] = useState("0.01")
+  const [showLotConfirm, setShowLotConfirm] = useState<Signal | null>(null)
+
   const handleExecuteSignal = async (sig: Signal) => {
+    // Risk gate: Confirm high lot sizes
+    if (parseFloat(lotSize) > 0.1 && !showLotConfirm) {
+      setShowLotConfirm(sig)
+      return
+    }
+
     setExecutingId(sig.id)
+    setShowLotConfirm(null)
+
+    // 1. Insert into copy_events (Pickable by local Python bridge)
     const { data: req, error: insError } = await supabase.from('copy_events').insert({
       signal_id: sig.id,
       subscriber_id: user?.id,
       status: 'PENDING',
       mt5_account_id: profile?.mt5_account_id,
-      lot_size: profile?.chart_ai_lot_size || 0.01
+      lot_size: parseFloat(lotSize)
     }).select().single()
 
     if (insError) {
@@ -175,6 +187,40 @@ export function ChartAITab() {
       return
     }
 
+    // 2. Head-start for Python bridge (3 seconds)
+    console.log("[MT5] Waiting for local bridge head-start...");
+    await new RegExp('', '').exec('') // dummy wait or just use setTimeout
+    
+    // Better: use a small delay before triggering cloud fallback
+    setTimeout(async () => {
+      // Check if already processed by Python
+      const { data: current } = await supabase.from('copy_events').select('status').eq('id', req.id).single()
+      
+      if (current?.status === 'PENDING') {
+        console.log("[MT5] No local pick-up. Triggering MetaAPI Cloud Fallback...");
+        try {
+          const cloudRes = await fetch('/api/mt5-execute', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              signal_id: sig.id,
+              pair: sig.pair,
+              direction: sig.direction,
+              entry: sig.entry,
+              sl: sig.sl,
+              tp: sig.tp1, // Defaulting to TP1 for the order
+              lot_size: lotSize
+            })
+          });
+          const cloudData = await cloudRes.json();
+          if (!cloudRes.ok) throw new Error(cloudData.error || 'Execution failed');
+        } catch (err: any) {
+          console.error("[Fallback Failed]", err);
+        }
+      }
+    }, 3000);
+
+    // 3. Status Polling (Watcher for both Python & Cloud)
     let attempts = 0
     const pollInterval = setInterval(async () => {
       attempts++
@@ -187,15 +233,15 @@ export function ChartAITab() {
       if (update?.status === 'SUCCESS') {
         clearInterval(pollInterval)
         setExecutingId(null)
-        alert(`✅ SIGNAL EXECUTED: ${sig.pair} order successfully placed.`)
+        alert(`✅ SIGNAL EXECUTED: ${sig.pair} order successfully placed (Ticket: ${update.mt5_ticket}).`)
       } else if (update?.status === 'FAILED') {
         clearInterval(pollInterval)
         setExecutingId(null)
         alert(`❌ MT5 ERROR: ${update.error_message || "Terminal configuration error."}`)
-      } else if (attempts > 20) {
+      } else if (attempts > 30) { // Extended to 30s to allow for cloud cold-start
         clearInterval(pollInterval)
         setExecutingId(null)
-        alert(`⚠️ BRIDGE TIMEOUT: Signal transmission pending.`)
+        alert(`⚠️ BRIDGE TIMEOUT: Signal transmission pending. Check MT5 terminal.`)
       }
     }, 1000)
   }
@@ -371,7 +417,21 @@ export function ChartAITab() {
                 <h3 className="text-lg font-bold flex items-center gap-2 text-white">
                   <Zap className="w-4 h-4 text-yellow-500" /> Signals
                 </h3>
+                
+                {/* Lot Size Controller */}
+                <div className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-xl border border-zinc-800">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Lot</span>
+                  <input 
+                    type="number" 
+                    step="0.01" 
+                    min="0.01"
+                    value={lotSize}
+                    onChange={(e) => setLotSize(e.target.value)}
+                    className="w-16 bg-transparent text-white font-mono text-xs font-bold focus:outline-none border-b border-zinc-700 focus:border-yellow-500"
+                  />
+                </div>
               </div>
+
               <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
                 {activeSignals.length === 0 ? (
                   <div className="py-16 flex flex-col items-center justify-center text-gray-500 text-sm gap-3 opacity-30">
@@ -408,6 +468,37 @@ export function ChartAITab() {
               </div>
             </div>
           </div>
+
+          {/* Risk Confirmation Modal */}
+          {showLotConfirm && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 max-w-sm w-full shadow-2xl">
+                <div className="flex flex-col items-center text-center gap-4">
+                  <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center">
+                    <AlertCircle className="w-8 h-8 text-red-500" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white uppercase italic tracking-tighter">High Risk Warning</h3>
+                  <p className="text-zinc-400 text-sm leading-relaxed">
+                    Executing with <span className="text-white font-bold">{lotSize} lots</span> exceeds standard safety parameters for small accounts. Confirm adherence to institutional risk protocols?
+                  </p>
+                  <div className="flex gap-3 w-full mt-4">
+                    <button 
+                      onClick={() => setShowLotConfirm(null)}
+                      className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-bold text-xs transition-all"
+                    >
+                      CANCEL
+                    </button>
+                    <button 
+                      onClick={() => handleExecuteSignal(showLotConfirm)}
+                      className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-xs transition-all shadow-lg shadow-red-600/20"
+                    >
+                      CONFIRM RISK
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
