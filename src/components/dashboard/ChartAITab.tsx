@@ -158,7 +158,6 @@ export function ChartAITab() {
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
-  const [lotSize, setLotSize] = useState("0.01")
   const [showLotConfirm, setShowLotConfirm] = useState<Signal | null>(null)
 
   const handleExecuteSignal = async (sig: Signal) => {
