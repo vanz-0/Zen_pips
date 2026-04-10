@@ -52,9 +52,9 @@ export async function POST(req: Request) {
         'api-key': process.env.BREVO_API_KEY!
       },
       body: JSON.stringify({
-        sender: { name: 'Zen Pips Institutional', email: 'support@zenpips.com' },
+        sender: { name: 'Zenpips Team', email: 'zenithbrainiac@gmail.com' },
         to: [{ email, name: full_name }],
-        subject: 'Welcome to Zen Pips - Institutional Access Initialized',
+        subject: 'Welcome to Zenpips - Institutional Access Initialized',
         htmlContent: htmlContent
       })
     });
