@@ -697,18 +697,18 @@ function DashboardContent() {
                     { t: "Finally, a signal provider that actually cares about risk management. The journal tool alone is worth the sub.", v: "$10 Commitment", n: "Chris M.", r: 5 }
                   ].map((review, i) => (
                     <div key={i} className="min-w-full flex-shrink-0 flex justify-center px-4 snap-center py-4">
-                      <div className="w-full max-w-2xl p-6 sm:p-10 rounded-2xl bg-[var(--card-bg)] border border-[var(--border-color)] flex flex-col justify-between hover:border-[#d4af37]/30 transition-all duration-300 shadow-xl scale-[0.98] hover:scale-100">
-                        <div>
-                          <div className="flex items-center gap-1 mb-4 sm:mb-6">
-                            {[...Array(review.r)].map((_, j) => (
-                              <Star key={j} className="w-5 h-5 sm:w-6 sm:h-6 fill-yellow-500 text-yellow-500" />
-                            ))}
+                        <div className="w-full max-w-2xl p-6 sm:p-10 rounded-2xl bg-[var(--card-bg)] border border-[var(--border-color)] flex flex-col hover:border-[#d4af37]/30 transition-all duration-300 shadow-xl scale-[0.98] hover:scale-100 h-auto min-h-[250px]">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-1 mb-4 sm:mb-6">
+                              {[...Array(review.r)].map((_, j) => (
+                                <Star key={j} className="w-5 h-5 sm:w-6 sm:h-6 fill-yellow-500 text-yellow-500" />
+                              ))}
+                            </div>
+                            <p className="text-[var(--text-muted)] mb-6 text-sm sm:text-base leading-relaxed italic">"{review.t}"</p>
                           </div>
-                          <p className="text-[var(--foreground)] mb-6 text-sm sm:text-lg md:text-xl tracking-tight font-medium italic leading-relaxed">"{review.t}"</p>
-                        </div>
                         <div className="flex items-center justify-between border-t border-[var(--border-color)] pt-4">
                           <div className="flex flex-col">
-                            <span className="font-bold tracking-wide text-sm sm:text-base">{review.n}</span>
+                            <h3 className="text-lg sm:text-xl font-bold text-[var(--foreground)] leading-tight">{review.n}</h3>
                             <span className="text-[10px] text-[var(--text-muted)]">Verified Trader</span>
                           </div>
                           <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest bg-[#d4af37]/10 text-[#d4af37] px-3 py-1 rounded-full border border-[#d4af37]/20">{review.v}</span>

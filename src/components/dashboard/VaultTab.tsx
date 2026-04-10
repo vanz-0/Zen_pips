@@ -298,17 +298,14 @@ export function VaultTab({ onNavigate, profile: initialProfile }: VaultProps) {
                                             const isVIP = profile?.is_vip || profile?.plan === 'VIP'
                                             const credits = profile?.bonus_credits || 0
                                             
-                                            let isFinallyLocked = false
-                                            let lockMsg = "Unlock with VIP"
-                                            
-                                            if (!isVIP) {
-                                                if (resource.level === 'Intermediate' && credits < 1000) {
-                                                    isFinallyLocked = true
-                                                    lockMsg = "Req. 1000 Credits"
-                                                }
-                                                if (resource.level === 'Advanced' && credits < 5000) {
-                                                    isFinallyLocked = true
-                                                    lockMsg = "Req. 5000 Credits"
+                                            const resourceIndex = resources.findIndex((r) => r.id === resource.id);
+                                            let isFinallyLocked = false;
+                                            let lockMsg = "Complete previous lesson";
+
+                                            if (resourceIndex > 0) {
+                                                const prevResource = resources[resourceIndex - 1];
+                                                if (!completedIds.has(prevResource.id)) {
+                                                    isFinallyLocked = true;
                                                 }
                                             }
                                             

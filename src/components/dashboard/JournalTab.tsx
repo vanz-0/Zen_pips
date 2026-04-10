@@ -537,7 +537,7 @@ export function JournalTab() {
                                     <span className="text-[10px] font-black opacity-40">{day}</span>
                                     
                                     {hasActivity && (
-                                        <div className="text-center space-y-0.5">
+                                        <div className="text-center space-y-0.5 hidden sm:block">
                                             <p className="text-[8px] sm:text-[10px] font-black leading-none tracking-tighter">
                                                 {isActiveToday || isHoldingOnly ? (
                                                     <span className="flex items-center justify-center gap-0.5 sm:gap-1"><Shield className="w-1.5 h-1.5 sm:w-2 sm:h-2" /> {label}</span>

@@ -97,8 +97,11 @@ export function ProfileSetupPopup() {
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
                         
                         <button 
-                            onClick={handleDismiss}
-                            className="absolute top-4 right-4 sm:top-6 sm:right-6 text-[var(--text-muted)] hover:text-[#d4af37] transition-colors"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleDismiss();
+                            }}
+                            className="absolute top-4 right-4 sm:top-6 sm:right-6 text-[var(--text-muted)] hover:text-[#d4af37] transition-colors z-[99999]"
                         >
                             <X className="w-5 h-5 sm:w-6 sm:h-6" />
                         </button>
@@ -125,25 +128,13 @@ export function ProfileSetupPopup() {
                                                 </a>
                                             </div>
                                             <div className="flex flex-col gap-2">
-                                                <span className="text-xs font-bold text-[var(--text-muted)] font-mono">2. Enter your MT5 Account Details</span>
+                                                <span className="text-xs font-bold text-[var(--text-muted)] font-mono">2. Enter your MT5 Account ID</span>
                                                 <input
                                                     type="text"
                                                     value={mt5Id}
                                                     onChange={(e) => setMt5Id(e.target.value)}
                                                     placeholder="Vantage MT5 ID (e.g. 892019)"
                                                     className="w-full bg-[var(--background)] p-3 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] focus:border-yellow-500/50 outline-none transition-colors font-mono text-sm leading-relaxed"
-                                                />
-                                                <input
-                                                    type="password"
-                                                    placeholder="MT5 Password (Cloud Beta)"
-                                                    className="w-full bg-[var(--background)] p-3 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] outline-none font-mono text-sm leading-relaxed opacity-50 cursor-not-allowed mt-2"
-                                                    disabled
-                                                />
-                                                <input
-                                                    type="text"
-                                                    placeholder="Broker Server (e.g. Vantage-Live)"
-                                                    className="w-full bg-[var(--background)] p-3 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] outline-none font-mono text-sm leading-relaxed opacity-50 cursor-not-allowed mt-2"
-                                                    disabled
                                                 />
                                             </div>
                                         </div>

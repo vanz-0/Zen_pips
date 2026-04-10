@@ -194,7 +194,24 @@ export function SignalControlPanel() {
             }]);
 
             if (error) throw error;
-            setStatus({ type: "success", message: `✅ Signal for ${formData.pair} broadcast to all partners!` });
+
+            // Send to Community Tab
+            const messageTxt = `🚨 <b>${formData.direction} ${formData.pair}</b> @ ${formData.entry} 🚨\n\n🎯 TP1: ${formData.tp1}\n🎯 TP2: ${formData.tp2}\n🎯 TP3: ${formData.tp3}\n🛑 SL: ${formData.sl}\n\n📝 Confluence:\n${formData.confluence || "High-probability setup."}`;
+            
+            await supabase.from("community_messages").insert([{
+                content: messageTxt.replace(/<b>/g, '**').replace(/<\/b>/g, '**'), // Converting HTML to MD for community
+                channel: "setups-and-charts",
+                user_id: user?.id || "00000000-0000-0000-0000-000000000000"
+            }]);
+
+            // Broadcast to Telegram via Server API
+            await fetch("/api/telegram-broadcast", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: messageTxt })
+            });
+
+            setStatus({ type: "success", message: `✅ Signal for ${formData.pair} broadcast to all partners and Telegram!` });
         } catch (err: any) {
             setStatus({ type: "error", message: err.message || "Failed to publish signal." });
         } finally {
