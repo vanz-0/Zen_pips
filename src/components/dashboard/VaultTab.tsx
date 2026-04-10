@@ -207,7 +207,7 @@ export function VaultTab({ onNavigate, profile: initialProfile }: VaultProps) {
                             <GraduationCap className="w-6 h-6" />
                             <span className="text-sm font-bold uppercase tracking-widest">Education Hub</span>
                         </div>
-                        <h1 className="text-4xl font-bold text-[var(--foreground)] uppercase tracking-tight">The Dominator Vault</h1>
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--foreground)] uppercase tracking-tight font-[family-name:var(--font-outfit)]">The Dominator Vault</h1>
                         <p className="text-[var(--text-muted)] mt-2">Institutional-grade education for the selected few.</p>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
@@ -263,7 +263,7 @@ export function VaultTab({ onNavigate, profile: initialProfile }: VaultProps) {
                                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[var(--border-color)] pb-4">
                                         <div className="space-y-1 flex-1">
                                             <div className="flex items-center gap-3">
-                                                <h2 className="text-2xl font-bold">{lvl === 'Foundation' ? 'Beginner' : lvl} Mastery</h2>
+                                                <h2 className="text-lg sm:text-xl md:text-2xl font-bold">{lvl === 'Foundation' ? 'Beginner' : lvl} Mastery</h2>
                                                 {isCertsAwarded && (
                                                     <div className="flex items-center gap-1 bg-yellow-500/10 text-yellow-500 px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-yellow-500/20">
                                                         <Trophy className="w-3 h-3" /> Certified
@@ -340,7 +340,7 @@ export function VaultTab({ onNavigate, profile: initialProfile }: VaultProps) {
                                                         </div>
 
                                                         <div>
-                                                            <h3 className={`text-lg font-bold transition-colors leading-tight ${isCompleted ? 'text-gray-200' : 'text-[var(--foreground)] group-hover:text-yellow-500'}`}>
+                                                            <h3 className={`text-sm sm:text-base md:text-lg font-bold transition-colors leading-tight ${isCompleted ? 'text-gray-200' : 'text-[var(--foreground)] group-hover:text-yellow-500'}`}>
                                                                 {resource.title}
                                                             </h3>
                                                             <p className="text-sm text-[var(--text-muted)] mt-2 line-clamp-2">{resource.description}</p>
@@ -409,7 +409,7 @@ export function VaultTab({ onNavigate, profile: initialProfile }: VaultProps) {
                                 <Shield className="w-5 h-5" />
                                 <span className="text-xs font-bold uppercase tracking-widest font-mono">Institutional Toolkit</span>
                             </div>
-                            <h2 className="text-3xl font-black italic tracking-tight uppercase">Trading Weapons & Links</h2>
+                            <h2 className="text-xl sm:text-2xl md:text-3xl font-black italic tracking-tight uppercase font-[family-name:var(--font-outfit)]">Trading Weapons & Links</h2>
                             <p className="text-[var(--text-muted)] text-sm mt-2">Essential external and internal tools to maximize your institutional edge.</p>
                         </div>
                     </div>
@@ -507,7 +507,7 @@ export function VaultTab({ onNavigate, profile: initialProfile }: VaultProps) {
                                         <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest font-mono">{tool.label}</span>
                                     </div>
                                     <div>
-                                        <h4 className="text-lg font-bold group-hover:text-[var(--foreground)] transition-colors">{tool.title}</h4>
+                                        <h4 className="text-sm sm:text-base md:text-lg font-bold group-hover:text-[var(--foreground)] transition-colors">{tool.title}</h4>
                                         <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">{tool.desc}</p>
                                     </div>
                                 </div>
@@ -540,7 +540,7 @@ export function VaultTab({ onNavigate, profile: initialProfile }: VaultProps) {
                             </div>
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                                 <div className="space-y-4">
-                                    <h3 className="text-2xl font-bold italic uppercase">Your Terminal Identity</h3>
+                                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold italic uppercase">Your Terminal Identity</h3>
                                     <p className="text-[var(--text-muted)] text-sm leading-relaxed max-w-md">
                                         Use your unique Client UID to calibrate your local **Zen MT5 Node**. This allows the bridge to securely fetch signals and execute trades exclusively for your account.
                                     </p>

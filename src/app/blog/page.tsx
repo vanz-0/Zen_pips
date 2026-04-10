@@ -96,10 +96,10 @@ export default function BlogPage() {
             </Link>
 
             <div className="max-w-2xl">
-                <h1 className="text-4xl md:text-7xl font-black mb-4 font-outfit uppercase tracking-tighter">
+                <h1 className="text-2xl sm:text-4xl md:text-7xl font-black mb-4 font-outfit uppercase tracking-tighter">
                     ZEN<span className="text-yellow-500">PIPS</span> BLOG
                 </h1>
-                <p className="text-gray-400 max-w-xl mx-auto text-lg leading-relaxed font-inter">
+                <p className="text-gray-400 max-w-xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed font-inter">
                     Institutional-grade insights and structural analysis. Macro-economic flow and real-time execution logic.
                 </p>
             </div>
@@ -133,7 +133,7 @@ export default function BlogPage() {
                             <span className="flex items-center gap-1.5 uppercase"><Clock className="w-3 h-3" /> {post.date}</span>
                             <span className="flex items-center gap-1.5 uppercase"><BookOpen className="w-3 h-3" /> 5 min read</span>
                         </div>
-                        <h3 className="text-xl font-bold mb-3 group-hover:text-yellow-500 transition-colors leading-tight font-outfit">
+                        <h3 className="text-base sm:text-lg md:text-xl font-bold mb-3 group-hover:text-yellow-500 transition-colors leading-tight font-outfit">
                             {post.title}
                         </h3>
                         <p className="text-sm text-gray-400 leading-relaxed mb-6 flex-1 font-inter">
@@ -168,7 +168,7 @@ export default function BlogPage() {
                         <div className="p-8 md:p-12 space-y-6 overflow-y-auto custom-scrollbar flex-1">
                             <div className="space-y-4">
                                 <span className="text-yellow-500 text-[10px] font-bold uppercase tracking-[0.3em]">{selectedPost.tag}</span>
-                                <h2 className="text-3xl md:text-4xl font-black font-outfit uppercase leading-tight">{selectedPost.title}</h2>
+                                <h2 className="text-xl sm:text-2xl md:text-4xl font-black font-outfit uppercase leading-tight">{selectedPost.title}</h2>
                             </div>
                             <div className="prose prose-sm md:prose-base prose-invert prose-yellow max-w-none text-gray-300 font-inter leading-loose">
                                 <p className="text-gray-400 text-lg leading-relaxed mb-6 font-semibold border-l-2 border-yellow-500 pl-4">{selectedPost.excerpt}</p>
@@ -191,7 +191,7 @@ export default function BlogPage() {
         {/* Secondary CTA Area */}
         <div className="mt-24 p-8 md:p-16 rounded-[40px] bg-gradient-to-br from-yellow-500/10 to-transparent border border-white/5 text-center relative overflow-hidden">
             <div className="relative z-10">
-                <h2 className="text-3xl md:text-5xl font-black mb-6 uppercase tracking-tight">Institutional Dominance. Live Access.</h2>
+                <h2 className="text-xl sm:text-3xl md:text-5xl font-black mb-6 uppercase tracking-tight">Institutional Dominance. Live Access.</h2>
                 <p className="text-gray-400 max-w-xl mx-auto mb-10 text-lg leading-relaxed font-inter">
                     Our institutional terminal is now fully synchronized with the live London and NY sessions.
                 </p>

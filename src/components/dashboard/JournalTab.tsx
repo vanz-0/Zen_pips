@@ -189,7 +189,7 @@ export function JournalTab() {
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-[var(--foreground)] to-[var(--text-muted)] bg-clip-text text-transparent">Trading Journal</h1>
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-[var(--foreground)] to-[var(--text-muted)] bg-clip-text text-transparent font-[family-name:var(--font-outfit)]">Trading Journal</h1>
                         <p className="text-[var(--text-muted)] mt-2">Log your journey. Refine your edge. Master the self.</p>
                     </div>
                     <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 bg-yellow-500 text-black px-6 py-3 rounded-xl font-bold hover:bg-yellow-400 transition-all transform hover:scale-105 active:scale-95">
@@ -213,7 +213,7 @@ export function JournalTab() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                             <div className="space-y-4">
-                                <h3 className="text-2xl font-bold italic">{currentDate.toLocaleString('default', { month: 'long' })} Performance Summary</h3>
+                                <h3 className="text-lg sm:text-xl md:text-2xl font-bold italic">{currentDate.toLocaleString('default', { month: 'long' })} Performance Summary</h3>
                                 <p className="text-[var(--text-muted)] text-sm leading-relaxed">
                                     Your institutional metrics for {currentDate.toLocaleString('default', { month: 'long' })} indicate a 
                                     <span className="text-yellow-500 font-bold"> {monthWinRate}% win rate</span>. 
@@ -223,7 +223,7 @@ export function JournalTab() {
                                 <div className="flex gap-3">
                                     <div className="bg-[var(--panel-bg)] border border-[var(--border-color)] px-4 py-2 rounded-xl">
                                         <p className="text-[10px] text-[var(--text-muted)] uppercase">MONTHLY Net</p>
-                                        <p className={`text-lg font-mono font-black ${monthPips >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>{monthPips > 0 ? '+' : ''}{monthPips} Pips</p>
+                                        <p className={`text-base sm:text-lg font-mono font-black ${monthPips >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>{monthPips > 0 ? '+' : ''}{monthPips} Pips</p>
                                     </div>
                                     <div className="bg-[var(--panel-bg)] border border-[var(--border-color)] px-4 py-2 rounded-xl">
                                         <p className="text-[10px] text-[var(--text-muted)] uppercase">EXPECTANCY</p>
@@ -266,7 +266,7 @@ export function JournalTab() {
                                 <stat.icon className="w-4 h-4" />
                                 <span className="text-xs uppercase tracking-wider">{stat.label}</span>
                             </div>
-                            <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                            <p className={`text-lg sm:text-2xl font-bold ${stat.color}`}>{stat.value}</p>
                         </motion.div>
                     ))}
                 </div>
@@ -276,7 +276,7 @@ export function JournalTab() {
                     <div className="space-y-4">
                         <div className="flex items-center gap-2">
                             <Zap className="w-5 h-5 text-yellow-500" />
-                            <h2 className="text-xl font-bold">Active Trades</h2>
+                            <h2 className="text-base sm:text-lg md:text-xl font-bold">Active Trades</h2>
                             <span className="ml-auto text-xs text-[var(--text-muted)] flex items-center gap-1">
                                 <Clock className="w-3 h-3" /> Live from Chart AI & Signals
                             </span>
@@ -366,7 +366,7 @@ export function JournalTab() {
                                 <CalendarIcon className="w-5 h-5 text-yellow-500" />
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold">Discipline Tracker</h2>
+                                <h2 className="text-base sm:text-lg md:text-xl font-bold">Discipline Tracker</h2>
                                 <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-black">Trade Continuity System</p>
                             </div>
                         </div>
@@ -563,7 +563,7 @@ export function JournalTab() {
                     <div className="space-y-4">
                         <div className="flex items-center gap-2">
                             <Flame className="w-5 h-5 text-orange-500" />
-                            <h2 className="text-xl font-bold">Awaiting Your Analysis</h2>
+                            <h2 className="text-base sm:text-lg md:text-xl font-bold">Awaiting Your Analysis</h2>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {pendingJournalSignals.map((sig: any) => (
@@ -668,7 +668,7 @@ export function JournalTab() {
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowAdd(false)}>
                         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} onClick={(e) => e.stopPropagation()} className="bg-[var(--card-bg)] w-full max-w-2xl rounded-2xl border border-[var(--border-color)] overflow-hidden max-h-[90vh] overflow-y-auto">
                             <div className="p-6 border-b border-[var(--border-color)] flex justify-between items-center sticky top-0 bg-[var(--card-bg)] z-10">
-                                <h3 className="text-xl font-bold">New Journal Entry</h3>
+                                <h3 className="text-base sm:text-lg md:text-xl font-bold">New Journal Entry</h3>
                                 <button onClick={() => setShowAdd(false)} className="text-[var(--text-muted)] hover:text-[var(--foreground)]"><XCircle className="w-6 h-6" /></button>
                             </div>
                             <div className="p-6 space-y-4">
@@ -769,7 +769,7 @@ export function JournalTab() {
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedEntry(null)}>
                         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} onClick={(e) => e.stopPropagation()} className="bg-[var(--card-bg)] w-full max-w-lg rounded-2xl border border-[var(--border-color)] overflow-hidden">
                             <div className="p-6 border-b border-[var(--border-color)] flex justify-between items-center">
-                                <h3 className="text-xl font-bold">{selectedEntry.pair} — {selectedEntry.date}</h3>
+                                <h3 className="text-base sm:text-lg md:text-xl font-bold">{selectedEntry.pair} — {selectedEntry.date}</h3>
                                 <button onClick={() => setSelectedEntry(null)} className="text-[var(--text-muted)] hover:text-[var(--foreground)]"><XCircle className="w-6 h-6" /></button>
                             </div>
                             <div className="p-6 space-y-4">

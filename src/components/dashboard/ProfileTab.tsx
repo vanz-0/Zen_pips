@@ -120,10 +120,10 @@ export function ProfileTab() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-500 to-white bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-500 to-white bg-clip-text text-transparent font-[family-name:var(--font-outfit)]">
               Analytics Dashboard
             </h1>
-            <p className="text-[var(--text-muted)] mt-2">Your command center. Track live performance and automate your edge.</p>
+            <p className="text-[var(--text-muted)] mt-2 text-sm sm:text-base md:text-lg leading-relaxed">Your command center. Track live performance and automate your edge.</p>
           </div>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -185,7 +185,7 @@ export function ProfileTab() {
           >
             <div className="flex items-center gap-2 text-yellow-500">
               <Shield className="w-5 h-5" />
-              <h3 className="font-semibold">Subscription Status</h3>
+              <h3 className="font-semibold text-sm sm:text-base">Subscription Status</h3>
             </div>
             <div className="space-y-1">
               <p className="text-3xl font-bold text-[var(--color-success)]">ACTIVE</p>
@@ -209,7 +209,7 @@ export function ProfileTab() {
           >
             <div className="flex items-center gap-2 text-yellow-500">
               <History className="w-5 h-5" />
-              <h3 className="font-semibold">Trading Performance</h3>
+              <h3 className="font-semibold text-sm sm:text-base">Trading Performance</h3>
             </div>
             <div className="space-y-1">
               <p className="text-3xl font-bold font-mono">
@@ -274,11 +274,11 @@ export function ProfileTab() {
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs font-bold uppercase tracking-wider">
                 <img src="/vantage-logo.svg" alt="Vantage" className="w-3.5 h-3.5" /> Multi-Broker Copier
               </div>
-              <h2 className="text-2xl md:text-4xl font-bold text-[var(--foreground)] leading-tight">
+              <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-[var(--foreground)] leading-tight font-[family-name:var(--font-outfit)]">
                 Automate Your Edge <br className="hidden sm:block" />
                 <span className="text-[#d4af37]">with Institutional Liquidity.</span>
               </h2>
-              <p className="text-[var(--text-muted)] text-sm md:text-lg leading-relaxed max-w-xl">
+              <p className="text-[var(--text-muted)] text-sm sm:text-base md:text-lg leading-relaxed max-w-xl">
                 The Zen Pips Bridge supports Vantage Markets. Link your preferred broker to activate zero-latency institutional trade synchronization.
               </p>
               

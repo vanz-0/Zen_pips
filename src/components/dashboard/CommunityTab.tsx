@@ -476,10 +476,10 @@ export function CommunityTab() {
         {/* Channel Header (Hidden on small mobile if needed, or kept) */}
         <div className="hidden sm:flex px-5 py-3 border-b border-[var(--border-color)] bg-[var(--panel-bg)] items-center justify-between flex-shrink-0">
             <div>
-                <h1 className="text-lg font-bold flex items-center gap-2">
-                    <Hash className="w-5 h-5 text-[var(--text-muted)]" /> {activeChannel}
+                <h1 className="text-base sm:text-lg font-bold flex items-center gap-2 font-[family-name:var(--font-outfit)]">
+                    <Hash className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--text-muted)]" /> {activeChannel}
                 </h1>
-                <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                <p className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5">
                   {activeChannel === 'setups-and-charts' 
                     ? 'Institutional setups and technical analysis.' 
                     : 'Discuss setups, trading concepts, and interact with the institutional flow.'}

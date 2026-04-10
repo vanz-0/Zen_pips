@@ -247,10 +247,10 @@ export function ChartAITab() {
         
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-[#d4af37] bg-clip-text text-transparent flex items-center gap-3">
-              <Cpu className="w-10 h-10 text-blue-400" /> Chart AI
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-[#d4af37] bg-clip-text text-transparent flex items-center gap-3 font-[family-name:var(--font-outfit)]">
+              <Cpu className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-blue-400" /> Chart AI
             </h1>
-            <p className="text-gray-400 mt-2">Professional trade copier, providing AI-Driven Signal Entry Validation and Deep Character Analysis / Markups.</p>
+            <p className="text-gray-400 mt-2 text-sm sm:text-base md:text-lg leading-relaxed">Professional trade copier, providing AI-Driven Signal Entry Validation and Deep Character Analysis / Markups.</p>
           </div>
           <div className="flex flex-col items-end gap-2">
             <div className="flex items-center gap-4 bg-zinc-900 p-4 rounded-2xl border border-zinc-800">
@@ -275,7 +275,7 @@ export function ChartAITab() {
                     <ImageIcon className="w-10 h-10 text-blue-400" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold mb-2">Upload Analysis Chart</h3>
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2">Upload Analysis Chart</h3>
                     <p className="text-gray-400 text-sm max-w-sm mx-auto">Drag & drop or click to select a screenshot of your SMC or price action analysis.</p>
                   </div>
                   <div className="flex items-center gap-4">

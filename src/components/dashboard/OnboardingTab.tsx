@@ -53,10 +53,10 @@ function Step({ number, title, description, isOpen, onToggle, children, isLast }
                         className="flex items-center justify-between w-full text-left group"
                     >
                         <div className="space-y-1">
-                            <h3 className={`text-xl font-bold transition-colors ${isOpen ? "text-[var(--foreground)]" : "text-[var(--text-muted)] group-hover:text-[var(--text-muted)]"}`}>
+                            <h3 className={`text-base sm:text-lg md:text-xl font-bold transition-colors ${isOpen ? "text-[var(--foreground)]" : "text-[var(--text-muted)] group-hover:text-[var(--text-muted)]"}`}>
                                 {title}
                             </h3>
-                            <p className="text-sm text-[var(--text-muted)]">{description}</p>
+                            <p className="text-xs sm:text-sm text-[var(--text-muted)]">{description}</p>
                         </div>
                         {isOpen ? <ChevronDown className="w-5 h-5 text-[var(--text-muted)]" /> : <ChevronRight className="w-5 h-5 text-[var(--text-muted)]" />}
                     </button>
@@ -103,10 +103,10 @@ export function OnboardingTab() {
                         </div>
                         Getting Started
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-black text-[var(--foreground)] italic tracking-tight uppercase">
+                    <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-[var(--foreground)] italic tracking-tight uppercase font-[family-name:var(--font-outfit)]">
                         THE DOMINATOR SETUP
                     </h1>
-                    <p className="text-[var(--text-muted)] max-w-xl mx-auto">
+                    <p className="text-[var(--text-muted)] max-w-xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed">
                         Follow our institutional onboarding process to link your capital to the Zen Pips Bridge and start trading our high-probability signals.
                     </p>
                 </div>
@@ -125,7 +125,7 @@ export function OnboardingTab() {
                         <div className="bg-gradient-to-br from-[var(--card-bg)] via-[var(--background)] to-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-6 space-y-6">
                             <div className="flex flex-col md:flex-row gap-6 items-start">
                                 <div className="flex-1 space-y-4">
-                                    <p className="text-[var(--text-muted)] leading-relaxed">
+                                    <p className="text-[var(--text-muted)] text-sm sm:text-base leading-relaxed">
                                         We exclusively use <strong className="text-[var(--foreground)]">Vantage (Vantage Markets)</strong> for our Copy Trader bridge. Their execution speed ensures all our members enter at the exact same price as the main institutional flow.
                                     </p>
                                     <ul className="space-y-3">
