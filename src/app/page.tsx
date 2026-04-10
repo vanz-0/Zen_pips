@@ -329,6 +329,7 @@ function DashboardContent() {
                 {/* Blog / Edu */}
                 <a
                   href="/blog"
+                  onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 rounded-xl bg-purple-500/[0.05] hover:bg-purple-500/[0.12] border border-purple-500/20 hover:border-purple-500/40 transition-all group"
                 >
                   <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
@@ -496,11 +497,11 @@ function DashboardContent() {
           {/* Results / Social Proof Section */}
           <section id="results" className="relative z-10 py-12 sm:py-16 md:py-24 px-4 sm:px-6 max-w-7xl mx-auto border-t border-[var(--border-color)]">
             <FadeInSection>
-              <div className="text-center mb-8 sm:mb-12 md:mb-16">
+              <div className="text-center md:text-left mb-8 sm:mb-12 md:mb-16">
                 <h2 className="font-[family-name:var(--font-outfit)] text-2xl sm:text-3xl md:text-5xl font-bold text-[var(--foreground)] mb-3 sm:mb-4">
                   Real <span className="text-[#d4af37]">Results.</span> No Filters.
                 </h2>
-                <p className="text-[var(--text-muted)] max-w-xl mx-auto text-sm sm:text-base md:text-lg">
+                <p className="text-[var(--text-muted)] max-w-xl text-sm sm:text-base md:text-lg">
                   Verified pip counts from our live Telegram channel. Every number is backed by posted signals.
                 </p>
               </div>
@@ -664,9 +665,13 @@ function DashboardContent() {
           {/* AI Reviews Section */}
           <section className="relative z-10 py-16 px-4 max-w-7xl mx-auto">
             <FadeInSection>
-              <div className="text-center mb-10">
-                <h2 className="text-2xl md:text-4xl font-bold text-[var(--foreground)] mb-3">What Traders Say</h2>
-                <p className="text-[var(--text-muted)]">Real feedback from verified copy-trading clients.</p>
+              <div className="text-center md:text-left mb-8 sm:mb-12 md:mb-16">
+                <h2 className="font-[family-name:var(--font-outfit)] text-2xl sm:text-3xl md:text-5xl font-bold text-[var(--foreground)] mb-3 sm:mb-4">
+                  What Traders Say
+                </h2>
+                <p className="text-[var(--text-muted)] max-w-xl text-sm sm:text-base md:text-lg">
+                  Real feedback from verified copy-trading clients.
+                </p>
               </div>
             </FadeInSection>
             <div className="relative w-full group">
@@ -699,7 +704,7 @@ function DashboardContent() {
                               <Star key={j} className="w-5 h-5 sm:w-6 sm:h-6 fill-yellow-500 text-yellow-500" />
                             ))}
                           </div>
-                          <p className="text-[var(--foreground)] mb-6 text-base sm:text-xl tracking-tight font-medium italic leading-relaxed">"{review.t}"</p>
+                          <p className="text-[var(--foreground)] mb-6 text-sm sm:text-lg md:text-xl tracking-tight font-medium italic leading-relaxed">"{review.t}"</p>
                         </div>
                         <div className="flex items-center justify-between border-t border-[var(--border-color)] pt-4">
                           <div className="flex flex-col">
@@ -742,11 +747,11 @@ function DashboardContent() {
           {/* Pricing Section */}
           <section id="pricing" className="relative z-10 py-12 sm:py-16 md:py-24 px-4 sm:px-6 max-w-7xl mx-auto border-t border-[var(--border-color)]">
             <FadeInSection>
-              <div className="text-center mb-8 sm:mb-12 md:mb-16">
-                <h2 className="font-[family-name:var(--font-outfit)] text-xl sm:text-2xl md:text-5xl font-bold text-[var(--foreground)] mb-3 sm:mb-4">
+              <div className="text-center md:text-left mb-8 sm:mb-12 md:mb-16">
+                <h2 className="font-[family-name:var(--font-outfit)] text-2xl sm:text-3xl md:text-5xl font-bold text-[var(--foreground)] mb-3 sm:mb-4">
                   Join the <span className="text-[#d4af37]">Inner Circle.</span>
                 </h2>
-                <p className="text-[var(--text-muted)] max-w-xl mx-auto text-xs sm:text-base md:text-lg px-4 sm:px-0">
+                <p className="text-[var(--text-muted)] max-w-xl text-sm sm:text-base md:text-lg">
                   Unlock all features with our flexible plans. Gain access to advanced scanners, AI-powered signals, expert academy lessons, and 24/7 updates designed to maximize your trading edge.
                 </p>
               </div>
@@ -834,11 +839,11 @@ function DashboardContent() {
           {/* Get Started / Broker Section */}
           <section id="broker" className="relative z-10 py-12 sm:py-16 md:py-24 px-4 sm:px-6 max-w-7xl mx-auto border-t border-[var(--border-color)]">
             <FadeInSection>
-              <div className="text-center mb-8 sm:mb-12 md:mb-16">
+              <div className="text-center md:text-left mb-8 sm:mb-12 md:mb-16">
                 <h2 className="font-[family-name:var(--font-outfit)] text-2xl sm:text-3xl md:text-5xl font-bold text-[var(--foreground)] mb-3 sm:mb-4">
                   Get <span className="text-[#d4af37]">Set Up.</span>
                 </h2>
-                <p className="text-[var(--text-muted)] max-w-xl mx-auto text-sm sm:text-base md:text-lg">
+                <p className="text-[var(--text-muted)] max-w-xl text-sm sm:text-base md:text-lg">
                   Everything you need to start executing trades in under 10 minutes.
                 </p>
               </div>

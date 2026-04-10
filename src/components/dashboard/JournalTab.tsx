@@ -359,8 +359,8 @@ export function JournalTab() {
                 )}
 
                 {/* Calendar Interface */}
-                <div className="bg-[var(--panel-bg)] p-8 rounded-3xl border border-[var(--border-color)] space-y-6 shadow-xl">
-                    <div className="flex items-center justify-between">
+                <div className="bg-[var(--panel-bg)] p-4 sm:p-8 rounded-3xl border border-[var(--border-color)] space-y-6 shadow-xl">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                             <div className="bg-yellow-500/10 p-2 rounded-lg">
                                 <CalendarIcon className="w-5 h-5 text-yellow-500" />
@@ -370,7 +370,7 @@ export function JournalTab() {
                                 <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-black">Trade Continuity System</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-between sm:justify-end gap-4">
                             <span className="text-sm font-bold text-[var(--text-muted)] font-mono">
                                 {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
                             </span>
@@ -381,9 +381,9 @@ export function JournalTab() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-7 gap-3">
+                    <div className="grid grid-cols-7 gap-1 sm:gap-3">
                         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d: string) => (
-                            <div key={d} className="text-[10px] text-[var(--text-muted)] uppercase font-black text-center mb-2 tracking-widest">{d}</div>
+                            <div key={d} className="text-[8px] sm:text-[10px] text-[var(--text-muted)] uppercase font-black text-center mb-2 tracking-widest">{d}</div>
                         ))}
                         {Array.from({ length: firstDay }).map((_, i) => (
                             <div key={`empty-${i}`} className="aspect-square bg-transparent" />
@@ -397,8 +397,8 @@ export function JournalTab() {
                             today.setHours(23, 59, 59, 999);
                             if (fullDate > today) {
                                 return (
-                                    <div key={day} className="aspect-square rounded-2xl border border-[var(--border-color)] bg-[#0a0a0a]/30 p-3 flex flex-col justify-between opacity-30">
-                                        <span className="text-[10px] font-black opacity-20">{day}</span>
+                                    <div key={day} className="aspect-square rounded-lg sm:rounded-2xl border border-[var(--border-color)] bg-[#0a0a0a]/30 p-1 sm:p-3 flex flex-col justify-between opacity-30">
+                                        <span className="text-[8px] sm:text-[10px] font-black opacity-20">{day}</span>
                                     </div>
                                 );
                             }
@@ -522,7 +522,7 @@ export function JournalTab() {
                                 <motion.div
                                     key={day}
                                     whileHover={{ scale: 1.05 }}
-                                    className={`aspect-square rounded-2xl border p-3 flex flex-col justify-between transition-all relative group cursor-pointer ${cellStyle}`}
+                                    className={`aspect-square rounded-lg sm:rounded-2xl border p-1 sm:p-3 flex flex-col justify-between transition-all relative group cursor-pointer ${cellStyle}`}
                                     onClick={() => {
                                         if (dayEntries.length > 0) setSelectedEntry(dayEntries[0]);
                                         else if (daySignalsStarted.length > 0) {
@@ -538,14 +538,14 @@ export function JournalTab() {
                                     
                                     {hasActivity && (
                                         <div className="text-center space-y-0.5">
-                                            <p className="text-[10px] font-black leading-none tracking-tighter">
+                                            <p className="text-[8px] sm:text-[10px] font-black leading-none tracking-tighter">
                                                 {isActiveToday || isHoldingOnly ? (
-                                                    <span className="flex items-center justify-center gap-1"><Shield className="w-2 h-2" /> {label}</span>
+                                                    <span className="flex items-center justify-center gap-0.5 sm:gap-1"><Shield className="w-1.5 h-1.5 sm:w-2 sm:h-2" /> {label}</span>
                                                 ) : (
                                                     <span>{label}</span>
                                                 )}
                                             </p>
-                                            <p className="text-[6px] uppercase font-black tracking-widest opacity-60">
+                                            <p className="text-[5px] sm:text-[6px] uppercase font-black tracking-widest opacity-60 overflow-hidden line-clamp-1">
                                                 {sublabel}
                                             </p>
                                         </div>

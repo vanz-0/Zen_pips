@@ -11,6 +11,7 @@ export default function ChatWidget() {
     const { user } = useAuth()
     const { theme } = useTheme()
     const [isOpen, setIsOpen] = useState(false)
+    const chatRef = useRef<HTMLDivElement>(null)
     const [messages, setMessages] = useState([
         { role: "assistant", content: "Zen Pips Terminal active. Query institutional parameters, SOPs, or trading framework below." }
     ])
@@ -25,6 +26,20 @@ export default function ChatWidget() {
     useEffect(() => {
         scrollToBottom()
     }, [messages])
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (chatRef.current && !chatRef.current.contains(event.target as Node)) {
+                setIsOpen(false)
+            }
+        }
+        if (isOpen) {
+            document.addEventListener("mousedown", handleClickOutside)
+        }
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside)
+        }
+    }, [isOpen])
 
     const handleSend = async () => {
         if (!input.trim() || loading) return
@@ -80,6 +95,7 @@ export default function ChatWidget() {
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
+                        ref={chatRef}
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -118,9 +134,9 @@ export default function ChatWidget() {
                                 </a>
                                 <button
                                     onClick={() => setIsOpen(false)}
-                                    className="p-1.5 hover:bg-[var(--foreground)]/5 rounded-md transition-colors text-[var(--text-muted)] hover:text-[var(--foreground)]"
+                                    className="p-2 sm:p-1.5 hover:bg-[var(--foreground)]/5 rounded-md transition-colors text-[var(--text-muted)] hover:text-[var(--foreground)] border border-[var(--border-color)] sm:border-none"
                                 >
-                                    <X className="w-4 h-4" />
+                                    <X className="w-5 h-5 sm:w-4 sm:h-4" />
                                 </button>
                             </div>
                         </div>

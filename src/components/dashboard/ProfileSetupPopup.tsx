@@ -19,19 +19,23 @@ export function ProfileSetupPopup() {
     const [mt5Id, setMt5Id] = useState("")
 
     useEffect(() => {
-        const hasShown = sessionStorage.getItem('zenpips_onboarding_shown')
+        const hasShown = localStorage.getItem('zenpips_onboarding_dismissed')
         if (hasShown) return
 
         const timer = setTimeout(() => {
             const needsSetup = profile && (!profile.mt5_account_id || !profile.email)
             if (needsSetup) {
                 setIsVisible(true)
-                sessionStorage.setItem('zenpips_onboarding_shown', 'true')
             }
-        }, 10000)
+        }, 20000)
 
         return () => clearTimeout(timer)
     }, [profile])
+
+    const handleDismiss = () => {
+        setIsVisible(false)
+        localStorage.setItem('zenpips_onboarding_dismissed', 'true')
+    }
 
     const handleBrokerSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -93,7 +97,7 @@ export function ProfileSetupPopup() {
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
                         
                         <button 
-                            onClick={() => setIsVisible(false)}
+                            onClick={handleDismiss}
                             className="absolute top-4 right-4 sm:top-6 sm:right-6 text-[var(--text-muted)] hover:text-[#d4af37] transition-colors"
                         >
                             <X className="w-5 h-5 sm:w-6 sm:h-6" />

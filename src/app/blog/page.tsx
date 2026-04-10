@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, BookOpen, Clock, Tag, ExternalLink } from "lucide-react";
 import Image from "next/image";
 
@@ -66,6 +67,8 @@ const POSTS = [
 ];
 
 export default function BlogPage() {
+  const [selectedPost, setSelectedPost] = useState<typeof POSTS[0] | null>(null);
+
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white selection:bg-[#d4af37] selection:text-black">
       {/* 🧭 NAVIGATION OVERLAY (Transparent) */}
@@ -74,19 +77,16 @@ export default function BlogPage() {
       </nav>
 
       {/* ⚡ TRANSITION BANNER (Exclusive to Blog) */}
-      <div className="bg-yellow-500 text-black py-3 px-6 text-center font-black tracking-widest uppercase text-[10px] sticky top-0 z-[60] border-b border-black/10">
-        <div className="flex items-center justify-center gap-4 flex-wrap">
-            <span className="flex items-center gap-2 animate-pulse">🎯 LIVE TRADING TERMINAL IS NOW ACCESSIBLE ON NETLIFY</span>
+      <div className="bg-yellow-500 text-black py-2 px-6 text-center font-black tracking-widest uppercase text-[10px] sticky top-0 z-[60] border-b border-black/10">
+        <div className="flex items-center justify-center gap-4">
             <Link 
               href="/" 
-              className="bg-black text-yellow-500 px-4 py-1.5 rounded-full hover:bg-zinc-900 transition-all inline-flex items-center gap-2 border border-black/5 hover:scale-105"
+              className="bg-black text-yellow-500 px-6 py-1.5 rounded-full hover:bg-zinc-900 transition-all inline-flex items-center gap-2 border border-black/5 hover:scale-105"
             >
                 OPEN MAIN DASHBOARD <ExternalLink className="w-3 h-3" />
             </Link>
         </div>
       </div>
-
-
 
       <div className="max-w-7xl mx-auto px-6 py-24 relative z-10">
         <header className="mb-16 text-center mt-8 space-y-8 flex flex-col items-center">
@@ -148,13 +148,54 @@ export default function BlogPage() {
                         <p className="text-sm text-gray-400 leading-relaxed mb-6 flex-1 font-inter">
                             {post.excerpt}
                         </p>
-                        <button className="flex items-center gap-2 text-yellow-500 font-bold text-xs uppercase tracking-widest hover:gap-3 transition-all">
+                        <button 
+                            onClick={() => setSelectedPost(post)}
+                            className="flex items-center gap-2 text-yellow-500 font-bold text-xs uppercase tracking-widest hover:gap-3 transition-all"
+                        >
                             Read Insight <ArrowRight className="w-3 h-3" />
                         </button>
                     </div>
                 </motion.article>
             ))}
         </div>
+
+        {/* Post Detail Modal */}
+        <AnimatePresence>
+            {selectedPost && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl" onClick={() => setSelectedPost(null)}>
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-[#0a0a0a] border border-yellow-500/20 rounded-[32px] w-full max-w-2xl overflow-hidden shadow-[0_0_100px_rgba(212,175,55,0.1)]"
+                    >
+                        <div className="relative h-64 w-full">
+                            <Image src={selectedPost.image} alt={selectedPost.title} fill className="object-cover opacity-80" />
+                            <button onClick={() => setSelectedPost(null)} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:bg-yellow-500 hover:text-black transition-all">✕</button>
+                        </div>
+                        <div className="p-8 md:p-12 space-y-6">
+                            <div className="space-y-4">
+                                <span className="text-yellow-500 text-[10px] font-bold uppercase tracking-[0.3em]">{selectedPost.tag}</span>
+                                <h2 className="text-3xl md:text-4xl font-black font-outfit uppercase leading-tight">{selectedPost.title}</h2>
+                            </div>
+                            <p className="text-gray-400 text-lg leading-relaxed font-inter">
+                                {selectedPost.excerpt}
+                            </p>
+                            <div className="pt-8 border-t border-white/5 space-y-4">
+                                <p className="text-sm text-gray-500 italic">Full article synchronization from the institutional database is currently in progress...</p>
+                                <button 
+                                    onClick={() => setSelectedPost(null)}
+                                    className="w-full py-4 bg-yellow-500 text-black font-black uppercase tracking-widest rounded-2xl hover:bg-yellow-400 transition-all"
+                                >
+                                    Dismiss Insight
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+        </AnimatePresence>
 
         {/* Secondary CTA Area */}
         <div className="mt-24 p-8 md:p-16 rounded-[40px] bg-gradient-to-br from-yellow-500/10 to-transparent border border-white/5 text-center relative overflow-hidden">
@@ -186,3 +227,4 @@ export default function BlogPage() {
     </main>
   );
 }
+

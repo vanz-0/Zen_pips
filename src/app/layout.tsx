@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${outfit.variable} antialiased selection:bg-yellow-500 selection:text-black min-h-screen flex flex-col transition-colors duration-300`}
+        className={`${inter.variable} ${outfit.variable} antialiased selection:bg-yellow-500 selection:text-black min-h-screen flex flex-col transition-colors duration-300 overflow-x-hidden`}
         suppressHydrationWarning
       >
         <AuthProvider>
