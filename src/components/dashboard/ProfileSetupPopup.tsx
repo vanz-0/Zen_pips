@@ -245,13 +245,31 @@ export function ProfileSetupPopup() {
                                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto border-2 border-blue-500/50">
                                     <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500" />
                                 </div>
-                                <div className="space-y-2">
+                                <div className="pt-4 flex flex-col gap-3">
                                     <h2 className="text-xl sm:text-2xl md:text-3xl font-black italic tracking-tight uppercase text-[var(--foreground)]">All Systems Go</h2>
                                     <p className="text-[var(--text-muted)] text-xs sm:text-sm max-w-sm mx-auto">
-                                        Your Vantage integration and Journal setup are complete. Welcome to the Zen Pips Institutional Hub.
+                                        Your Vantage integration and Journal setup are complete. Now, join the inner circle to receive real-time signals.
                                     </p>
                                 </div>
-                                <div className="text-[10px] font-bold text-blue-500/50 uppercase tracking-[0.2em] animate-pulse">Syncing Connection...</div>
+                                
+                                <div className="space-y-3">
+                                    <a 
+                                        href="https://t.me/Zen_pips_bot?start=ACTIVATE_TERMINAL"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full bg-[#d4af37] text-black py-4 rounded-xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 hover:brightness-110 transition-all shadow-[0_0_30px_rgba(212,175,55,0.2)]"
+                                    >
+                                        <Send className="w-5 h-5" /> Connect to Telegram
+                                    </a>
+                                    <button 
+                                        onClick={() => window.location.reload()}
+                                        className="w-full bg-white/5 text-[var(--text-muted)] py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all"
+                                    >
+                                        Return to Dashboard
+                                    </button>
+                                </div>
+
+                                <div className="text-[10px] font-bold text-[#d4af37]/50 uppercase tracking-[0.2em] animate-pulse">Syncing Connection...</div>
                             </div>
                         )}
                     </motion.div>
