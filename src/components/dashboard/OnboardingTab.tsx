@@ -106,9 +106,25 @@ export function OnboardingTab() {
                     <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-[var(--foreground)] italic tracking-tight uppercase font-[family-name:var(--font-outfit)]">
                         THE DOMINATOR SETUP
                     </h1>
-                    <p className="text-[var(--text-muted)] max-w-xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed">
+                    <p className="text-[var(--text-muted)] max-w-xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed mb-6">
                         Follow our institutional onboarding process to link your capital to the Zen Pips Bridge and start trading our high-probability signals.
                     </p>
+                    <div className="flex flex-wrap justify-center gap-4">
+                        <a 
+                            href="/Institutional_Master_Manual_2026.md" 
+                            target="_blank"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl border border-[#d4af37]/30 text-[#d4af37] text-xs font-bold uppercase tracking-widest hover:bg-[#d4af37] hover:text-black transition-all"
+                        >
+                            Read Institutional Guide <Search className="w-4 h-4" />
+                        </a>
+                        <a 
+                            href="https://t.me/MadDmakz" 
+                            target="_blank"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white/5 text-[var(--text-muted)] text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all border border-white/10"
+                        >
+                            Contact Support <Shield className="w-4 h-4" />
+                        </a>
+                    </div>
                 </div>
 
                 {/* Steps Accordion */}
