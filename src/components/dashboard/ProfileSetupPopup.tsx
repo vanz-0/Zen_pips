@@ -19,6 +19,16 @@ export function ProfileSetupPopup() {
     const [mt5Id, setMt5Id] = useState("")
 
     useEffect(() => {
+        // 1. Check for 'first_login' query parameter (triggered by activation link)
+        const params = new URLSearchParams(window.location.search)
+        const isFirstLogin = params.get('first_login') === 'true'
+
+        if (isFirstLogin) {
+            setIsVisible(true)
+            return
+        }
+
+        // 2. Fallback: Show after 20 seconds if MT5 ID is missing
         const hasShown = localStorage.getItem('zenpips_onboarding_dismissed')
         if (hasShown) return
 
@@ -68,7 +78,7 @@ export function ProfileSetupPopup() {
                 particleCount: 150,
                 spread: 70,
                 origin: { y: 0.6 },
-                colors: ['#0066ff', '#ffffff'] // Vantage blue colors
+                colors: ['#d4af37', '#000000', '#ffffff'] // Zen Pips Gold, Black, White
             })
 
             setTimeout(() => {

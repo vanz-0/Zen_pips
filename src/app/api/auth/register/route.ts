@@ -17,15 +17,29 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // 1. Generate Confirmation Link & Create User
-    // Use generateLink with type: 'signup' to create the user and get the link in one step
-    // This prevents Supabase from sending its own confirmation email automatically
+    // 1. Pre-Flight: Check if user already exists to prevent duplicates
+    const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    
+    if (listError) {
+        console.error('List Users Error:', listError);
+    } else {
+        const existingUser = users.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+        if (existingUser) {
+            return NextResponse.json({ 
+                error: 'Account already exists. Please log in or reset your password if you forgotten it.' 
+            }, { status: 409 });
+        }
+    }
+
+    // 2. Generate Confirmation Link & Create User
+    // Use the production URL (NEXT_PUBLIC_SITE_URL) to prevent localhost drift
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zenpips.netlify.app';
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'signup',
       email,
       password,
       options: { 
-        redirectTo: `${new URL(req.url).origin}/dashboard`,
+        redirectTo: `${siteUrl}/api/auth/callback/onboard`,
         data: { full_name } // Include metadata
       }
     });
@@ -40,7 +54,6 @@ export async function POST(req: Request) {
     htmlContent = htmlContent
       .replace('{{NAME}}', full_name)
       .replace('{{EMAIL}}', email)
-      .replace('{{PASSWORD}}', password)
       .replace('{{CONFIRMATION_URL}}', linkData.properties.action_link);
 
     // 3. Send via Brevo API

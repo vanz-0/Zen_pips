@@ -252,67 +252,51 @@ export function OnboardingTab() {
                         </div>
                     </Step>
 
-                    {/* Step 4: Subscription */}
+                    {/* Step 4: Token Provisioning */}
                     <Step 
                         number={4} 
-                        title="Unlock Institutional Access (Subscription)" 
-                        description="Pay your VIP membership via Bitcoin from Binance."
+                        title="Institutional Token Provisioning" 
+                        description="Your account is provisioned with 10 Daily AI Execution Credits."
                         isOpen={openStep === 4}
                         onToggle={() => setOpenStep(4)}
                     >
                         <div className="bg-gradient-to-br from-[var(--card-bg)] via-[var(--background)] to-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-6 space-y-8">
-                            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-yellow-500/10 to-transparent rounded-2xl border border-yellow-500/20">
+                            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-[#d4af37]/10 to-transparent rounded-2xl border border-[#d4af37]/20">
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 relative">
-                                            <Image src="/binance-logo.svg" alt="Binance" fill className="object-contain" />
+                                            <Zap className="w-full h-full text-[#d4af37]" />
                                         </div>
                                         <div>
-                                            <p className="text-xs text-[var(--text-muted)] font-bold uppercase tracking-widest">Crypto Checkout</p>
-                                            <h4 className="text-2xl font-black text-[var(--foreground)]">$50 / Month - VIP ACCESS</h4>
+                                            <p className="text-xs text-[var(--text-muted)] font-bold uppercase tracking-widest">Provisioning Active</p>
+                                            <h4 className="text-2xl font-black text-[var(--foreground)]">FREE INSTITUTIONAL ACCESS</h4>
                                         </div>
                                     </div>
-                                    <p className="text-sm text-[var(--text-muted)] max-w-md">We exclusively accept USDT via TRC20 (Tron) or BEP20 (Binance Smart Chain) for membership payments to ensure low fees and instant confirmation.</p>
+                                    <p className="text-sm text-[var(--text-muted)] max-w-md">No subscription fees. Your access is fully sponsored. Your account receives **10 AI Credits** every 24 hours for deep SMC/ICT analysis and automated execution.</p>
                                 </div>
                                 <div className="hidden lg:block">
-                                    <Download className="w-12 h-12 text-[var(--foreground)]/10" />
+                                    <Shield className="w-12 h-12 text-[#d4af37]/20" />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-4">
                                     <p className="text-sm font-bold text-[var(--foreground)] flex items-center gap-2">
-                                        <ArrowRight className="w-4 h-4 text-yellow-500" />
-                                        1. Get USDT via Binance
+                                        <CheckCircle2 className="w-4 h-4 text-[#d4af37]" />
+                                        Unlimited Vault & Journal
                                     </p>
                                     <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                                        Download the Binance app. Use our link to register and get lower transaction fees. Buy USDT using your local currency (P2P or Bank Card).
+                                        Access all 60+ PDF resources and our high-fidelity trade journaling system at zero cost. This is the Zen Pips commitment to institutional transparency.
                                     </p>
-                                    <a 
-                                        href="https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?hl=en&ref=GRO_28502_E50OE&utm_source=default" 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 text-[#d4af37] text-xs font-bold hover:gap-3 transition-all"
-                                    >
-                                        REGISTER ON BINANCE <ExternalLink className="w-3 h-3" />
-                                    </a>
                                 </div>
                                 <div className="space-y-4">
                                     <p className="text-sm font-bold text-[var(--foreground)] flex items-center gap-2">
-                                        <ArrowRight className="w-4 h-4 text-yellow-500" />
-                                        2. Send To Admin Wallet (TRC20 / BEP20)
+                                        <CheckCircle2 className="w-4 h-4 text-[#d4af37]" />
+                                        Global Support Bot
                                     </p>
                                     <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                                        Message <strong className="text-[var(--foreground)]">@MadDmakz</strong> on Telegram to get the current institutional USDT address. IMPORTANT: Only use the TRC20 or BEP20 network to avoid losing funds.
+                                        Our Support Bot monitors for execution errors and critical failures 24/5. Simply trade, and the system handles the heavy lifting.
                                     </p>
-                                    <a 
-                                        href="https://t.me/MadDmakz" 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 text-[#d4af37] text-xs font-bold hover:gap-3 transition-all font-mono"
-                                    >
-                                        MESSAGE @MadDmakz <ArrowRight className="w-3 h-3" />
-                                    </a>
                                 </div>
                             </div>
                         </div>

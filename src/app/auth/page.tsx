@@ -16,6 +16,7 @@ export default function AuthPage() {
     const [rememberMe, setRememberMe] = useState(true)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [isSuccess, setIsSuccess] = useState(false)
     const router = useRouter()
 
     const handleAuth = async (e: React.FormEvent) => {
@@ -29,7 +30,7 @@ export default function AuthPage() {
                     redirectTo: `${window.location.origin}/auth/update-password`,
                 })
                 if (resetError) throw resetError
-                alert("Password reset instructions sent to your email!")
+                setIsSuccess(true)
                 setIsForgotPassword(false)
             } else if (isLogin) {
                 const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -49,8 +50,7 @@ export default function AuthPage() {
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Registration failed');
 
-                alert("Account created! Check your email for your institutional access key and verification link.");
-                router.push("/auth/login") // Optional: redirect to login
+                setIsSuccess(true);
             }
         } catch (err: any) {
             setError(err.message || "An error occurred during authentication")
@@ -95,126 +95,149 @@ export default function AuthPage() {
                     </p>
                 </div>
 
-                <form className="space-y-4" onSubmit={handleAuth}>
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm p-3 rounded-xl text-center">
-                            {error}
+                {isSuccess ? (
+                    <div className="text-center space-y-6 py-8">
+                        <div className="w-20 h-20 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto border border-yellow-500/20 mb-4">
+                            <Mail className="w-10 h-10 text-yellow-500 animate-pulse" />
                         </div>
-                    )}
-                    {!isLogin && !isForgotPassword && (
+                        <div className="space-y-3">
+                            <h2 className="text-2xl font-bold text-white uppercase italic tracking-tighter">Verification Sent</h2>
+                            <p className="text-gray-400 text-sm leading-relaxed">
+                                We've sent your **Institutional Access Key** and verification link to <span className="text-white font-bold">{email}</span>.
+                            </p>
+                            <p className="text-xs text-gray-500 italic">
+                                Please check your inbox (and spam) to initialize your terminal connection.
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setIsSuccess(false)}
+                            className="w-full bg-white/5 text-gray-400 py-3 rounded-xl text-sm font-bold hover:bg-white/10 transition-all"
+                        >
+                            Return to Login
+                        </button>
+                    </div>
+                ) : (
+                    <form className="space-y-4" onSubmit={handleAuth}>
+                        {error && (
+                            <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm p-3 rounded-xl text-center">
+                                {error}
+                            </div>
+                        )}
+                        {!isLogin && !isForgotPassword && (
+                            <div className="space-y-1">
+                                <label className="text-xs text-gray-400 uppercase font-bold tracking-widest ml-1">Full Name</label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="John Doe"
+                                        value={fullName}
+                                        onChange={(e) => setFullName(e.target.value)}
+                                        required
+                                        className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-11 outline-none focus:border-yellow-500/50 transition-all text-white"
+                                    />
+                                    <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                </div>
+                            </div>
+                        )}
+
                         <div className="space-y-1">
-                            <label className="text-xs text-gray-400 uppercase font-bold tracking-widest ml-1">Full Name</label>
+                            <label className="text-xs text-gray-400 uppercase font-bold tracking-widest ml-1">Email Address</label>
                             <div className="relative">
                                 <input
-                                    type="text"
-                                    placeholder="John Doe"
-                                    value={fullName}
-                                    onChange={(e) => setFullName(e.target.value)}
+                                    type="email"
+                                    placeholder="dominator@zenpips.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     required
                                     className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-11 outline-none focus:border-yellow-500/50 transition-all text-white"
                                 />
-                                <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                             </div>
                         </div>
-                    )}
 
-                    <div className="space-y-1">
-                        <label className="text-xs text-gray-400 uppercase font-bold tracking-widest ml-1">Email Address</label>
-                        <div className="relative">
-                            <input
-                                type="email"
-                                placeholder="dominator@zenpips.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-11 outline-none focus:border-yellow-500/50 transition-all text-white"
-                            />
-                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                        </div>
-                    </div>
-
-                    {!isForgotPassword && (
-                        <div className="space-y-1">
-                            <label className="text-xs text-gray-400 uppercase font-bold tracking-widest ml-1">Password</label>
-                            <div className="relative">
-                                <input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-11 outline-none focus:border-yellow-500/50 transition-all text-white"
-                                />
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                        {!isForgotPassword && (
+                            <div className="space-y-1">
+                                <label className="text-xs text-gray-400 uppercase font-bold tracking-widest ml-1">Password</label>
+                                <div className="relative">
+                                    <input
+                                        type="password"
+                                        placeholder="••••••••"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                        className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-11 outline-none focus:border-yellow-500/50 transition-all text-white"
+                                    />
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                </div>
                             </div>
-                        </div>
-                    )}
-
-                    {isLogin && !isForgotPassword && (
-                        <div className="flex items-center justify-between text-sm py-2">
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    id="remember"
-                                    checked={rememberMe}
-                                    onChange={(e) => setRememberMe(e.target.checked)}
-                                    className="w-4 h-4 rounded border-gray-600 bg-black/50 text-yellow-500 focus:ring-yellow-500/50"
-                                />
-                                <label htmlFor="remember" className="text-gray-400 cursor-pointer">Remember me</label>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => setIsForgotPassword(true)}
-                                className="text-yellow-500 hover:text-yellow-400 transition-colors"
-                            >
-                                Forgot Password?
-                            </button>
-                        </div>
-                    )}
-
-                    <button
-                        disabled={loading}
-                        className="w-full bg-yellow-500 text-black py-4 rounded-xl font-bold flex items-center justify-center gap-2 group hover:bg-yellow-400 transition-all mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {loading ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                        ) : (
-                            <>
-                                {isForgotPassword ? "Send Reset Link" : isLogin ? "Access Terminal" : "Create Account"}
-                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                            </>
                         )}
-                    </button>
 
-                    <div className="text-center mt-6">
-                        {isForgotPassword ? (
-                            <p className="text-sm text-gray-400">
-                                Remembered your password?{" "}
+                        {isLogin && !isForgotPassword && (
+                            <div className="flex items-center justify-between text-sm py-2">
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        id="remember"
+                                        checked={rememberMe}
+                                        onChange={(e) => setRememberMe(e.target.checked)}
+                                        className="w-4 h-4 rounded border-gray-600 bg-black/50 text-yellow-500 focus:ring-yellow-500/50"
+                                    />
+                                    <label htmlFor="remember" className="text-gray-400 cursor-pointer">Remember me</label>
+                                </div>
                                 <button
                                     type="button"
-                                    onClick={() => setIsForgotPassword(false)}
-                                    className="text-yellow-500 font-bold hover:text-yellow-400 transition-colors"
+                                    onClick={() => setIsForgotPassword(true)}
+                                    className="text-yellow-500 hover:text-yellow-400 transition-colors"
                                 >
-                                    Return to Login
+                                    Forgot Password?
                                 </button>
-                            </p>
-                        ) : (
-                            <p className="text-sm text-gray-400">
-                                {isLogin ? "Don't have an elite pass?" : "Already part of the inner circle?"}{" "}
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsLogin(!isLogin)
-                                        setIsForgotPassword(false)
-                                    }}
-                                    className="text-yellow-500 font-bold hover:text-yellow-400 transition-colors"
-                                >
-                                    {isLogin ? "Apply Now" : "Sign In"}
-                                </button>
-                            </p>
+                            </div>
                         )}
-                    </div>
-                </form>
+
+                        <button
+                            disabled={loading}
+                            className="w-full bg-yellow-500 text-black py-4 rounded-xl font-bold flex items-center justify-center gap-2 group hover:bg-yellow-400 transition-all mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                                <>
+                                    {isForgotPassword ? "Send Reset Link" : isLogin ? "Access Terminal" : "Create Account"}
+                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                </>
+                            )}
+                        </button>
+
+                        <div className="text-center mt-6">
+                            {isForgotPassword ? (
+                                <p className="text-sm text-gray-400">
+                                    Remembered your password?{" "}
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsForgotPassword(false)}
+                                        className="text-yellow-500 font-bold hover:text-yellow-400 transition-colors"
+                                    >
+                                        Return to Login
+                                    </button>
+                                </p>
+                            ) : (
+                                <p className="text-sm text-gray-400">
+                                    {isLogin ? "Don't have an elite pass?" : "Already part of the inner circle?"}{" "}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setIsLogin(!isLogin)
+                                            setIsForgotPassword(false)
+                                        }}
+                                        className="text-yellow-500 font-bold hover:text-yellow-400 transition-colors"
+                                    >
+                                        {isLogin ? "Apply Now" : "Sign In"}
+                                    </button>
+                                </p>
+                            )}
+                        </div>
+                    </form>
+                )}
             </motion.div>
         </div>
     )
