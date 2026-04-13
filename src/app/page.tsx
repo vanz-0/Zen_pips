@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { BarChart2, Shield, TrendingUp, Zap, Target, Users, Clock, ExternalLink, Menu, X, LogIn, BookOpen, History, User, GraduationCap, MessageCircle, Home as HomeIcon, Lock, LogOut, Lightbulb, Sun, Moon, Star } from "lucide-react";
+import { AlertTriangle, BarChart2, Shield, TrendingUp, Zap, Target, Users, Clock, ExternalLink, Menu, X, LogIn, BookOpen, History, User, GraduationCap, MessageCircle, Home as HomeIcon, Lock, LogOut, Lightbulb, Sun, Moon, Star } from "lucide-react";
 import dynamic from "next/dynamic";
 import { GlowCard } from "@/components/ui/glow-card";
 
@@ -24,6 +24,7 @@ const LeadMagnetSection = dynamic(() => import("@/components/marketing/LeadMagne
 const ProfileSetupPopup = dynamic(() => import("@/components/dashboard/ProfileSetupPopup").then(mod => mod.ProfileSetupPopup), { ssr: false });
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
+const NewsModal = dynamic(() => import("@/components/dashboard/NewsModal"));
 
 function FadeInSection({ children, className = "" }: { children: React.ReactNode; className?: string; delay?: number }) {
   return (
@@ -44,6 +45,20 @@ function DashboardContent() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // News Blackout Status
+  const [blackout, setBlackout] = useState<{ isBlackout: boolean, reason: string }>({ isBlackout: false, reason: "" });
+
+  useEffect(() => {
+    fetch('/api/news')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.activeBlackout?.isBlackout) {
+          setBlackout({ isBlackout: true, reason: data.activeBlackout.reason || "High Impact News" });
+        }
+      })
+      .catch(err => console.error(err));
+  }, []);
 
   // Derived stats
   const totalPipsToday = Math.round(signals
@@ -98,6 +113,12 @@ function DashboardContent() {
 
       {/* Subtle Grid Overlay */}
       <div className="absolute inset-0 z-[1] bg-[linear-gradient(to_right,var(--border-color)_1px,transparent_1px),linear-gradient(to_bottom,var(--border-color)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30"></div>
+      
+      {/* News Modal */}
+      {user && <NewsModal />}
+
+      {/* Blackout Warning Indicator moved to Signals Section */}
+
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-[var(--background)]/80 backdrop-blur-xl border-b border-[var(--border-color)]">
         <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
@@ -533,13 +554,31 @@ function DashboardContent() {
             </div>
 
             {/* Recent Signal Cards */}
+            <div className="flex items-center gap-2 mb-4">
+              <h3 className="font-[family-name:var(--font-outfit)] text-xl md:text-2xl font-bold text-[var(--foreground)]">Active Signals</h3>
+              {blackout.isBlackout && (
+                <div className="relative group z-[60] flex items-center">
+                   <button className="w-4 h-4 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)] cursor-pointer border border-red-400 ml-2" title="News Analysis Post" />
+                   <div className="absolute top-full left-0 mt-2 w-64 bg-zinc-900 border border-red-500/30 rounded-xl p-4 shadow-2xl z-50 hidden group-hover:block transition-all">
+                      <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-2 border-b border-red-500/20 pb-2">News Analysis Post</p>
+                      <p className="text-[11px] text-zinc-300 leading-relaxed font-mono">High impact activity: {blackout.reason}.<br/><br/>Execution paused 30m before and 1hr after. See community feed for full AI educational insight.</p>
+                   </div>
+                </div>
+              )}
+            </div>
+            
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
               {signals.slice(0, 5).map((sig, i) => (
                 <FadeInSection key={sig.id} delay={0.1 * (i + 1)}>
                   <div 
                     onClick={() => user ? handleNavClick("chartai") : router.push("/auth")}
-                    className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-6 hover:border-green-500/20 transition-all h-full cursor-pointer group"
+                    className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-6 hover:border-green-500/20 transition-all h-full cursor-pointer group relative"
                   >
+                    {blackout.isBlackout && sig.status !== 'CLOSED' && sig.status !== 'TP1_HIT' && (
+                       <div className="absolute top-2 right-2 flex items-center justify-center p-1 bg-red-500/20 rounded-md">
+                         <AlertTriangle className="w-3 h-3 text-red-500" />
+                       </div>
+                    )}
                     <div className="flex items-center justify-between mb-3 sm:mb-4">
                       <span className="text-[#d4af37] font-bold text-sm sm:text-lg">{sig.pair} <span className="text-[10px] text-[var(--text-muted)]">{sig.timeframe}</span></span>
                       <span className={`text-[8px] sm:text-[10px] font-mono px-2 sm:px-3 py-1 rounded-full border ${sig.closed

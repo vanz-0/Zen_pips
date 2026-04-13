@@ -23,6 +23,18 @@ export function ChartAITab() {
   const [executingId, setExecutingId] = useState<string | null>(null)
   
   // Chart Analysis States
+  const [analysisMode, setAnalysisMode] = useState<'upload' | 'live' | 'link'>('upload')
+  const [selectedPair, setSelectedPair] = useState("OANDA:EURUSD")
+  const [customLink, setCustomLink] = useState("")
+  
+  const CORE_PAIRS = [
+    { label: "Bitcoin (BTC/USD)", value: "BINANCE:BTCUSD" },
+    { label: "Euro (EUR/USD)", value: "OANDA:EURUSD" },
+    { label: "Pound (GBP/USD)", value: "OANDA:GBPUSD" },
+    { label: "Gold (XAU/USD)", value: "OANDA:XAUUSD" },
+    { label: "Silver (XAG/USD)", value: "OANDA:XAGUSD" },
+  ]
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [lastImageUrl, setLastImageUrl] = useState<string | null>(null)
@@ -68,6 +80,11 @@ export function ChartAITab() {
   useEffect(() => {
     fetchProfile()
     fetchHistory()
+    fetch('/api/news').then(res => res.json()).then(data => {
+      if (data?.activeBlackout?.isBlackout) {
+        setBlackout({ isBlackout: true, reason: data.activeBlackout.reason || "News Event" })
+      }
+    }).catch(err => console.log(err))
   }, [fetchProfile, fetchHistory])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,9 +151,18 @@ export function ChartAITab() {
     setIsSharing(true)
     
     try {
+      if (analysisMode === 'live') {
+        const pairSimple = selectedPair.split(':')[1] || selectedPair;
+        await supabase.from('community_messages')
+           .delete()
+           .eq('channel', 'setups-and-charts')
+           .ilike('content', `%[${pairSimple}]%`)
+      }
+
+      const tag = analysisMode === 'live' ? `[${selectedPair.split(':')[1] || selectedPair}] ` : '';
       const { error } = await supabase.from('community_messages').insert({
         user_id: user.id,
-        content: `🎯 AI ANALYSIS SHARED:\n\n${analysisResult.split('### 4. Verdict:')[0].trim()}`,
+        content: `🎯 AI ANALYSIS SHARED:\n\n${tag}${analysisResult.split('### 4. Verdict:')[0].trim()}`,
         image: lastImageUrl,
         channel: 'setups-and-charts'
       })
@@ -155,10 +181,9 @@ export function ChartAITab() {
     setSelectedFile(null)
     setPreviewUrl(null)
     setAnalysisResult(null)
+    setCustomLink("")
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
-
-  const [showLotConfirm, setShowLotConfirm] = useState<Signal | null>(null)
 
   const handleExecuteSignal = async (sig: Signal) => {
     // Risk gate: Confirm high lot sizes
@@ -310,27 +335,86 @@ export function ChartAITab() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
+            {/* Mode Toggle */}
+            <div className="flex bg-zinc-900 rounded-xl p-1 border border-zinc-800 mb-6 font-[family-name:var(--font-outfit)]">
+              <button onClick={() => { setAnalysisMode('upload'); clearImage(); }} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${analysisMode === 'upload' ? 'bg-blue-500 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}>Image Upload</button>
+              <button onClick={() => { setAnalysisMode('live'); clearImage(); }} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${analysisMode === 'live' ? 'bg-blue-500 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}>Live Chart</button>
+              <button onClick={() => { setAnalysisMode('link'); clearImage(); }} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${analysisMode === 'link' ? 'bg-blue-500 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}>Published Link</button>
+            </div>
+
             {!previewUrl ? (
               <div className="space-y-6">
-                <div 
-                  className="bg-zinc-900 border-2 border-dashed border-zinc-800 rounded-3xl p-12 text-center flex flex-col items-center gap-6 hover:border-blue-500/50 transition-all cursor-pointer group"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-all">
-                    <ImageIcon className="w-10 h-10 text-blue-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2">Upload Analysis Chart</h3>
-                    <p className="text-gray-400 text-sm max-w-sm mx-auto">Drag & drop or click to select a screenshot of your SMC or price action analysis.</p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="px-4 py-2 bg-black border border-zinc-800 rounded-xl text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-                      PNG/JPG SUPPORTED
+                {analysisMode === 'upload' && (
+                  <div 
+                    className="bg-zinc-900 border-2 border-dashed border-zinc-800 rounded-3xl p-12 text-center flex flex-col items-center gap-6 hover:border-blue-500/50 transition-all cursor-pointer group"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-all">
+                      <ImageIcon className="w-10 h-10 text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2">Upload Analysis Chart</h3>
+                      <p className="text-gray-400 text-sm max-w-sm mx-auto">Drag & drop or click to select a screenshot of your SMC or price action analysis.</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="px-4 py-2 bg-black border border-zinc-800 rounded-xl text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                        PNG/JPG SUPPORTED
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
-                <div className="bg-yellow-500/5 border border-yellow-500/15 rounded-2xl p-4">
+                {analysisMode === 'live' && (
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 space-y-6">
+                     <h3 className="text-xl font-bold">Select Live Asset</h3>
+                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                       {CORE_PAIRS.map(pair => (
+                         <button 
+                           key={pair.value}
+                           onClick={() => setSelectedPair(pair.value)}
+                           className={`p-4 rounded-xl border text-sm font-bold transition-all ${selectedPair === pair.value ? 'bg-blue-500/10 border-blue-500 text-blue-400' : 'bg-black/40 border-zinc-800 text-zinc-400 hover:border-zinc-600'}`}
+                         >
+                           {pair.label}
+                         </button>
+                       ))}
+                     </div>
+                     <button
+                        onClick={() => {
+                            setAnalysisResult("⏳ SYSTEM: The Browser Subagent has been queued. Please ask the AI agent to extract and analyze the live chart for " + (selectedPair.split(':')[1] || selectedPair) + " in your dialog.")
+                            setPreviewUrl(`live:${selectedPair}`)
+                        }}
+                        className="w-full py-4 bg-blue-500 text-white rounded-xl font-bold uppercase tracking-widest flex justify-center items-center gap-2 hover:bg-blue-400 shadow-lg shadow-blue-500/20"
+                     >
+                        <Cpu className="w-5 h-5"/> Fetch Live Data
+                     </button>
+                  </div>
+                )}
+
+                {analysisMode === 'link' && (
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 space-y-6">
+                     <h3 className="text-xl font-bold">TradingView Public Link</h3>
+                     <p className="text-sm text-zinc-400">Paste your published markup link to sync with your dashboard.</p>
+                     <input 
+                       type="text" 
+                       value={customLink}
+                       onChange={e => setCustomLink(e.target.value)}
+                       placeholder="https://www.tradingview.com/chart/..."
+                       className="w-full bg-black border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:border-blue-500"
+                     />
+                     <button
+                        onClick={() => {
+                            if(!customLink) return;
+                            setAnalysisResult("⏳ SYSTEM: Custom URL fetched. Please ask the AI agent to analyze this URL in your dialog.")
+                            setPreviewUrl(`link:${customLink}`)
+                        }}
+                        className="w-full py-4 bg-blue-500 text-white rounded-xl font-bold uppercase tracking-widest flex justify-center items-center gap-2 hover:bg-blue-400 shadow-lg shadow-blue-500/20"
+                     >
+                        <Cpu className="w-5 h-5"/> Extract Markup Data
+                     </button>
+                  </div>
+                )}
+
+                <div className="bg-yellow-500/5 border border-yellow-500/15 rounded-2xl p-4 mt-6">
                   <div className="flex items-start gap-3">
                     <Shield className="w-4 h-4 text-yellow-500 mt-0.5 shrink-0" />
                     <div>
@@ -347,9 +431,18 @@ export function ChartAITab() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
                 <div className="relative rounded-2xl overflow-hidden border border-zinc-800 bg-black aspect-video md:aspect-auto min-h-[400px]">
-                  <img src={previewUrl} alt="Chart Preview" className="w-full h-full object-contain" />
+                  {previewUrl?.startsWith('live:') ? (
+                    <iframe src={`https://s.tradingview.com/widgetembed/?symbol=${previewUrl.replace('live:', '')}&interval=H1&theme=dark`} className="w-full h-full min-h-[400px]" frameBorder="0"></iframe>
+                  ) : previewUrl?.startsWith('link:') ? (
+                    <div className="flex flex-col items-center justify-center h-full text-zinc-500 gap-4 p-8 text-center min-h-[400px]">
+                       <FileText className="w-16 h-16 opacity-50" />
+                       <span className="text-xs break-all bg-black border border-zinc-800 p-2 rounded-lg">{previewUrl.replace('link:', '')}</span>
+                    </div>
+                  ) : (
+                    <img src={previewUrl || ''} alt="Chart Preview" className="w-full h-full object-contain min-h-[400px]" />
+                  )}
                   <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 to-transparent flex justify-center">
-                    {!isAnalyzing && !analysisResult && (
+                    {!isAnalyzing && !analysisResult && analysisMode === 'upload' && (
                       <button 
                         onClick={handleAnalyzeChart}
                         className="px-6 py-3 bg-blue-500 hover:bg-blue-400 text-white rounded-xl font-bold flex items-center gap-2 shadow-2xl hover:scale-105 transition-all outline-none"
@@ -413,8 +506,19 @@ export function ChartAITab() {
           <div className="flex flex-col gap-4 h-full max-h-[700px]">
             <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-6 flex flex-col h-full min-h-[300px] overflow-hidden">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold flex items-center gap-2 text-white">
+                <h3 className="text-lg font-bold flex items-center gap-2 text-white relative">
                   <Zap className="w-4 h-4 text-yellow-500" /> Signals
+                  {blackout.isBlackout && (
+                    <div className="relative ml-2 z-[60]">
+                       <button onClick={() => setShowNewsDetail(!showNewsDetail)} className="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)] cursor-pointer border border-red-400" title="News Analysis Post" />
+                       {showNewsDetail && (
+                          <div className="absolute top-full left-0 mt-2 w-64 bg-zinc-900 border border-red-500/30 rounded-xl p-4 shadow-2xl z-50 animate-in fade-in zoom-in duration-200">
+                             <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-2 border-b border-red-500/20 pb-2">News Analysis Post</p>
+                             <p className="text-[11px] text-zinc-300 leading-relaxed font-mono">High impact activity: {blackout.reason}.<br/><br/>Execution paused 30m before and 1hr after. See community feed for full AI educational insight.</p>
+                          </div>
+                       )}
+                    </div>
+                  )}
                 </h3>
                 
                 {/* Lot Size Controller */}
@@ -451,14 +555,33 @@ export function ChartAITab() {
                                 </div>
                             </div>
                             {!isTpPassed && (
-                                <button 
-                                    onClick={() => handleExecuteSignal(sig)} 
-                                    disabled={executingId === sig.id}
-                                    className={`w-full py-3 rounded-xl font-bold text-[10px] transition-all flex items-center justify-center gap-2 ${executingId === sig.id ? 'bg-zinc-800 text-zinc-500' : 'bg-zinc-800 hover:bg-yellow-500 hover:text-black border border-zinc-700'}`}
-                                >
-                                    {executingId === sig.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
-                                    EXECUTE
-                                </button>
+                                isAdmin ? (
+                                  <button 
+                                      onClick={() => handleExecuteSignal(sig)} 
+                                      disabled={executingId === sig.id}
+                                      className={`w-full py-3 rounded-xl font-bold text-[10px] transition-all flex items-center justify-center gap-2 ${executingId === sig.id ? 'bg-zinc-800 text-zinc-500' : 'bg-zinc-800 hover:bg-yellow-500 hover:text-black border border-zinc-700'}`}
+                                  >
+                                      {executingId === sig.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+                                      EXECUTE (ADMIN)
+                                  </button>
+                                ) : (
+                                  <div className="space-y-2 mt-2">
+                                    <button 
+                                        onClick={() => {
+                                          const text = `🎯 **ZEN PIPS SETUP**\nPair: ${sig.pair}\nDirection: ${sig.direction}\nEntry: ${sig.entry}\nSL: ${sig.sl}\nTP1: ${sig.tp1}`
+                                          navigator.clipboard.writeText(text)
+                                          alert("Copied to clipboard!")
+                                        }} 
+                                        className="w-full py-3 rounded-xl font-bold text-[10px] bg-zinc-800 hover:bg-blue-500 hover:text-white border border-zinc-700 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <FileText className="w-3 h-3" />
+                                        COPY SETUP
+                                    </button>
+                                    <div className="text-center text-[8px] text-zinc-500 uppercase tracking-widest italic pt-1">
+                                        Autonomous Execution Coming Soon
+                                    </div>
+                                  </div>
+                                )
                             )}
                         </div>
                     )

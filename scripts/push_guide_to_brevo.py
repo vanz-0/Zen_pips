@@ -3,6 +3,14 @@ import json
 import os
 
 def push_master_guide():
+    # Load .env manually
+    if os.path.exists(".env"):
+        with open(".env", "r") as f:
+            for line in f:
+                if "=" in line and not line.startswith("#"):
+                    k, v = line.strip().split("=", 1)
+                    os.environ[k] = v
+
     api_key = os.getenv("BREVO_API_KEY")
     if not api_key:
         print("Error: BREVO_API_KEY not found in environment.")
