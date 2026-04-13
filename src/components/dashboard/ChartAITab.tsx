@@ -42,6 +42,10 @@ export function ChartAITab() {
   const [isSharing, setIsSharing] = useState(false)
   const [analysisResult, setAnalysisResult] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  const [showLotConfirm, setShowLotConfirm] = useState<any>(null)
+  const [blackout, setBlackout] = useState<{ isBlackout: boolean, reason: string }>({ isBlackout: false, reason: "" })
+  const [showNewsDetail, setShowNewsDetail] = useState(false)
 
   const [history, setHistory] = useState<any[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
