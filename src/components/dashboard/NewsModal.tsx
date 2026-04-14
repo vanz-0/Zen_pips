@@ -76,46 +76,62 @@ export default function NewsModal() {
                 </button>
               </div>
 
-              <div className={`mb-8 space-y-4 rounded-3xl border p-6 transition-all duration-300
+              <div className={`mb-8 space-y-5 rounded-[2rem] border p-8 transition-all duration-300
                 ${isDarkMode ? 'bg-zinc-900/50 border-white/5' : 'bg-gray-50 border-black/5 shadow-inner'}`}>
                 <div className="flex items-center gap-2">
                   <Terminal className={`h-4 w-4 ${isDarkMode ? 'text-[#d4af37]' : 'text-[#b8860b]'}`} />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Strategic Analytics</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Strategic Analytics & Directives</span>
                 </div>
-                <p className={`text-sm leading-relaxed font-medium ${isDarkMode ? 'text-zinc-300' : 'text-zinc-600'}`}>
-                  {newsData.aiAnalysis}
-                </p>
+                
+                <div className={`space-y-4 text-sm leading-relaxed font-medium font-[family-name:var(--font-outfit)]
+                  ${isDarkMode ? 'text-zinc-200' : 'text-zinc-700'}`}>
+                   {newsData.aiAnalysis.split('\n\n').map((paragraph: string, idx: number) => (
+                     <p key={idx} className="flex gap-2 text-base">
+                       {paragraph.startsWith('🚨') || paragraph.startsWith('🔹') || paragraph.startsWith('🐻') ? '' : '•'} {paragraph}
+                     </p>
+                   ))}
+                </div>
               </div>
 
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                    <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest opacity-50">
-                     <Clock className="h-4 w-4" /> Live Economic Calendar
+                     <Clock className="h-4 w-4" /> Live Institutional Calendar
                    </h3>
-                   <span className="text-[10px] px-2 py-1 rounded-full bg-[#d4af37]/10 text-[#d4af37] font-bold animate-pulse">CONNECTIVITY: LIVE</span>
+                   <span className="text-[10px] px-2 py-1 rounded-full bg-[#d4af37]/10 text-[#d4af37] font-bold animate-pulse">CONNECTIVITY: ESTABLISHED 🌐</span>
                 </div>
 
-                <div className="grid gap-3">
+                <div className="grid gap-4">
                   {newsData.events.map((ev: any) => (
                     <div 
                       key={ev.id} 
-                      className={`group flex items-center justify-between rounded-2xl border p-5 transition-all
+                      className={`group relative flex items-center justify-between rounded-3xl border p-6 transition-all
                         ${isDarkMode ? 'bg-zinc-900/30 border-white/5 hover:border-[#d4af37]/30' : 'bg-white border-black/5 shadow-sm hover:border-[#d4af37]/30'}`}
                     >
-                      <div className="flex items-center gap-5">
-                        <div className={`h-12 w-1.5 rounded-full shadow-lg transition-transform group-hover:scale-y-110 
+                      <div className="flex items-center gap-6">
+                        <div className={`h-14 w-1.5 rounded-full shadow-lg transition-transform group-hover:scale-y-110 
                           ${ev.impact === 'High' ? 'bg-red-500 shadow-red-500/20' : 'bg-[#d4af37] shadow-[#d4af37]/20'}`} />
                         <div>
-                          <p className="font-bold tracking-tight">{ev.currency} <span className="opacity-30 mx-1">/</span> {ev.event}</p>
-                          <p className="mt-1 text-xs font-mono opacity-50">
-                            {new Date(ev.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase()}
+                          <div className="flex items-center gap-2">
+                             <p className="font-bold text-lg tracking-tight">{ev.currency} <span className="opacity-20 mx-1">/</span> {ev.event}</p>
+                             <a 
+                               href={ev.sourceUrl} 
+                               target="_blank" 
+                               rel="noreferrer"
+                               className="opacity-20 hover:opacity-100 transition-opacity"
+                             >
+                                <ArrowRight className="h-4 w-4 -rotate-45" />
+                             </a>
+                          </div>
+                          <p className="mt-1 text-xs font-mono font-bold opacity-40 uppercase tracking-tighter">
+                            {new Date(ev.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase()} • {ev.source} 🔗
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-[10px] uppercase tracking-tighter opacity-40 mb-1 font-bold">Expectation</div>
-                        <div className={`text-sm font-mono font-bold ${isDarkMode ? 'text-white' : 'text-zinc-900'}`}>
-                          {ev.forecast} <ArrowRight className="inline h-3 w-3 opacity-30 mx-1" /> <span className="opacity-40">{ev.previous}</span>
+                        <div className="text-[10px] uppercase tracking-[0.1em] opacity-40 mb-2 font-bold">Institutional Bias</div>
+                        <div className={`text-base font-mono font-black ${isDarkMode ? 'text-white' : 'text-zinc-900'}`}>
+                          {ev.impact === 'High' ? '⚡ VOLATILITY' : '🛡️ STABLE'}
                         </div>
                       </div>
                     </div>
@@ -125,12 +141,13 @@ export default function NewsModal() {
 
               <button 
                 onClick={() => setIsOpen(false)}
-                className={`mt-10 flex w-full items-center justify-center gap-3 rounded-2xl py-6 text-sm font-bold uppercase tracking-widest transition-all
+                className={`group mt-10 flex w-full items-center justify-center gap-4 rounded-[2rem] py-7 text-base font-black uppercase tracking-widest transition-all
                   ${isDarkMode 
-                    ? 'bg-[#d4af37] text-zinc-950 hover:bg-[#c5a037] hover:scale-[0.99]' 
-                    : 'bg-zinc-950 text-white hover:bg-zinc-800 shadow-xl hover:shadow-zinc-950/20'}`}
+                    ? 'bg-[#d4af37] text-zinc-950 hover:bg-[#ffe082] hover:scale-[0.98] shadow-[0_20px_40px_rgba(212,175,55,0.2)]' 
+                    : 'bg-zinc-950 text-white hover:bg-zinc-800 shadow-2xl hover:shadow-zinc-950/20'}`}
               >
-                Acknowledge Directive
+                Acknowledge Strategy Directive
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
               </button>
             </div>
           </motion.div>

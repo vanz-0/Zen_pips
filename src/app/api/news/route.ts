@@ -21,10 +21,10 @@ export async function GET() {
       const data = await response.json();
       
       if (data && data.economicCalendar) {
-        // Filter for high and medium impact events for major institutional pairs
+        // Filter for high and medium impact events
         const relevantEvents = data.economicCalendar.filter((ev: any) => 
           (ev.impact === "high" || ev.impact === "medium") && 
-          ["USD", "EUR", "GBP", "JPY"].includes(ev.country)
+          ["USD", "EUR", "GBP", "JPY", "AUD"].includes(ev.country)
         );
         
         if (relevantEvents.length > 0) {
@@ -33,30 +33,44 @@ export async function GET() {
              currency: ev.country,
              impact: ev.impact === "high" ? "High" : "Medium",
              event: ev.event,
-             time: ev.time, // ISO string
+             time: ev.time,
              forecast: ev.estimate || "PROD",
              previous: ev.previous || "N/A",
+             source: "Forex Factory / Finnhub",
+             sourceUrl: `https://www.forexfactory.com/calendar?day=${todayStr}`
            }));
 
-           // Sort by time
            events.sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime());
 
-           const topEvent = events.find((e: any) => e.impact === "High") || events[0];
-           const eventTime = topEvent ? new Date(topEvent.time) : null;
-           
-           if (eventTime) {
-             const blackoutStart = new Date(eventTime.getTime() - 30 * 60000);
-             const blackoutEnd = new Date(eventTime.getTime() + 60 * 60000);
-             
-             activeBlackout = {
-               isBlackout: now >= blackoutStart && now <= blackoutEnd,
-               start: blackoutStart.toISOString(),
-               end: blackoutEnd.toISOString(),
-               reason: topEvent.event,
-             };
+           // OpenAI Analysis for direct instructions
+           const openaiKey = process.env.OPENAI_API_KEY;
+           if (openaiKey) {
+             try {
+               const eventSummary = events.map((e: any) => `${e.currency} ${e.event} (${e.impact})`).join(', ');
+               const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+                 method: 'POST',
+                 headers: {
+                   'Authorization': `Bearer ${openaiKey}`,
+                   'Content-Type': 'application/json'
+                 },
+                 body: JSON.stringify({
+                   model: "gpt-4o",
+                   messages: [{
+                     role: "system",
+                     content: "You are a senior institutional FX analyst. Provide direct, instruction-giving trading conclusions for the provided economic events. Do not use markdown. Use plenty of emojis. Specifically explain the perspective for the 'Bears' (Downside risk). Keep it concise and professional. Structure: [Event] - [Instruction] - [Bears Perspective]."
+                   }, {
+                     role: "user",
+                     content: `Events today: ${eventSummary}. Generate analysis and instructions.`
+                   }]
+                 })
+               });
+               const aiData = await aiResponse.json();
+               analysis = aiData.choices[0].message.content;
+             } catch (aiErr) {
+               console.error("AI Analysis failed:", aiErr);
+               analysis = "🚨 *ALERT*: High volatility expected. Market behavior suggests institutional liquidity grabs at open. Avoid direct exposure during releases. 🧘‍♂️";
+             }
            }
-
-           analysis = `🚨 **INSTITUTIONAL RISK ALERT** 🚨\n\nLive data confirms high-volatility events for ${relevantEvents.map((e:any) => e.country).join('/')} today. \n\n**Strategic Directive**: Institutions will use today's releases to engineer liquidity. Expect rapid stop-hunts across major pairs before the true directional expansion. \n\n**Autonomous Control**: The MT5 Bridge is monitoring these timestamps. We recommend closing intra-day exposure 15 minutes prior to the top-tier releases to avoid spread widening and slippage.`;
         }
       }
     }
