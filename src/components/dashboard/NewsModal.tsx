@@ -1,102 +1,141 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { AlertTriangle, Clock, X, Terminal } from 'lucide-react'
+import { Clock, X, Terminal, ArrowRight, ShieldAlert } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function NewsModal() {
   const [isOpen, setIsOpen] = useState(false)
   const [newsData, setNewsData] = useState<any>(null)
-  
+  const [isDarkMode, setIsDarkMode] = useState(true)
+
   useEffect(() => {
+    const isDark = document.documentElement.classList.contains('dark') || 
+                   window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setIsDarkMode(isDark);
+
     const checkNews = async () => {
       try {
-        const today = new Date().toISOString().split('T')[0]
-        const lastSeen = localStorage.getItem('news_modal_seen_date')
-        
         const res = await fetch('/api/news')
         const data = await res.json()
-        setNewsData(data)
-        
-        // Show modal on first load of the day
-        if (lastSeen !== today) {
-          setIsOpen(true)
-          localStorage.setItem('news_modal_seen_date', today)
+        if (data.events && data.events.length > 0) {
+          setNewsData(data)
+          const sessionKey = 'zenpips_news_session_seen';
+          if (!sessionStorage.getItem(sessionKey)) {
+            setIsOpen(true)
+            sessionStorage.setItem(sessionKey, 'true')
+          }
         }
       } catch (e) {
-        console.error("Failed to fetch news data", e)
+        console.error("Failed to fetch live news feed", e)
       }
     }
     checkNews()
   }, [])
 
-  if (!isOpen || !newsData) return null
+  if (!newsData) return null
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-      <div className="bg-zinc-900 border border-[#d4af37]/30 rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-        
-        <div className="bg-[#d4af37]/10 p-6 border-b border-[#d4af37]/20 flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-red-500/20 p-2 rounded-full">
-               <AlertTriangle className="w-6 h-6 text-red-500" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-white font-[family-name:var(--font-outfit)] uppercase tracking-wide">Daily Institutional News</h2>
-              <p className="text-xs text-zinc-400 mt-1 uppercase tracking-widest">{newsData.date}</p>
-            </div>
-          </div>
-          <button onClick={() => setIsOpen(false)} className="text-zinc-500 hover:text-white transition-colors">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsOpen(false)}
+            className="absolute inset-0 bg-black/60 backdrop-blur-xl"
+          />
 
-        <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
-          {/* AI Analysis */}
-          <div className="bg-black/50 border border-zinc-800 rounded-2xl p-5">
-             <div className="flex items-center gap-2 mb-3 text-[#d4af37]">
-                <Terminal className="w-4 h-4" />
-                <span className="text-[10px] font-mono font-bold uppercase tracking-widest">AI Market Bias</span>
-             </div>
-             <p className="text-sm text-zinc-300 whitespace-pre-wrap leading-relaxed font-mono">
-                {newsData.aiAnalysis}
-             </p>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className={`relative w-full max-w-2xl overflow-hidden rounded-[2.5rem] border shadow-2xl transition-colors duration-500
+              ${isDarkMode 
+                ? 'bg-zinc-950/80 border-white/10 text-white' 
+                : 'bg-white/90 border-black/5 text-zinc-900 backdrop-blur-3xl'}`}
+          >
+            <div className={`h-1.5 w-full ${newsData.activeBlackout?.isBlackout ? 'bg-red-500' : 'bg-[#d4af37]'}`} />
 
-          {/* Event List */}
-          <div>
-            <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <Clock className="w-4 h-4" /> Scheduled High-Impact Events
-            </h3>
-            <div className="space-y-3">
-              {newsData.events.map((ev: any) => (
-                <div key={ev.id} className="bg-zinc-800/30 border border-zinc-800 rounded-xl p-4 flex justify-between items-center hover:border-red-500/30 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="w-2 h-10 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
-                    <div>
-                      <div className="font-bold text-white flex items-center gap-2">
-                        {ev.currency} <span className="text-zinc-500 font-normal">|</span> {ev.event}
-                      </div>
-                      <div className="text-xs text-zinc-400 mt-1 font-mono">
-                        {new Date(ev.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                    </div>
+            <div className="p-8 md:p-10">
+              <div className="mb-8 flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div className={`rounded-2xl p-3 ${isDarkMode ? 'bg-zinc-900 border border-white/5' : 'bg-zinc-100 border border-black/5'}`}>
+                    <ShieldAlert className={`h-7 w-7 ${newsData.activeBlackout?.isBlackout ? 'text-red-500' : 'text-[#d4af37]'}`} />
                   </div>
-                  <div className="text-right text-xs font-mono">
-                     <span className="text-zinc-500">FCST:</span> <span className="text-white font-bold">{ev.forecast}</span><br/>
-                     <span className="text-zinc-500">PREV:</span> <span className="text-white font-bold">{ev.previous}</span>
+                  <div>
+                    <h2 className="text-2xl font-bold tracking-tight font-[family-name:var(--font-outfit)]">Institutional Intel</h2>
+                    <p className={`text-xs font-semibold uppercase tracking-widest opacity-50 mt-1`}>{newsData.date}</p>
                   </div>
                 </div>
-              ))}
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className={`rounded-full p-2 transition-colors ${isDarkMode ? 'hover:bg-white/10 text-zinc-500' : 'hover:bg-black/5 text-zinc-400'}`}
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div className={`mb-8 space-y-4 rounded-3xl border p-6 transition-all duration-300
+                ${isDarkMode ? 'bg-zinc-900/50 border-white/5' : 'bg-gray-50 border-black/5 shadow-inner'}`}>
+                <div className="flex items-center gap-2">
+                  <Terminal className={`h-4 w-4 ${isDarkMode ? 'text-[#d4af37]' : 'text-[#b8860b]'}`} />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Strategic Analytics</span>
+                </div>
+                <p className={`text-sm leading-relaxed font-medium ${isDarkMode ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                  {newsData.aiAnalysis}
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                   <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest opacity-50">
+                     <Clock className="h-4 w-4" /> Live Economic Calendar
+                   </h3>
+                   <span className="text-[10px] px-2 py-1 rounded-full bg-[#d4af37]/10 text-[#d4af37] font-bold animate-pulse">CONNECTIVITY: LIVE</span>
+                </div>
+
+                <div className="grid gap-3">
+                  {newsData.events.map((ev: any) => (
+                    <div 
+                      key={ev.id} 
+                      className={`group flex items-center justify-between rounded-2xl border p-5 transition-all
+                        ${isDarkMode ? 'bg-zinc-900/30 border-white/5 hover:border-[#d4af37]/30' : 'bg-white border-black/5 shadow-sm hover:border-[#d4af37]/30'}`}
+                    >
+                      <div className="flex items-center gap-5">
+                        <div className={`h-12 w-1.5 rounded-full shadow-lg transition-transform group-hover:scale-y-110 
+                          ${ev.impact === 'High' ? 'bg-red-500 shadow-red-500/20' : 'bg-[#d4af37] shadow-[#d4af37]/20'}`} />
+                        <div>
+                          <p className="font-bold tracking-tight">{ev.currency} <span className="opacity-30 mx-1">/</span> {ev.event}</p>
+                          <p className="mt-1 text-xs font-mono opacity-50">
+                            {new Date(ev.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[10px] uppercase tracking-tighter opacity-40 mb-1 font-bold">Expectation</div>
+                        <div className={`text-sm font-mono font-bold ${isDarkMode ? 'text-white' : 'text-zinc-900'}`}>
+                          {ev.forecast} <ArrowRight className="inline h-3 w-3 opacity-30 mx-1" /> <span className="opacity-40">{ev.previous}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <button 
+                onClick={() => setIsOpen(false)}
+                className={`mt-10 flex w-full items-center justify-center gap-3 rounded-2xl py-6 text-sm font-bold uppercase tracking-widest transition-all
+                  ${isDarkMode 
+                    ? 'bg-[#d4af37] text-zinc-950 hover:bg-[#c5a037] hover:scale-[0.99]' 
+                    : 'bg-zinc-950 text-white hover:bg-zinc-800 shadow-xl hover:shadow-zinc-950/20'}`}
+              >
+                Acknowledge Directive
+              </button>
             </div>
-          </div>
-          
-          <button 
-             onClick={() => setIsOpen(false)}
-             className="w-full py-4 text-sm font-bold uppercase tracking-widest bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl transition-all"
-          >
-             Acknowledge & Enter Dashboard
-          </button>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   )
 }
