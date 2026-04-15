@@ -24,7 +24,7 @@ const AuthContext = createContext<AuthContextType>({
 const DEV_BYPASS = false
 
 const MOCK_USER = {
-    id: "825e206a-1c83-4041-8fb5-16440c004f18",
+    id: "c3abc54b-2801-4624-b8b3-c56accb5d20e",
     email: "dev@zenpips.com",
     app_metadata: {},
     user_metadata: { full_name: "Dev Tester" },

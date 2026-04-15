@@ -42,6 +42,7 @@ function DashboardContent() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [activeReviewSlide, setActiveReviewSlide] = useState(0);
+  const [isNewsOpen, setIsNewsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -61,15 +62,15 @@ function DashboardContent() {
   }, []);
 
   // Derived stats
-  const totalPipsToday = Math.round(signals
+  const totalPipsToday = signals
     .filter(s => {
       const createdDate = new Date(s.created_at);
       const today = new Date();
       return createdDate.toDateString() === today.toDateString();
     })
-    .reduce((acc, sig) => acc + (Number(sig.total_pips) || 0), 0));
+    .reduce((acc, sig) => acc + (Number(sig.total_pips) || 0), 0);
 
-  const grandTotalPips = Math.round(signals.reduce((acc, sig) => acc + (Number(sig.total_pips) || 0), 0));
+  const grandTotalPips = signals.reduce((acc, sig) => acc + (Number(sig.total_pips) || 0), 0);
   
   const winRate = signals.length > 0
     ? Math.round((signals.filter(s => Number(s.total_pips) > 0).length / signals.length) * 100)
@@ -115,7 +116,7 @@ function DashboardContent() {
       <div className="absolute inset-0 z-[1] bg-[linear-gradient(to_right,var(--border-color)_1px,transparent_1px),linear-gradient(to_bottom,var(--border-color)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30"></div>
       
       {/* News Modal */}
-      {user && <NewsModal />}
+      {user && <NewsModal isOpen={isNewsOpen} onClose={() => setIsNewsOpen(false)} />}
 
       {/* Blackout Warning Indicator moved to Signals Section */}
 
@@ -537,8 +538,8 @@ function DashboardContent() {
             {/* Stats Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8 sm:mb-12 md:mb-16 pb-8 md:pb-0">
               {[
-                { value: `+${grandTotalPips.toLocaleString()}`, label: "Grand Total Pips", color: "text-[#d4af37]" },
-                { value: `+${totalPipsToday.toLocaleString()}`, label: "Pips Today", color: "text-[var(--foreground)]" },
+                { value: `+${Number(grandTotalPips).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 3 })}`, label: "Grand Total Pips", color: "text-[#d4af37]" },
+                { value: `+${Number(totalPipsToday).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 3 })}`, label: "Pips Today", color: "text-[var(--foreground)]" },
                 { value: `${winRate}%`, label: "Win Rate", color: "text-[var(--foreground)]" },
                 { value: activeCount > 0 ? "LIVE" : "MONITORING", label: activeCount > 0 ? "Active Now" : "Systems Check", color: activeCount > 0 ? "text-[var(--color-success)]" : "text-[var(--color-info)]", glow: activeCount > 0 },
               ].map((stat, i) => (
@@ -558,7 +559,11 @@ function DashboardContent() {
               <h3 className="font-[family-name:var(--font-outfit)] text-xl md:text-2xl font-bold text-[var(--foreground)]">Active Signals</h3>
               {blackout.isBlackout && (
                 <div className="relative group z-[60] flex items-center">
-                   <button className="w-4 h-4 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)] cursor-pointer border border-red-400 ml-2" title="News Analysis Post" />
+                   <button 
+                      onClick={() => setIsNewsOpen(true)}
+                      className="w-4 h-4 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)] cursor-pointer border border-red-400 ml-2 hover:scale-125 transition-transform" 
+                      title="Click for Institutional Analysis" 
+                   />
                    <div className="absolute top-full left-0 mt-2 w-64 bg-zinc-900 border border-red-500/30 rounded-xl p-4 shadow-2xl z-50 hidden group-hover:block transition-all">
                       <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-2 border-b border-red-500/20 pb-2">News Analysis Post</p>
                       <p className="text-[11px] text-zinc-300 leading-relaxed font-mono">High impact activity: {blackout.reason}.<br/><br/>Execution paused 30m before and 1hr after. See community feed for full AI educational insight.</p>
@@ -595,7 +600,7 @@ function DashboardContent() {
                       <div className="flex justify-between">
                         <span className="text-[var(--text-muted)]">Result</span>
                         <span className={`${sig.total_pips >= 0 ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"} font-mono font-bold`}>
-                          {sig.total_pips > 0 ? "+" : ""}{Math.round(sig.total_pips).toLocaleString()} Pips
+                          {sig.total_pips > 0 ? "+" : ""}{Number(sig.total_pips).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 3 })} Pips
                         </span>
                       </div>
                       <div className="pt-2 border-t border-[var(--border-color)]">

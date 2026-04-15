@@ -71,44 +71,58 @@ def handle_pending_events():
             # Map signal to MT5 order
             symbol = get_vantage_symbol(sig["pair"])
             direction = sig["direction"]
-            lot = event.get("lot_size", 0.01)
+            # Trademark 3-Order Split: Always 0.01 lot x 3 orders
+            split_lot = 0.01
+            
             entry = float(sig["entry"])
             sl = float(sig["sl"]) if sig.get("sl") else 0
-            tp = float(sig["tp1"]) if sig.get("tp1") else 0
+            
+            tps = [
+                float(sig["tp1"]) if sig.get("tp1") else 0,
+                float(sig["tp2"]) if sig.get("tp2") else 0,
+                float(sig["tp3"]) if sig.get("tp3") else 0
+            ]
 
-            print(f"📈 Attempting {direction} {symbol} @ {entry} (Lot: {lot})...")
+            print(f"📈 Attempting 3-Order Split for {direction} {symbol} @ {entry} (0.01 x 3)...")
 
-            # MT5 Order Request
+            deployed_tickets = []
             order_type = mt5.ORDER_TYPE_BUY_LIMIT if direction == "BUY" else mt5.ORDER_TYPE_SELL_LIMIT
             
-            request = {
-                "action": mt5.TRADE_ACTION_PENDING,
-                "symbol": symbol,
-                "volume": float(lot),
-                "type": order_type,
-                "price": entry,
-                "sl": sl,
-                "tp": tp,
-                "magic": 123456,
-                "comment": "ZenPips Institutional Bridge",
-                "type_time": mt5.ORDER_TIME_GTC,
-                "type_filling": mt5.ORDER_FILLING_RETURN, # Preferred for Vantage/Pending
-            }
+            for i, tp in enumerate(tps):
+                if tp == 0: continue
+                
+                request = {
+                    "action": mt5.TRADE_ACTION_PENDING,
+                    "symbol": symbol,
+                    "volume": split_lot,
+                    "type": order_type,
+                    "price": entry,
+                    "sl": sl,
+                    "tp": tp,
+                    "magic": 123456,
+                    "comment": f"ZenPips TP{i+1}",
+                    "type_time": mt5.ORDER_TIME_GTC,
+                    "type_filling": mt5.ORDER_FILLING_RETURN,
+                }
 
-            result = mt5.order_send(request)
-            
-            if result.retcode != mt5.TRADE_RETCODE_DONE:
-                print(f"❌ MT5 Order Failed: {result.comment} (code: {result.retcode})")
-                supabase.table("copy_events").update({
-                    "status": "FAILED",
-                    "error_message": f"MT5 Error: {result.comment}"
-                }).eq("id", event["id"]).execute()
-            else:
-                print(f"✅ Order Placed! Ticket: {result.order}")
+                result = mt5.order_send(request)
+                
+                if result.retcode != mt5.TRADE_RETCODE_DONE:
+                    print(f"❌ TP{i+1} Order Failed: {result.comment}")
+                else:
+                    print(f"✅ TP{i+1} Set! Ticket: {result.order}")
+                    deployed_tickets.append(str(result.order))
+
+            if deployed_tickets:
                 supabase.table("copy_events").update({
                     "status": "SUCCESS",
-                    "mt5_ticket": str(result.order),
+                    "mt5_tickets": deployed_tickets,
                     "executed_at": "now()"
+                }).eq("id", event["id"]).execute()
+            else:
+                supabase.table("copy_events").update({
+                    "status": "FAILED",
+                    "error_message": "All 3 order attempts failed."
                 }).eq("id", event["id"]).execute()
 
     except Exception as e:

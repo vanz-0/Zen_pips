@@ -223,7 +223,7 @@ export function JournalTab() {
                                 <div className="flex gap-3">
                                     <div className="bg-[var(--panel-bg)] border border-[var(--border-color)] px-4 py-2 rounded-xl">
                                         <p className="text-[10px] text-[var(--text-muted)] uppercase">MONTHLY Net</p>
-                                        <p className={`text-base sm:text-lg font-mono font-black ${monthPips >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>{monthPips > 0 ? '+' : ''}{monthPips} Pips</p>
+                                        <p className={`text-base sm:text-lg font-mono font-black ${monthPips >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>{monthPips > 0 ? '+' : ''}{Number(monthPips).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 3 })} Pips</p>
                                     </div>
                                     <div className="bg-[var(--panel-bg)] border border-[var(--border-color)] px-4 py-2 rounded-xl">
                                         <p className="text-[10px] text-[var(--text-muted)] uppercase">EXPECTANCY</p>
@@ -257,7 +257,7 @@ export function JournalTab() {
                     {[
                         { label: "Active Trades", value: `${activeSignals.length}`, icon: Zap, color: "text-yellow-500" },
                         { label: "Win Rate", value: `${winRate}%`, icon: TrendingUp, color: "text-green-500" },
-                        { label: "Total Pips", value: totalPips > 0 ? `+${totalPips}` : `${totalPips}`, icon: BarChart3, color: totalPips >= 0 ? "text-green-500" : "text-red-500" },
+                        { label: "Total Pips", value: totalPips > 0 ? `+${Number(totalPips).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 3 })}` : `${Number(totalPips).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 3 })}`, icon: BarChart3, color: totalPips >= 0 ? "text-green-500" : "text-red-500" },
                         { label: "Total Logs", value: `${entries.length + signals.length}`, icon: Book, color: "text-[var(--color-info)]" },
                         { label: "Top Mistake", value: topMistake, icon: Brain, color: "text-yellow-500" },
                     ].map((stat, i: number) => (
@@ -339,12 +339,12 @@ export function JournalTab() {
                                                 <div className="flex items-center gap-1">
                                                     <Shield className={`w-3 h-3 ${sig.status === 'CANCELLED' ? 'text-[var(--text-muted)]' : 'text-yellow-500'}`} />
                                                     <span className={`text-[10px] uppercase font-bold ${
-                                                        sig.status === 'CANCELLED' ? 'text-[var(--text-muted)]' : 'text-[var(--text-muted)]'
-                                                    }`}>{sig.status || 'ACTIVE'}</span>
+                                                    sig.status === 'CANCELLED' ? 'text-red-500/50' : 'text-[var(--text-muted)]'
+                                                }`}>{sig.status === 'CANCELLED' ? 'INVALIDATED' : (sig.status || 'ACTIVE')}</span>
                                                 </div>
                                                 <span className={`text-sm font-bold font-mono ${
                                                     (sig.total_pips || 0) >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'
-                                                }`}>{(sig.total_pips || 0) > 0 ? '+' : ''}{sig.total_pips || 0} pips</span>
+                                                }`}>{(sig.total_pips || 0) > 0 ? '+' : ''}{Math.round(sig.total_pips || 0)} pips</span>
                                             </div>
 
                                             {sig.confluence && (
@@ -479,7 +479,7 @@ export function JournalTab() {
                             const isHoldingOnly = holdingSignals.length > 0 && !hadTPHitEvent && !isTradeStartDay;
                             const isActiveToday = isToday && holdingSignals.length > 0 && !hadTPHitEvent && !isTradeStartDay;
                             
-                            const netPips = entryPips + signalPips + holdingDayPips;
+                            const netPips = Math.round((entryPips + signalPips + holdingDayPips) * 1000) / 1000;
                             
                             // Determine label and color
                             let cellStyle = "bg-[#0a0a0a]/50 border-[var(--border-color)] text-gray-800 hover:border-[var(--border-color)]";
@@ -495,11 +495,11 @@ export function JournalTab() {
                                 } else if (isHoldingWithTP && holdingDayPips > 0) {
                                     // Day where a TP was hit - GREEN with pips
                                     cellStyle = "bg-green-500/10 border-green-500/30 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.1)]";
-                                    label = `+${Math.round(holdingDayPips)}`;
+                                    label = `+${Number(holdingDayPips).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 3 })}`;
                                     sublabel = "TP SECURED";
                                 } else if (isTradeStartDay && netPips > 0) {
                                     cellStyle = "bg-green-500/10 border-green-500/30 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.1)]";
-                                    label = `+${Math.round(netPips)}`;
+                                    label = `+${Number(netPips).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 3 })}`;
                                     sublabel = `${dayEntries.length + daySignalsStarted.length} TRADE${(dayEntries.length + daySignalsStarted.length) > 1 ? 'S' : ''}`;
                                 } else if (isTradeStartDay && netPips < 0) {
                                     cellStyle = "bg-red-500/10 border-red-500/30 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.1)]";
@@ -620,8 +620,8 @@ export function JournalTab() {
                             <p className="text-[var(--text-muted)]">No journal entries yet. Start logging your trades!</p>
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
+                        <div className="overflow-x-auto max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-500/20 scrollbar-track-transparent">
+                            <table className="w-full text-left relative">
                                 <thead>
                                     <tr className="border-b border-[var(--border-color)] bg-white/[0.03]">
                                         <th className="p-4 text-xs uppercase tracking-wider text-[var(--text-muted)] font-semibold">Date</th>
@@ -645,7 +645,7 @@ export function JournalTab() {
                                                 </span>
                                             </td>
                                             <td className={`p-4 font-mono ${entry.pips > 0 ? "text-[var(--color-success)]" : entry.pips < 0 ? "text-[var(--color-danger)]" : "text-[var(--text-muted)]"}`}>
-                                                {entry.pips > 0 ? "+" : ""}{entry.pips}
+                                                {entry.pips > 0 ? "+" : ""}{Number(entry.pips).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 3 })}
                                             </td>
                                             <td className="p-4 text-sm text-[var(--text-muted)] italic">
                                                 {entry.mistake !== "None" ? entry.mistake : <span className="text-[var(--text-muted)]">Perfect Execution</span>}
