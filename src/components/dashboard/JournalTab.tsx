@@ -66,6 +66,7 @@ export function JournalTab() {
             .select("*")
             .eq("user_id", user.id)
             .order("date", { ascending: false })
+            .order("created_at", { ascending: false })
 
         if (!error && data) {
             setEntries(data as JournalEntry[])

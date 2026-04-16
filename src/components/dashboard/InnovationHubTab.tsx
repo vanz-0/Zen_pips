@@ -176,16 +176,8 @@ export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
                                     </p>
                                 )}
                                  </form>
-                                 <div className="p-4 bg-[var(--panel-bg)] rounded-2xl border border-[var(--border-color)] mt-6">
-                                     <h3 className="text-[10px] text-[#d4af37] font-bold uppercase mb-2">Institutional Bridge (MT5)</h3>
-                                     <p className="text-[10px] text-[var(--text-muted)] leading-relaxed font-medium">
-                                         The **Zen MT5 Node** is the core bridge. Once deployed, it syncs cloud signals to your local terminal with 1% risk-per-trade logic. 
-                                         <br/><br/>
-                                         <span className="text-white">Status: ⚡ DISCONNECTED (Run `python mt5_bridge.py`)</span>
-                                     </p>
-                                 </div>
-                             </div>
-                         </div>
+                            </div>
+                        </div>
 
                     {/* Proposal Feed */}
                     <div className="lg:col-span-2 space-y-6">
@@ -257,6 +249,73 @@ export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
                                 ))}
                             </div>
                         )}
+
+                        {/* Active Agent Integrations Command Center */}
+                        <div className="mt-8 bg-[var(--panel-bg)] border border-[var(--border-color)] rounded-3xl p-6">
+                            <div className="flex items-center gap-2 mb-6">
+                                <Terminal className="w-5 h-5 text-[#d4af37]" />
+                                <h2 className="text-xl font-bold">Active Agent Ecosystem</h2>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Component 1: MT5 Bridge */}
+                                <div className="bg-[var(--background)] p-4 rounded-2xl border border-[var(--border-color)] group hover:border-[#d4af37]/30 transition-all">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <Zap className="w-4 h-4 text-[#d4af37]" />
+                                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#d4af37]">MT5 Execution Node</h3>
+                                        </div>
+                                        <span className="text-[8px] font-bold px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20">DISCONNECTED</span>
+                                    </div>
+                                    <p className="text-[10px] text-[var(--text-muted)] leading-relaxed font-medium">
+                                        The core execution bridge syncing institutional signals to local terminals with strict 1% risk management. Run `python mt5_bridge.py` to initiate.
+                                    </p>
+                                </div>
+
+                                {/* Component 2: TV Agent Signal Monitor */}
+                                <div className="bg-[var(--background)] p-4 rounded-2xl border border-[var(--border-color)] group hover:border-[#d4af37]/30 transition-all">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <Activity className="w-4 h-4 text-[#d4af37]" />
+                                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#d4af37]">TV Signal Sentinel</h3>
+                                        </div>
+                                        <span className="text-[8px] font-bold px-2 py-0.5 rounded bg-green-500/10 text-green-500 border border-green-500/20">AUTONOMOUS</span>
+                                    </div>
+                                    <p className="text-[10px] text-[var(--text-muted)] leading-relaxed font-medium">
+                                        Replaces external APIs (TwelveData) by extracting real-time price validation directly from the charts to manage SL tracking and TP milestones.
+                                    </p>
+                                </div>
+
+                                {/* Component 3: News Oracle */}
+                                <div className="bg-[var(--background)] p-4 rounded-2xl border border-[var(--border-color)] group hover:border-[#d4af37]/30 transition-all">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <Shield className="w-4 h-4 text-[#d4af37]" />
+                                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#d4af37]">News Oracle</h3>
+                                        </div>
+                                        <span className="text-[8px] font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20">LIVE</span>
+                                    </div>
+                                    <p className="text-[10px] text-[var(--text-muted)] leading-relaxed font-medium">
+                                        Generates the pre-London and pre-New York fundamental briefings autonomously, overriding volatility using institutional risk algorithms.
+                                    </p>
+                                </div>
+
+                                {/* Component 4: Multi-Agent Consensus */}
+                                <div className="bg-[var(--background)] p-4 rounded-2xl border border-[var(--border-color)] group hover:border-[#d4af37]/30 transition-all">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <MessageSquare className="w-4 h-4 text-[#d4af37]" />
+                                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#d4af37]">Consensus AI</h3>
+                                        </div>
+                                        <span className="text-[8px] font-bold px-2 py-0.5 rounded bg-[var(--border-color)] text-[var(--text-muted)] border border-[var(--border-color)]">STANDBY</span>
+                                    </div>
+                                    <p className="text-[10px] text-[var(--text-muted)] leading-relaxed font-medium">
+                                        A multi-agent debate system (Technical vs. Sentiment vs. Risk) utilizing MCP to pre-validate signals before community broadcast.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

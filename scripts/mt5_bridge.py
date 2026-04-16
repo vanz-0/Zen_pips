@@ -21,14 +21,14 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def initialize_mt5():
     if not mt5.initialize():
-        print(f"❌ MT5 Initialization failed: {mt5.last_error()}")
+        print(f"[FAIL] MT5 Initialization failed: {mt5.last_error()}")
         return False
     
-    print("✅ MT5 Connected Successfully")
+    print("[OK] MT5 Connected Successfully")
     account_info = mt5.account_info()
     if account_info:
-        print(f"📡 Trading Account: {account_info.login}")
-        print(f"🏢 Server: {account_info.server}")
+        print(f"[*] Trading Account: {account_info.login}")
+        print(f"[*] Server: {account_info.server}")
     return True
 
 def get_vantage_symbol(base_pair):
@@ -57,13 +57,13 @@ def handle_pending_events():
         if not events:
             return
 
-        print(f"[{datetime.now().strftime('%H:%M:%S')}] 🚀 Found {len(events)} pending execution tasks...")
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] [*] Found {len(events)} pending execution tasks...")
 
         for event in events:
             # Re-verify signal data from 'signals' table
             signal_res = supabase.table("signals").select("*").eq("id", event["signal_id"]).execute()
             if not signal_res.data:
-                print(f"⚠️ Signal {event['signal_id']} not found.")
+                print(f"[WARN] Signal {event['signal_id']} not found.")
                 continue
             
             sig = signal_res.data[0]
@@ -83,10 +83,28 @@ def handle_pending_events():
                 float(sig["tp3"]) if sig.get("tp3") else 0
             ]
 
-            print(f"📈 Attempting 3-Order Split for {direction} {symbol} @ {entry} (0.01 x 3)...")
+            print(f"[*] Attempting 3-Order Split for {direction} {symbol} @ {entry} (0.01 x 3)...")
+
+            # FETCH LIVE PRICE for Logic
+            tick = mt5.symbol_info_tick(symbol)
+            if not tick:
+                print(f"[FAIL] Failed to get live tick for {symbol}. Cannot determine LIMIT vs STOP.")
+                continue
+                
+            current_price = tick.ask if direction == "BUY" else tick.bid
+            
+            if direction == "BUY":
+                # Market > Entry -> Buy Limit. Market < Entry -> Buy Stop
+                order_type = mt5.ORDER_TYPE_BUY_LIMIT if current_price > entry else mt5.ORDER_TYPE_BUY_STOP
+                log_type = "LIMIT" if current_price > entry else "STOP"
+            else:
+                # Market < Entry -> Sell Limit. Market > Entry -> Sell Stop
+                order_type = mt5.ORDER_TYPE_SELL_LIMIT if current_price < entry else mt5.ORDER_TYPE_SELL_STOP
+                log_type = "LIMIT" if current_price < entry else "STOP"
+
+            print(f"   [Routing] Live: {current_price} | Entry: {entry} | Selected: {direction}_{log_type}")
 
             deployed_tickets = []
-            order_type = mt5.ORDER_TYPE_BUY_LIMIT if direction == "BUY" else mt5.ORDER_TYPE_SELL_LIMIT
             
             for i, tp in enumerate(tps):
                 if tp == 0: continue
@@ -108,16 +126,15 @@ def handle_pending_events():
                 result = mt5.order_send(request)
                 
                 if result.retcode != mt5.TRADE_RETCODE_DONE:
-                    print(f"❌ TP{i+1} Order Failed: {result.comment}")
+                    print(f"[FAIL] TP{i+1} Order Failed: {result.comment}")
                 else:
-                    print(f"✅ TP{i+1} Set! Ticket: {result.order}")
+                    print(f"[OK] TP{i+1} Set! Ticket: {result.order}")
                     deployed_tickets.append(str(result.order))
 
             if deployed_tickets:
                 supabase.table("copy_events").update({
                     "status": "SUCCESS",
-                    "mt5_tickets": deployed_tickets,
-                    "executed_at": "now()"
+                    "mt5_tickets": deployed_tickets
                 }).eq("id", event["id"]).execute()
             else:
                 supabase.table("copy_events").update({
@@ -126,11 +143,11 @@ def handle_pending_events():
                 }).eq("id", event["id"]).execute()
 
     except Exception as e:
-        print(f"⚠️ Bridge Logic Error: {e}")
+        print(f"[WARN] Bridge Logic Error: {e}")
 
 if __name__ == "__main__":
     print("--- Zen Pips Institutional MT5 Bridge Starting ---")
-    print(f"📅 Session: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"[*] Session: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     if initialize_mt5():
         last_heartbeat = time.time()
@@ -140,11 +157,11 @@ if __name__ == "__main__":
                 
                 # Heartbeat every 60s
                 if time.time() - last_heartbeat > 60:
-                    print(f"[{datetime.now().strftime('%H:%M:%S')}] 💓 Polling active...")
+                    print(f"[{datetime.now().strftime('%H:%M:%S')}] [*] Polling active...")
                     last_heartbeat = time.time()
                     
                 time.sleep(2) 
         except KeyboardInterrupt:
-            print("\n🛑 Bridge Stopping...")
+            print("\n[!] Bridge Stopping...")
         finally:
             mt5.shutdown()

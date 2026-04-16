@@ -559,33 +559,27 @@ export function ChartAITab() {
                                 </div>
                             </div>
                             {!isTpPassed && (
-                                isAdmin ? (
+                                <div className="space-y-2 mt-2">
                                   <button 
                                       onClick={() => handleExecuteSignal(sig)} 
                                       disabled={executingId === sig.id}
-                                      className={`w-full py-3 rounded-xl font-bold text-[10px] transition-all flex items-center justify-center gap-2 ${executingId === sig.id ? 'bg-zinc-800 text-zinc-500' : 'bg-zinc-800 hover:bg-yellow-500 hover:text-black border border-zinc-700'}`}
+                                      className={`w-full py-3 rounded-xl font-bold text-[10px] transition-all flex items-center justify-center gap-2 ${executingId === sig.id ? 'bg-zinc-800 text-zinc-500' : 'bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-black border border-yellow-500/30'}`}
                                   >
                                       {executingId === sig.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
-                                      EXECUTE (ADMIN)
+                                      EXECUTE ON MT5
                                   </button>
-                                ) : (
-                                  <div className="space-y-2 mt-2">
-                                    <button 
-                                        onClick={() => {
-                                          const text = `🎯 **ZEN PIPS SETUP**\nPair: ${sig.pair}\nDirection: ${sig.direction}\nEntry: ${sig.entry}\nSL: ${sig.sl}\nTP1: ${sig.tp1}`
-                                          navigator.clipboard.writeText(text)
-                                          alert("Copied to clipboard!")
-                                        }} 
-                                        className="w-full py-3 rounded-xl font-bold text-[10px] bg-zinc-800 hover:bg-blue-500 hover:text-white border border-zinc-700 transition-all flex items-center justify-center gap-2"
-                                    >
-                                        <FileText className="w-3 h-3" />
-                                        COPY SETUP
-                                    </button>
-                                    <div className="text-center text-[8px] text-zinc-500 uppercase tracking-widest italic pt-1">
-                                        Autonomous Execution Coming Soon
-                                    </div>
-                                  </div>
-                                )
+                                  <button 
+                                      onClick={() => {
+                                        const text = `🎯 **ZEN PIPS SETUP**\nPair: ${sig.pair}\nDirection: ${sig.direction}\nEntry: ${sig.entry}\nSL: ${sig.sl}\nTP1: ${sig.tp1}`
+                                        navigator.clipboard.writeText(text)
+                                        alert("Copied to clipboard!")
+                                      }} 
+                                      className="w-full py-3 rounded-xl font-bold text-[10px] bg-zinc-800 hover:bg-blue-500 hover:text-white border border-zinc-700 transition-all flex items-center justify-center gap-2"
+                                  >
+                                      <FileText className="w-3 h-3" />
+                                      COPY SETUP
+                                  </button>
+                                </div>
                             )}
                         </div>
                     )
