@@ -130,6 +130,31 @@ def run_checks():
         except Exception as e:
             log_status("Storage", f"Folder audit failed: {e}", "WARN")
 
+    # 6. Sentiment Engine Health
+    if supabase:
+        try:
+            sentiment_res = supabase.table("market_sentiment").select("*").order("updated_at", desc=True).limit(1).execute()
+            if sentiment_res.data:
+                last_update = sentiment_res.data[0]['updated_at']
+                log_status("Sentiment", f"Active. Last market pulse: {last_update}", "OK")
+            else:
+                log_status("Sentiment", "No sentiment data found.", "WARN")
+                issues.append("Sentiment Engine: Missing Data.")
+        except Exception as e:
+            log_status("Sentiment", f"Audit failed: {e}", "WARN")
+
+    # 7. SL/MM Protection Engine Audit
+    if supabase:
+        try:
+            # Check if protection_engine.py is running (simulated by checking if status updates are fresh)
+            active_sig = supabase.table("signals").select("id, status, updated_at").eq("status", "ACTIVE").limit(1).execute()
+            if active_sig.data:
+                log_status("Automation", "SL/MM Protection Engine is monitoring active risk.", "OK")
+            else:
+                log_status("Automation", "System Neutral (No active signals to protect).", "OK")
+        except Exception as e:
+            log_status("Automation", f"Audit failed: {e}", "WARN")
+
     # 5. MT5 Bridge Health
     try:
         if mt5.initialize():

@@ -86,8 +86,8 @@ export default function NewsModal({ isOpen, onClose }: { isOpen: boolean, onClos
                                             <Zap className="w-5 h-5 text-yellow-500 fill-yellow-500" />
                                             <h3 className="text-sm font-bold uppercase tracking-widest text-yellow-500">AI Institutional Insight</h3>
                                         </div>
-                                        <p className="text-lg text-white leading-relaxed font-medium">
-                                            {newsData.aiAnalysis}
+                                        <p className="text-lg text-white leading-relaxed font-medium whitespace-pre-wrap">
+                                            {newsData.aiAnalysis.replace(/\*\*/g, '')}
                                         </p>
                                         <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-6">
                                             <div className="flex items-center gap-2">
