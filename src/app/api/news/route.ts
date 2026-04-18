@@ -17,6 +17,9 @@ export async function GET() {
   const todayStr = now.toISOString().split('T')[0];
 
   try {
+    const day = now.getUTCDay();
+    const isWeekend = day === 0 || day === 6; // 0=Sun, 6=Sat
+
     // 1. Fetch live prices for Technical Confluence
     if (twelveDataKey) {
         try {
@@ -26,6 +29,28 @@ export async function GET() {
         } catch (pErr) {
             console.error("Price fetch failed:", pErr);
         }
+    }
+
+    // 2. Determine if we should trigger an AUTO-OPEN (Fresh Data Trigger)
+    let triggerOpen = false;
+    const tenMinsAgo = new Date(now.getTime() - 10 * 60 * 1000).toISOString();
+
+    // Check for fresh signals (last 10 mins)
+    const { data: freshSignals } = await supabase
+      .from('signals')
+      .select('id')
+      .gt('created_at', tenMinsAgo)
+      .limit(1);
+
+    // Check for fresh news (last 10 mins)
+    const { data: freshNews } = await supabase
+      .from('market_news')
+      .select('id')
+      .gt('created_at', tenMinsAgo)
+      .limit(1);
+
+    if (freshSignals?.length || freshNews?.length) {
+      triggerOpen = true;
     }
 
     if (finnhubKey) {
@@ -39,53 +64,66 @@ export async function GET() {
         );
         
         if (relevantEvents.length > 0) {
-           events = relevantEvents.map((ev: any) => ({
-             id: `news-${ev.id || Math.random()}`,
-             currency: ev.country,
-             impact: ev.impact === "high" ? "High" : "Medium",
-             event: ev.event,
-             time: ev.time,
-             forecast: ev.estimate || "PROD",
-             previous: ev.previous || "N/A",
-             source: "Forex Factory / Finnhub",
-             sourceUrl: `https://www.forexfactory.com/calendar?day=${todayStr}`
-           }));
+            events = relevantEvents.map((ev: any) => ({
+              id: `news-${ev.id || Math.random()}`,
+              currency: ev.country,
+              impact: ev.impact === "high" ? "High" : "Medium",
+              event: ev.event,
+              time: ev.time,
+              forecast: ev.estimate || "PROD",
+              previous: ev.previous || "N/A",
+              source: "Forex Factory / Finnhub",
+              sourceUrl: `https://www.forexfactory.com/calendar?day=${todayStr}`
+            }));
 
-           events.sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime());
+            events.sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime());
 
-           const openaiKey = process.env.OPENAI_API_KEY;
-           if (openaiKey) {
-             try {
-               const eventSummary = events.map((e: any) => `${e.currency} ${e.event} (${e.impact})`).join(', ');
-               const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-                 method: 'POST',
-                 headers: {
-                   'Authorization': `Bearer ${openaiKey}`,
-                   'Content-Type': 'application/json'
-                 },
-                 body: JSON.stringify({
-                   model: "gpt-4o",
-                   messages: [{
-                     role: "system",
-                     content: "You are a senior institutional FX analyst. Provide direct, instruction-giving trading conclusions based on the provided economic events and current price levels. Do not use markdown. Use plenty of emojis. Specifically explain the perspective for the 'Bears' (Downside risk) and 'Bulls' (Upside potential). Keep it concise and professional. Structure: [Event] - [Instruction] - [Bulls/Bears Confluence]."
-                   }, {
-                     role: "user",
-                     content: `Current Technical Context: ${technicalConfluence}. Events today: ${eventSummary}. Generate analysis and instructions.`
-                   }]
-                 })
-               });
-               const aiData = await aiResponse.json();
-               analysis = aiData.choices[0].message.content;
-             } catch (aiErr) {
-               console.error("AI Analysis failed:", aiErr);
-               analysis = "🚨 *ALERT*: High volatility expected at ${technicalConfluence}. Avoid direct exposure during releases. Institutional liquidity grabs likely.";
-             }
-           }
+            const openaiKey = process.env.OPENAI_API_KEY;
+            if (openaiKey) {
+              try {
+                const eventSummary = events.map((e: any) => `${e.currency} ${e.event} (${e.impact})`).join(', ');
+                const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${openaiKey}`,
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    model: "gpt-4o",
+                    messages: [{
+                      role: "system",
+                      content: "You are a senior institutional FX analyst. Provide direct, instruction-giving trading conclusions based on the provided economic events and current price levels. Do not use markdown. Use plenty of emojis. Specifically explain the perspective for the 'Bears' (Downside risk) and 'Bulls' (Upside potential). Keep it concise and professional. Structure: [Event] - [Instruction] - [Bulls/Bears Confluence]."
+                    }, {
+                      role: "user",
+                      content: `Current Technical Context: ${technicalConfluence}. Events today: ${eventSummary}. Generate analysis and instructions.`
+                    }]
+                  })
+                });
+                const aiData = await aiResponse.json();
+                analysis = aiData.choices[0].message.content;
+              } catch (aiErr) {
+                console.error("AI Analysis failed:", aiErr);
+                analysis = "🚨 *ALERT*: High volatility expected. Avoid direct exposure during releases. Institutional liquidity grabs likely.";
+              }
+            }
         }
       }
     }
 
+    // Weekend Logic & Mock Event filtering
     if (events.length === 0) {
+      if (isWeekend) {
+        // Only show crypto news or equilibrium status on weekends
+        return NextResponse.json({
+          date: now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+          events: [],
+          aiAnalysis: "FX Markets are currently closed for the weekend. Bitcoin and Crypto markets remain active with high institutional volatility. No high-impact FX events detected.",
+          technicalSummary: technicalConfluence,
+          activeBlackout: { isBlackout: false, start: "", end: "", reason: "Weekend Market Close" },
+          triggerOpen: triggerOpen
+        });
+      }
+
       events = [{
           id: "news-mock-1",
           currency: "USD",
@@ -98,8 +136,6 @@ export async function GET() {
       analysis = `⚠️ ZENP CORE ANALYTICS: ${technicalConfluence} Market reveals institutional divergence. Maintain a conservative bias until New York open.`;
     }
 
-    // Forex Factory / Professional News Validation Check
-    // If no high impact events are validated, we return a 'System Healthy' status instead of a news alert
     const hasHighImpact = events.some((e: any) => e.impact === "High");
     if (!hasHighImpact && events.length > 0 && events[0].id.startsWith("news-mock")) {
        return NextResponse.json({
@@ -107,7 +143,8 @@ export async function GET() {
          events: [],
          aiAnalysis: "System is in institutional equilibrium. No high-impact volatility detected through the Forex Factory cross-check. Focus on core liquidity levels.",
          technicalSummary: technicalConfluence,
-         activeBlackout: { isBlackout: false, start: "", end: "", reason: "" }
+         activeBlackout: { isBlackout: false, start: "", end: "", reason: "" },
+         triggerOpen: triggerOpen
        });
     }
 
@@ -116,7 +153,8 @@ export async function GET() {
       events: events,
       aiAnalysis: analysis,
       technicalSummary: technicalConfluence,
-      activeBlackout: activeBlackout
+      activeBlackout: activeBlackout,
+      triggerOpen: triggerOpen
     });
 
   } catch (err: any) {

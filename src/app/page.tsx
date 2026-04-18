@@ -57,9 +57,20 @@ function DashboardContent() {
         if (data?.activeBlackout?.isBlackout) {
           setBlackout({ isBlackout: true, reason: data.activeBlackout.reason || "High Impact News" });
         }
+        
+        // Auto-open logic: only if the API says to trigger AND we haven't auto-opened for this specific event date/time yet
+        if (data?.triggerOpen && user) {
+          const lastTriggeredAt = localStorage.getItem('last_news_trigger');
+          const currentTriggerTime = data.events?.[0]?.time || data.date;
+          
+          if (lastTriggeredAt !== currentTriggerTime) {
+            setIsNewsOpen(true);
+            localStorage.setItem('last_news_trigger', currentTriggerTime);
+          }
+        }
       })
       .catch(err => console.error(err));
-  }, []);
+  }, [user]);
 
   // Derived stats
   const totalPipsToday = signals
