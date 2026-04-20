@@ -12,6 +12,9 @@ class LinksManager:
     
     def __init__(self):
         self.base_domain = os.getenv("NEXT_PUBLIC_SITE_URL", "https://zenpips.netlify.app")
+        # Community Channel / Support Bot
+        self.channel_link = "https://t.me/+_gM-I1B7_p00MjZk" # Replaced with standard channel invite pattern or actual link if known
+        self.bot_link = "https://t.me/zenpips_support_bot"
         
         # Free Lead Magnets (Cold Leads - Value First)
         self.educational_links = [
@@ -24,44 +27,47 @@ class LinksManager:
         self.community_links = [
             f"{self.base_domain}?tab=community",
             f"{self.base_domain}?tab=chartai",
-            "https://t.me/zenpips_support_bot" # Funnel to the bot
+            self.channel_link
         ]
         
         # High Intent (Hot Leads)
         self.action_links = [
             "https://www.vantagemarkets.com/", # TODO: Replace with User's Affiliate URL
             f"{self.base_domain}?tab=journal",
-            "https://t.me/zenpips_support_bot?start=vip"
+            f"{self.bot_link}?start=vip"
         ]
 
     def get_cta(self, temperature="warm"):
         """
-        Returns a formatted Markdown CTA for social media platforms.
+        Returns a dictionary with 'text' and 'url' for the CTA.
         Temperature can be 'cold', 'warm', or 'hot'.
         """
         if temperature == "cold":
             link = random.choice(self.educational_links)
             message = [
-                f"I actually dive deeper into this institutional approach over at Zen Pips: {link}",
-                f"If you're tired of retail traps, grab our free institutional blueprint here: {link}",
-                f"We just published an analysis that covers this exact scenario: {link}"
+                "I actually dive deeper into this institutional approach over at Zen Pips: [here]",
+                "If you're tired of retail traps, grab our free institutional blueprint: [here]",
+                "We just published an analysis that covers this exact scenario: [details]"
             ]
         elif temperature == "hot":
             link = random.choice(self.action_links)
             message = [
-                f"We execute these exact institutional setups live. See the raw journal: {link}",
-                f"Ready to trade with real institutional liquidity? Get the exact tools here: {link}",
-                f"Connect directly with our autonomous AI for live setups: {link}"
+                "We execute these exact institutional setups live. See the raw journal: [here]",
+                "Ready to trade with real institutional liquidity? Get the tools [here]",
+                "Connect directly with our autonomous AI for live setups: [start]"
             ]
         else: # Warm
             link = random.choice(self.community_links)
             message = [
-                f"Drop this chart into our free Chart AI at Zen Pips to see the real institutional zones: {link}",
-                f"Our community was just discussing this exact pair today: {link}",
-                f"Let our AI bot break down this setup for you directly in Telegram: {link}"
+                "Drop this chart into our free Chart AI to see the real institutional zones: [here]",
+                "Our community was just discussing this institutional move today: [community]",
+                "Let our AI bot break down this setup for you directly in Telegram: [here]"
             ]
             
-        return random.choice(message)
+        return {
+            "text": random.choice(message),
+            "url": link
+        }
 
 # Simple manual test if run directly
 if __name__ == "__main__":
