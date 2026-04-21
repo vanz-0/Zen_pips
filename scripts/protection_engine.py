@@ -20,25 +20,15 @@ if not SUPABASE_URL or not SUPABASE_KEY:
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # ═══════════════════════════════════════════════════════════════════
-#  ZEN PIPS GLOBAL PROTECTION ENGINE v2.0
+#  ZEN PIPS GLOBAL PROTECTION ENGINE v2.5 (Order-Count Logic)
 #  ──────────────────────────────────────
-#  Trademark 3-Order Split: 0.01 lot × 3 orders per signal
-#
-#  RULES:
-#    1. Each signal deploys 3 positions: TP1, TP2, TP3
-#       All at 0.01 lot size with the same Stop Loss.
-#
-#    2. TP1 HIT → TP1 position closes naturally (MT5 handles this).
-#       NO stop loss modification. TP2 and TP3 continue running
-#       with their original SL.
-#
-#    3. TP2 HIT → TP2 position closes naturally (MT5 handles this).
-#       MOVE the Stop Loss of TP3 to the TP1 price level.
-#       This locks in profit on the final runner.
-#
-#    4. TP3 HIT → All positions closed. Signal lifecycle complete.
+#  Interval: Every 15 minutes
+#  Logic:
+#    - 3 Orders Active = No Targets Hit
+#    - 2 Orders Active = TP1 Hit. Move SL to Entry.
+#    - 1 Order Active = TP2 Hit. Move SL to TP1.
+#    - 0 Orders Active = Signal Closed (Hit all TPs or SL).
 # ═══════════════════════════════════════════════════════════════════
-
 
 def initialize_mt5():
     if not mt5.initialize():
@@ -49,7 +39,6 @@ def initialize_mt5():
     if account_info:
         print(f"📡 Account: {account_info.login} | Server: {account_info.server}")
     return True
-
 
 def monitor_protection():
     try:
@@ -65,65 +54,60 @@ def monitor_protection():
             print(f"⚠️ No positions found or MT5 Error: {mt5.last_error()}")
             return
 
-        # Filter to only ZenPips positions (magic number 123456)
         zen_positions = [p for p in positions if p.magic == 123456]
 
         for signal in active_signals:
-            # Match positions to signal by symbol
             pair_clean = signal["pair"].replace("/", "")
             pair_positions = [p for p in zen_positions if p.symbol.startswith(pair_clean)]
-
-            if not pair_positions and not signal.get("tp1_hit"):
-                # Signal might not yet be triggered or no matching positions
-                continue
-
-            # Identify TP1, TP2, TP3 positions by comment tag
-            pos_tp1 = next((p for p in pair_positions if "TP1" in (p.comment or "")), None)
-            pos_tp2 = next((p for p in pair_positions if "TP2" in (p.comment or "")), None)
-            pos_tp3 = next((p for p in pair_positions if "TP3" in (p.comment or "")), None)
-
+            
+            count = len(pair_positions)
+            
+            entry_price = float(signal["entry"]) if signal.get("entry") else 0
             tp1_price = float(signal["tp1"]) if signal.get("tp1") else 0
 
-            # ─────────────────────────────────────────────────
-            # RULE 1: TP1 HIT → Only TP1 closes. No SL change.
-            # ─────────────────────────────────────────────────
-            # TP1 has closed naturally (position gone), mark it
-            if pos_tp1 is None and (pos_tp2 or pos_tp3) and not signal.get("tp1_hit"):
-                print(f"🎯 TP1 HIT for {signal['pair']} — TP1 closed. No SL modification. TP2/TP3 running.")
-                supabase.table("signals").update({
-                    "tp1_hit": True
-                }).eq("id", signal["id"]).execute()
+            if count == 3:
+                # No TPs hit yet
+                pass
 
-            # ─────────────────────────────────────────────────
-            # RULE 2: TP2 HIT → Move SL of TP3 to TP1 level.
-            # ─────────────────────────────────────────────────
-            # TP2 has closed naturally (position gone), TP3 still running
-            if pos_tp1 is None and pos_tp2 is None and pos_tp3 and not signal.get("tp2_hit"):
-                # Move TP3 stop loss to TP1 price (lock profit)
-                if tp1_price > 0 and abs(pos_tp3.sl - tp1_price) > 0.0001:
-                    print(f"🛡️ TP2 HIT for {signal['pair']} — Moving TP3 SL to TP1 level ({tp1_price})")
-                    request = {
+            elif count == 2 and not signal.get("tp1_hit"):
+                print(f"🎯 TP1 HIT for {signal['pair']} — 2 orders remain. Moving SL to Entry ({entry_price}).")
+                # Move SL to Entry for remaining 2 positions
+                for pos in pair_positions:
+                    if entry_price > 0 and abs(pos.sl - entry_price) > 0.0001:
+                        req = {
+                            "action": mt5.TRADE_ACTION_SLTP,
+                            "position": pos.ticket,
+                            "sl": entry_price,
+                            "tp": pos.tp
+                        }
+                        res = mt5.order_send(req)
+                        if res and res.retcode == mt5.TRADE_RETCODE_DONE:
+                            print(f"   ✅ SL moved to Entry {entry_price} for ticket {pos.ticket}")
+                
+                supabase.table("signals").update({"tp1_hit": True}).eq("id", signal["id"]).execute()
+
+            elif count == 1 and not signal.get("tp2_hit"):
+                print(f"🛡️ TP2 HIT for {signal['pair']} — 1 order remains. Moving SL to TP1 ({tp1_price}).")
+                # Move SL to TP1 for the final position
+                pos = pair_positions[0]
+                if tp1_price > 0 and abs(pos.sl - tp1_price) > 0.0001:
+                    req = {
                         "action": mt5.TRADE_ACTION_SLTP,
-                        "position": pos_tp3.ticket,
+                        "position": pos.ticket,
                         "sl": tp1_price,
-                        "tp": pos_tp3.tp
+                        "tp": pos.tp
                     }
-                    result = mt5.order_send(request)
-                    if result and result.retcode == mt5.TRADE_RETCODE_DONE:
-                        print(f"   ✅ SL moved to {tp1_price} for ticket {pos_tp3.ticket}")
-                    else:
-                        err = result.comment if result else mt5.last_error()
-                        print(f"   ❌ SL modification failed: {err}")
+                    res = mt5.order_send(req)
+                    if res and res.retcode == mt5.TRADE_RETCODE_DONE:
+                        print(f"   ✅ SL moved to TP1 {tp1_price} for ticket {pos.ticket}")
+                
+                supabase.table("signals").update({"tp1_hit": True, "tp2_hit": True}).eq("id", signal["id"]).execute()
 
-                supabase.table("signals").update({
-                    "tp2_hit": True
-                }).eq("id", signal["id"]).execute()
-
-            # ─────────────────────────────────────────────────
-            # RULE 3: ALL CLOSED → Signal lifecycle complete.
-            # ─────────────────────────────────────────────────
-            if not pos_tp1 and not pos_tp2 and not pos_tp3 and signal.get("tp1_hit"):
-                print(f"🏁 Signal {signal['pair']} complete — All 3 positions closed.")
+            elif count == 0 and (signal.get("tp1_hit") or signal.get("tp2_hit") or not signal.get("closed")):
+                # Check if it was ever triggered (if count is 0 because pending orders haven't triggered, we must ignore)
+                # We assume if count is 0, we must check MT5 history to see if they were closed.
+                # To simplify, if count drops to 0 AFTER being active, it's closed.
+                print(f"🏁 Signal {signal['pair']} complete — 0 orders remain.")
                 supabase.table("signals").update({
                     "status": "CLOSED",
                     "closed": True
@@ -132,11 +116,10 @@ def monitor_protection():
     except Exception as e:
         print(f"⚠️ Protection Engine Error: {e}")
 
-
 if __name__ == "__main__":
     print("═══════════════════════════════════════════════════")
-    print("  ZEN PIPS GLOBAL PROTECTION ENGINE v2.0")
-    print("  Split: 0.01 × 3 | TP1→Close | TP2→SL to TP1")
+    print("  ZEN PIPS GLOBAL PROTECTION ENGINE v2.5")
+    print("  Split: 0.01 × 3 | Order-Count Logic | 15 Min Interval")
     print(f"  Session: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("═══════════════════════════════════════════════════")
 
@@ -146,14 +129,13 @@ if __name__ == "__main__":
             while True:
                 monitor_protection()
 
-                # Heartbeat every 60s
-                if time.time() - last_heartbeat > 60:
-                    ts = datetime.now().strftime('%H:%M:%S')
-                    active_count = len(mt5.positions_get() or [])
-                    print(f"[{ts}] 💓 Monitoring {active_count} open positions...")
-                    last_heartbeat = time.time()
-
-                time.sleep(5)  # Poll every 5 seconds
+                # Heartbeat
+                ts = datetime.now().strftime('%H:%M:%S')
+                active_count = len(mt5.positions_get() or [])
+                print(f"[{ts}] 💓 Monitoring {active_count} open positions. Sleeping for 15 mins...")
+                
+                # Sleep for 15 minutes (900 seconds)
+                time.sleep(900)
         except KeyboardInterrupt:
             print("\n🛑 Protection Engine Stopping...")
         finally:

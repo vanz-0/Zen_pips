@@ -152,17 +152,17 @@ function DashboardContent() {
             </button>
           </div>
           {/* Desktop nav links */}
-          <div className="hidden lg:flex gap-8 text-sm font-medium text-[var(--text-muted)]">
+          <div className="hidden lg:flex gap-8 text-sm font-medium text-[var(--text-muted)]" suppressHydrationWarning>
             {user ? (
               <>
-                <button onClick={() => handleNavClick(null)} className="hover:text-[var(--foreground)] transition-colors duration-300">Home</button>
-                <button onClick={() => handleNavClick("help")} className={`hover:text-[#d4af37] transition-colors duration-300 font-bold ${activeTab === 'help' ? 'text-[#d4af37]' : 'text-[var(--text-muted)]'}`}>Setup Guide</button>
-                <button onClick={() => handleNavClick("profile")} className={`hover:text-[var(--foreground)] transition-colors duration-300 ${activeTab === 'profile' ? 'text-yellow-500 font-bold' : ''}`}>Analytics</button>
-                <button onClick={() => handleNavClick("chartai")} className={`hover:text-[#d4af37] transition-colors duration-300 font-semibold ${activeTab === 'chartai' ? 'text-[#d4af37]' : ''}`}>Chart AI</button>
-                <button onClick={() => handleNavClick("innovation")} className={`hover:text-[#d4af37] transition-colors duration-300 font-semibold ${activeTab === 'innovation' ? 'text-[#d4af37]' : ''}`}>Innovation Hub</button>
-                <button onClick={() => handleNavClick("community")} className={`hover:text-[var(--foreground)] transition-colors duration-300 ${activeTab === 'community' ? 'text-yellow-500 font-bold' : ''}`}>Community</button>
-                <button onClick={() => handleNavClick("vault")} className={`hover:text-[var(--foreground)] transition-colors duration-300 ${activeTab === 'vault' ? 'text-yellow-500 font-bold' : ''}`}>Vault</button>
-                <button onClick={() => handleNavClick("journal")} className={`hover:text-[var(--foreground)] transition-colors duration-300 ${activeTab === 'journal' ? 'text-yellow-500 font-bold' : ''}`}>Journal</button>
+                <button onClick={() => handleNavClick(null)} className="hover:text-[var(--foreground)] transition-colors duration-300" suppressHydrationWarning>Home</button>
+                <button onClick={() => handleNavClick("help")} className={`hover:text-[#d4af37] transition-colors duration-300 font-bold ${activeTab === 'help' ? 'text-[#d4af37]' : 'text-[var(--text-muted)]'}`} suppressHydrationWarning>Setup Guide</button>
+                <button onClick={() => handleNavClick("profile")} className={`hover:text-[var(--foreground)] transition-colors duration-300 ${activeTab === 'profile' ? 'text-yellow-500 font-bold' : ''}`} suppressHydrationWarning>Analytics</button>
+                <button onClick={() => handleNavClick("chartai")} className={`hover:text-[#d4af37] transition-colors duration-300 font-semibold ${activeTab === 'chartai' ? 'text-[#d4af37]' : ''}`} suppressHydrationWarning>Chart AI</button>
+                <button onClick={() => handleNavClick("innovation")} className={`hover:text-[#d4af37] transition-colors duration-300 font-semibold ${activeTab === 'innovation' ? 'text-[#d4af37]' : ''}`} suppressHydrationWarning>Innovation Hub</button>
+                <button onClick={() => handleNavClick("community")} className={`hover:text-[var(--foreground)] transition-colors duration-300 ${activeTab === 'community' ? 'text-yellow-500 font-bold' : ''}`} suppressHydrationWarning>Community</button>
+                <button onClick={() => handleNavClick("vault")} className={`hover:text-[var(--foreground)] transition-colors duration-300 ${activeTab === 'vault' ? 'text-yellow-500 font-bold' : ''}`} suppressHydrationWarning>Vault</button>
+                <button onClick={() => handleNavClick("journal")} className={`hover:text-[var(--foreground)] transition-colors duration-300 ${activeTab === 'journal' ? 'text-yellow-500 font-bold' : ''}`} suppressHydrationWarning>Journal</button>
                 <a href="/blog" className="hover:text-[var(--foreground)] transition-colors duration-300 font-semibold px-3 py-1 rounded-lg bg-[var(--card-bg)] border border-[var(--border-color)]">Blog</a>
               </>
             ) : (

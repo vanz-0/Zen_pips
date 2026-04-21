@@ -376,8 +376,8 @@ export function JournalTab() {
                                 {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
                             </span>
                             <div className="flex bg-[var(--panel-bg)] rounded-xl p-1 border border-[var(--border-color)]">
-                                <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))} className="p-2 hover:bg-[var(--border-color)] rounded-lg transition-colors"><ChevronLeft className="w-4 h-4" /></button>
-                                <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))} className="p-2 hover:bg-[var(--border-color)] rounded-lg transition-colors"><ChevronRight className="w-4 h-4" /></button>
+                                <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-2 hover:bg-[var(--border-color)] rounded-lg transition-colors"><ChevronLeft className="w-4 h-4" /></button>
+                                <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))} className="p-2 hover:bg-[var(--border-color)] rounded-lg transition-colors"><ChevronRight className="w-4 h-4" /></button>
                             </div>
                         </div>
                     </div>

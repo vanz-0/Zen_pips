@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Zap, Send, RefreshCw, CheckCircle2, AlertCircle, Mic, BarChart2, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
@@ -101,7 +101,7 @@ function ThesisSection({
 
 export function SignalControlPanel() {
     const { user } = useAuth();
-    const isAdmin = user?.email === "dev@zenpips.com" || user?.email === "admin@zenpips.com";
+    const isAdmin = user?.email === "dev@zenpips.com" || user?.email === "admin@zenpips.com" || user?.email === "merchzenith@gmail.com";
 
     const [formData, setFormData] = useState<SignalFormData>({
         pair: "XAU/USD",
@@ -126,6 +126,16 @@ export function SignalControlPanel() {
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<{ type: "success" | "error" | null; message: string }>({ type: null, message: "" });
     const [isListening, setIsListening] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setSelectedImage(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
 
     const updateField = (field: keyof SignalFormData, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -175,9 +185,50 @@ export function SignalControlPanel() {
             setStatus({ type: "error", message: "Please fill in Entry, SL, and at least TP1." });
             return;
         }
+        if (!selectedImage) {
+            setStatus({ type: "error", message: "Chart screenshot is required for validation and community." });
+            return;
+        }
         setLoading(true);
         setStatus({ type: null, message: "" });
         try {
+            // 1. Upload to Supabase Storage
+            const fileExt = selectedImage.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+            
+            const { error: uploadError } = await supabase.storage
+                .from('setups-and-charts')
+                .upload(fileName, selectedImage);
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('setups-and-charts')
+                .getPublicUrl(fileName);
+
+            // 2. Validate Chart if not admin
+            if (!isAdmin) {
+                const res = await fetch("/api/validate-chart", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        imageUrl: publicUrl,
+                        pair: formData.pair,
+                        entry: formData.entry,
+                        sl: formData.sl,
+                        tp1: formData.tp1,
+                        tp2: formData.tp2,
+                        tp3: formData.tp3
+                    })
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json();
+                    await supabase.storage.from('setups-and-charts').remove([fileName]);
+                    throw new Error(errData.error || "Chart validation failed.");
+                }
+            }
+
             const ticker = formData.pair.replace("/", "");
             const isMetal = formData.pair.includes("XAU") || formData.pair.includes("XAG");
             const pipMultiplier = isMetal ? 10 : formData.pair.includes("JPY") ? 100 : 1;
@@ -190,17 +241,27 @@ export function SignalControlPanel() {
                 tp2: parseFloat(formData.tp2), tp3: parseFloat(formData.tp3),
                 tp1_hit: false, tp2_hit: false, tp3_hit: false, sl_hit: false,
                 closed: false, total_pips: 0, pip_multiplier: pipMultiplier,
-                confluence: formData.confluence || "High-probability setup. Structure confirmed."
+                confluence: formData.confluence || "High-probability setup. Structure confirmed.",
+                image_url: publicUrl
             }]);
 
             if (error) throw error;
 
-            // Send to Community Tab
-            const messageTxt = `🚨 <b>${formData.direction} ${formData.pair}</b> @ ${formData.entry} 🚨\n\n🎯 TP1: ${formData.tp1}\n🎯 TP2: ${formData.tp2}\n🎯 TP3: ${formData.tp3}\n🛑 SL: ${formData.sl}\n\n📝 Confluence:\n${formData.confluence || "High-probability setup."}`;
+            // Send to Community Tab (setups-and-charts channel gets the image)
+            const analysisText = formData.confluence || "High-probability setup.";
+            const setupsMessageTxt = `🚨 <b>${formData.direction} ${formData.pair}</b> @ ${formData.entry} 🚨\n\n🎯 TP1: ${formData.tp1}\n🎯 TP2: ${formData.tp2}\n🎯 TP3: ${formData.tp3}\n🛑 SL: ${formData.sl}\n\n📝 Analysis:\n${analysisText}\n\n${publicUrl}`;
             
             await supabase.from("community_messages").insert([{
-                content: messageTxt.replace(/<b>/g, '**').replace(/<\/b>/g, '**'), // Converting HTML to MD for community
+                content: setupsMessageTxt.replace(/<b>/g, '**').replace(/<\/b>/g, '**'),
                 channel: "setups-and-charts",
+                user_id: user?.id || "00000000-0000-0000-0000-000000000000"
+            }]);
+
+            // General channel gets discussion and anticipation
+            const generalMessageTxt = `New ${formData.pair} signal is live! We've verified the SMC/ICT structure. Anticipating movement shortly. Check setups-and-charts for the full breakdown.`;
+            await supabase.from("community_messages").insert([{
+                content: generalMessageTxt,
+                channel: "general-chat",
                 user_id: user?.id || "00000000-0000-0000-0000-000000000000"
             }]);
 
@@ -208,10 +269,12 @@ export function SignalControlPanel() {
             await fetch("/api/telegram-broadcast", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: messageTxt })
+                body: JSON.stringify({ message: setupsMessageTxt, imageUrl: publicUrl })
             });
 
             setStatus({ type: "success", message: `✅ Signal for ${formData.pair} broadcast to all partners and Telegram!` });
+            setSelectedImage(null);
+            setImagePreview(null);
         } catch (err: any) {
             setStatus({ type: "error", message: err.message || "Failed to publish signal." });
         } finally {
@@ -338,6 +401,31 @@ export function SignalControlPanel() {
                         ))}
                     </div>
 
+                    {/* Screenshot Upload */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Chart Screenshot</label>
+                        <div className="flex items-center gap-4">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                className="hidden"
+                                id="screenshot-upload"
+                            />
+                            <label
+                                htmlFor="screenshot-upload"
+                                className="flex-1 cursor-pointer bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-400 hover:border-[#d4af37]/50 hover:text-white transition-all text-center border-dashed"
+                            >
+                                {selectedImage ? selectedImage.name : "Click to upload chart (Required)"}
+                            </label>
+                        </div>
+                        {imagePreview && (
+                            <div className="mt-2 relative rounded-xl overflow-hidden border border-white/10">
+                                <img src={imagePreview} alt="Preview" className="w-full h-auto object-cover max-h-48" />
+                            </div>
+                        )}
+                    </div>
+
                     {/* Confluence (auto-filled by thesis, but editable) */}
                     <div className="space-y-2">
                         <div className="flex items-center justify-between ml-1">
@@ -428,6 +516,86 @@ export function SignalControlPanel() {
                         <p className="border-l border-green-500/30 pl-2 py-0.5 text-green-600">[{new Date().toLocaleTimeString()}] Thesis Validator online. Autonomous BE-Monitor active.</p>
                     </div>
                 </div>
+
+                {/* Pending Approvals Queue */}
+                <PendingApprovalsQueue />
+            </div>
+        </div>
+    );
+}
+
+// ─── Subcomponent: Pending Approvals Queue ───
+function PendingApprovalsQueue() {
+    const [pending, setPending] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    const fetchPending = async () => {
+        setLoading(true);
+        const { data } = await supabase
+            .from("community_messages")
+            .select("*")
+            .eq("channel", "pending-setups")
+            .order("created_at", { ascending: false });
+        if (data) setPending(data);
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        fetchPending();
+    }, []);
+
+    const handleApprove = async (msg: any) => {
+        // Move to setups-and-charts
+        const { error } = await supabase
+            .from("community_messages")
+            .update({ channel: "setups-and-charts" })
+            .eq("id", msg.id);
+        
+        if (!error) {
+            alert("Signal Approved and Published!");
+            fetchPending();
+        } else {
+            alert("Failed to approve.");
+        }
+    };
+
+    const handleReject = async (id: string) => {
+        const { error } = await supabase
+            .from("community_messages")
+            .delete()
+            .eq("id", id);
+        
+        if (!error) {
+            fetchPending();
+        }
+    };
+
+    return (
+        <div className="bg-[#111]/80 border border-yellow-500/10 rounded-3xl p-6 shadow-2xl flex flex-col max-h-[400px]">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-black text-yellow-500 tracking-tight flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" /> PENDING USER SIGNALS
+                </h3>
+                <span className="text-[10px] bg-yellow-500/10 text-yellow-500 px-2 py-0.5 rounded-full font-bold">{pending.length}</span>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar">
+                {loading ? (
+                    <div className="flex justify-center p-4"><RefreshCw className="w-4 h-4 animate-spin text-gray-500" /></div>
+                ) : pending.length === 0 ? (
+                    <div className="text-[10px] text-gray-500 text-center py-4 uppercase font-bold tracking-widest">No pending signals</div>
+                ) : (
+                    pending.map(p => (
+                        <div key={p.id} className="bg-black/40 border border-white/5 rounded-xl p-4 space-y-3">
+                            <p className="text-[10px] text-gray-400 font-mono whitespace-pre-wrap line-clamp-3">{p.content}</p>
+                            {p.image && <img src={p.image} alt="Chart" className="w-full h-24 object-cover rounded-lg border border-white/10" />}
+                            <div className="flex gap-2">
+                                <button onClick={() => handleApprove(p)} className="flex-1 bg-green-500/10 text-green-500 hover:bg-green-500/20 py-2 rounded-lg text-[10px] font-bold uppercase transition-colors">Approve</button>
+                                <button onClick={() => handleReject(p.id)} className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500/20 py-2 rounded-lg text-[10px] font-bold uppercase transition-colors">Reject</button>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );

@@ -11,7 +11,12 @@ export default function ChatWidget() {
     const { user } = useAuth()
     const { theme } = useTheme()
     const [isOpen, setIsOpen] = useState(false)
+    const [mounted, setMounted] = useState(false)
     const chatRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
     const [messages, setMessages] = useState([
         { role: "assistant", content: "Zen Pips Terminal active. Query institutional parameters, SOPs, or trading framework below." }
     ])
@@ -78,7 +83,7 @@ export default function ChatWidget() {
         <>
             {/* Toggle Button */}
             <AnimatePresence>
-                {!isOpen && (
+                {mounted && !isOpen && (
                     <motion.button
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -93,7 +98,7 @@ export default function ChatWidget() {
 
             {/* Chat Window */}
             <AnimatePresence>
-                {isOpen && (
+                {mounted && isOpen && (
                     <motion.div
                         ref={chatRef}
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}

@@ -34,12 +34,28 @@ export interface SignalData {
 
 // ─── Watchlist pairs ───
 const WATCHLIST = [
-    { symbol: "OANDA:XAUUSD", display: "XAU/USD", name: "Gold", price: "5,183.47", change: "+0.87%", up: true },
-    { symbol: "OANDA:XAGUSD", display: "XAG/USD", name: "Silver", price: "88.302", change: "+1.59%", up: true },
-    { symbol: "COINBASE:BTCUSD", display: "BTC/USD", name: "Bitcoin", price: "66,045.0", change: "+3.08%", up: true },
-    { symbol: "OANDA:GBPUSD", display: "GBP/USD", name: "British Pound", price: "1.35047", change: "+0.13%", up: true },
-    { symbol: "OANDA:EURUSD", display: "EUR/USD", name: "Euro", price: "1.17805", change: "+0.07%", up: true },
-    { symbol: "COINBASE:ETHUSD", display: "ETH/USD", name: "Ethereum", price: "1,917.84", change: "-3.43%", up: false },
+    // Forex
+    { symbol: "OANDA:EURUSD", display: "EUR/USD", name: "Euro", price: "1.08250", change: "+0.12%", up: true, category: "Forex" },
+    { symbol: "OANDA:GBPUSD", display: "GBP/USD", name: "British Pound", price: "1.26540", change: "+0.05%", up: true, category: "Forex" },
+    { symbol: "OANDA:EURGBP", display: "EUR/GBP", name: "Euro / Pound", price: "0.85520", change: "-0.08%", up: false, category: "Forex" },
+    { symbol: "OANDA:AUDUSD", display: "AUD/USD", name: "Australian Dollar", price: "0.65430", change: "+0.15%", up: true, category: "Forex" },
+    { symbol: "OANDA:USDCHF", display: "USD/CHF", name: "Swiss Franc", price: "0.88450", change: "+0.02%", up: true, category: "Forex" },
+    { symbol: "OANDA:USDCAD", display: "USD/CAD", name: "Canadian Dollar", price: "1.35200", change: "-0.10%", up: false, category: "Forex" },
+    
+    // Commodities
+    { symbol: "OANDA:XAUUSD", display: "XAU/USD", name: "Gold", price: "2,350.45", change: "+1.20%", up: true, category: "Commodities" },
+    { symbol: "OANDA:XAGUSD", display: "XAG/USD", name: "Silver", price: "28.502", change: "+1.85%", up: true, category: "Commodities" },
+    
+    // Indices
+    { symbol: "OANDA:SPX500USD", display: "S&P 500", name: "US 500", price: "5,183.47", change: "+0.87%", up: true, category: "Indices" },
+    { symbol: "OANDA:NAS100USD", display: "NASDAQ 100", name: "US Tech 100", price: "18,245.0", change: "+1.10%", up: true, category: "Indices" },
+    { symbol: "OANDA:UK100GBP", display: "UK 100", name: "FTSE 100", price: "7,950.2", change: "+0.45%", up: true, category: "Indices" },
+
+    // Crypto
+    { symbol: "BINANCE:BTCUSDT", display: "BTC/USDT", name: "Bitcoin", price: "66,045.0", change: "+3.08%", up: true, category: "Crypto" },
+    { symbol: "BINANCE:ETHUSDT", display: "ETH/USDT", name: "Ethereum", price: "3,517.84", change: "+2.43%", up: true, category: "Crypto" },
+    { symbol: "BINANCE:SOLUSDT", display: "SOL/USDT", name: "Solana", price: "145.20", change: "+5.12%", up: true, category: "Crypto" },
+    { symbol: "BINANCE:XRPUSDT", display: "XRP/USDT", name: "Ripple", price: "0.6240", change: "+1.15%", up: true, category: "Crypto" },
 ];
 
 // ─── TradingView Widget (center chart) ───
@@ -276,23 +292,35 @@ export function TradingTerminal() {
                             <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Market</span>
                             <span className="text-[10px] text-[var(--text-muted)]">{WATCHLIST.length} pairs</span>
                         </div>
-                        <div className="flex-1 overflow-y-auto">
-                            {WATCHLIST.map((pair) => (
-                                <button
-                                    key={pair.symbol}
-                                    onClick={() => setSelectedSymbol(pair.symbol)}
-                                    className={`w-full text-left px-3 py-3 border-b border-[var(--border-color)] transition-all cursor-pointer ${selectedSymbol === pair.symbol
-                                        ? "bg-[#d4af37]/5 border-l-2 border-l-[#d4af37]"
-                                        : "hover:bg-[var(--sub-panel-bg)] border-l-2 border-l-transparent"
-                                        }`}
-                                >
-                                    <div className="flex flex-col mb-1">
-                                        <span className={`font-bold text-sm ${selectedSymbol === pair.symbol ? "text-[#d4af37]" : "text-[var(--foreground)]"}`}>
-                                            {pair.display}
-                                        </span>
-                                        <span className="text-[10px] text-[var(--text-muted)] mt-1">{pair.name}</span>
+                        <div className="flex-1 overflow-y-auto custom-scrollbar">
+                            {["Forex", "Commodities", "Indices", "Crypto"].map((cat) => (
+                                <div key={cat}>
+                                    <div className="px-3 py-2 bg-white/[0.02] border-b border-[var(--border-color)]">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#d4af37]">{cat}</span>
                                     </div>
-                                </button>
+                                    {WATCHLIST.filter(p => p.category === cat).map((pair) => (
+                                        <button
+                                            key={pair.symbol}
+                                            onClick={() => setSelectedSymbol(pair.symbol)}
+                                            className={`w-full text-left px-3 py-3 border-b border-[var(--border-color)] transition-all cursor-pointer ${selectedSymbol === pair.symbol
+                                                ? "bg-[#d4af37]/5 border-l-2 border-l-[#d4af37]"
+                                                : "hover:bg-white/[0.01] border-l-2 border-l-transparent"
+                                                }`}
+                                        >
+                                            <div className="flex flex-col mb-1">
+                                                <div className="flex items-center justify-between">
+                                                    <span className={`font-bold text-sm ${selectedSymbol === pair.symbol ? "text-[#d4af37]" : "text-[var(--foreground)]"}`}>
+                                                        {pair.display}
+                                                    </span>
+                                                    <span className={`text-[10px] font-mono ${pair.up ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
+                                                        {pair.change}
+                                                    </span>
+                                                </div>
+                                                <span className="text-[10px] text-[var(--text-muted)] mt-1">{pair.name}</span>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
                             ))}
                         </div>
 

@@ -3,7 +3,7 @@ import time
 import requests
 from dotenv import load_dotenv
 from supabase import create_client, Client
-from scripts.marketing.quora_engine import QuoraEngine
+from scripts.marketing.marketing_orchestrator import MarketingOrchestrator
 
 # Load Environment
 load_dotenv('.env')
@@ -18,9 +18,9 @@ if not SUPPORT_BOT_TOKEN:
     print("❌ ERROR: SUPPORT_BOT_TOKEN missing in .env")
     exit(1)
 
-# Initialize Supabase
+# Initialize
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-quora = QuoraEngine()
+orchestrator = MarketingOrchestrator()
 
 def send_msg(chat_id, text, parse_mode="HTML"):
     url = f"https://api.telegram.org/bot{SUPPORT_BOT_TOKEN}/sendMessage"
@@ -35,31 +35,35 @@ def send_msg(chat_id, text, parse_mode="HTML"):
     except Exception as e:
         print(f"Error sending message: {e}")
 
-def handle_quora_command(chat_id, category="forex"):
-    send_msg(chat_id, f"🔍 <b>Scouting Quora for [{category}]...</b>\n<i>This may take 30-60 seconds due to Apify/AI processing.</i>")
+def handle_scout_command(chat_id, region="kenya"):
+    send_msg(chat_id, f"🚀 <b>ZEN PIPS HUB: Scouting [{region.upper()}] leads...</b>\n<i>Activating Quora, Reddit, and LinkedIn engines. This takes ~60-90s.</i>")
     
     try:
-        results = quora.run_daily_playbook(category=category, limit=2)
+        cycle_results = orchestrator.run_cycle(region=region, limit_per_platform=1)
         
-        if not results:
-            send_msg(chat_id, "❌ No fresh questions found for this category today.")
-            return
-
-        for res in results:
-            msg = (
-                f"🌐 <b>QUORA OPPORTUNITY [{category.upper()}]</b>\n\n"
-                f"❓ <b>Question:</b> {res['question']}\n\n"
-                f"🔗 <b>Source:</b> {res['url']}\n\n"
-                f"--------------------------------\n"
-                f"{res['answer']}\n"
-                f"--------------------------------\n\n"
-                f"🔗 <b>LINK TO EMBED:</b>\n<code>{res['cta_url']}</code>\n\n"
-                f"<i>Action: Copy the text, go to the source, and hyperlink a keyword with the URL above.</i>"
-            )
-            send_msg(chat_id, msg)
+        found_any = False
+        for platform, results in cycle_results.items():
+            if not results:
+                continue
+            
+            found_any = True
+            for res in results:
+                msg = (
+                    f"🎯 <b>NEW LEAD [{platform.upper()}] - {region.upper()}</b>\n\n"
+                    f"❓ <b>Topic:</b> {res.get('question') or res.get('title')}\n\n"
+                    f"🔗 <b>Source:</b> {res['url']}\n"
+                    f"--------------------------------\n"
+                    f"<i>Drafting content available in Supabase history.</i>\n\n"
+                    f"🔗 <b>CTA LINK:</b>\n<code>{res.get('cta_url', 'Check Supabase')}</code>\n\n"
+                    f"<i>Action: Verify lead and post from your browser.</i>"
+                )
+                send_msg(chat_id, msg)
+        
+        if not found_any:
+            send_msg(chat_id, "❌ No fresh opportunities found in this cycle.")
             
     except Exception as e:
-        send_msg(chat_id, f"❌ <b>Quora Engine Error:</b> {str(e)}")
+        send_msg(chat_id, f"❌ <b>Hub Error:</b> {str(e)}")
 
 def handle_update(update):
     if "message" not in update:
@@ -75,19 +79,20 @@ def handle_update(update):
     
     if text.startswith("/start"):
         welcome = (
-            "🛡 <b>ZEN PIPS ADMIN TOOL</b>\n\n"
-            "Commands:\n"
-            "/quora [category] - Get fresh Quora leads\n"
-            "<i>Categories: crypto, forex, regional, inst, propfirm</i>\n\n"
-            "Incoming support tickets will also be forwarded here automatically."
+            "🛡 <b>ZEN PIPS ADMIN HUB</b>\n\n"
+            "<b>Marketing Commands:</b>\n"
+            "/scout [region] - Trigger Quora, Reddit, LinkedIn\n"
+            "<i>Regions: kenya, global</i>\n\n"
+            "<b>Support:</b>\n"
+            "Tickets are forwarded here automatically."
         )
         send_msg(chat_id, welcome)
         return
 
-    if text.startswith("/quora") and is_admin:
+    if text.startswith("/scout") and is_admin:
         parts = text.split()
-        category = parts[1] if len(parts) > 1 else "forex"
-        handle_quora_command(chat_id, category)
+        region = parts[1] if len(parts) > 1 else "kenya"
+        handle_scout_command(chat_id, region)
         return
 
     # Default: Support Ticket Handling

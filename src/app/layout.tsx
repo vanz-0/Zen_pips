@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import ChatWidget from "@/components/ChatWidget";
+import { NewsAlertManager } from "@/components/dashboard/NewsAlertManager";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -38,6 +39,7 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider>
             {children}
+            <NewsAlertManager />
             <ChatWidget />
           </ThemeProvider>
         </AuthProvider>

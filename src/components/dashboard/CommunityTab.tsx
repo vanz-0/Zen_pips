@@ -145,7 +145,7 @@ export function CommunityTab() {
   const [loading, setLoading] = useState(true)
   const [dailyNews, setDailyNews] = useState<any[]>([])
   const [dbHasMessages, setDbHasMessages] = useState(false)
-  const [activeChannel, setActiveChannel] = useState<'general-chat' | 'setups-and-charts' | 'vip-lounge'>('general-chat')
+  const [activeChannel, setActiveChannel] = useState<'general-chat' | 'setups-and-charts' | 'market-news' | 'vip-lounge'>('general-chat')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -403,6 +403,12 @@ export function CommunityTab() {
                 >
                     <Hash className="w-4 h-4 text-[var(--text-muted)]" /> setups-and-charts
                 </button>
+                <button 
+                  onClick={() => setActiveChannel('market-news')}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl font-medium text-sm transition-colors ${activeChannel === 'market-news' ? 'bg-[var(--panel-bg)] text-[var(--foreground)] border border-[var(--border-color)]' : 'text-[var(--text-muted)] hover:bg-white/[0.02] hover:text-gray-200'}`}
+                >
+                    <Hash className="w-4 h-4 text-[var(--text-muted)]" /> market-news
+                </button>
             </div>
             
                 <button 
@@ -450,7 +456,7 @@ export function CommunityTab() {
       <div className="flex-1 bg-[var(--background)] flex flex-col overflow-hidden w-full relative">
         {/* Mobile Channel Switcher */}
         <div className="md:hidden flex overflow-x-auto border-b border-[var(--border-color)] bg-[var(--panel-bg)] hide-scrollbar shrink-0">
-            {['general-chat', 'setups-and-charts', 'vip-lounge'].map((ch: string) => (
+            {['general-chat', 'setups-and-charts', 'market-news', 'vip-lounge'].map((ch: string) => (
                 <button
                     key={ch}
                     onClick={() => {
@@ -482,6 +488,8 @@ export function CommunityTab() {
                 <p className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5">
                   {activeChannel === 'setups-and-charts' 
                     ? 'Institutional setups and technical analysis.' 
+                    : activeChannel === 'market-news'
+                    ? 'AI analysis of institutional liquidity traps, stop hunts, and high-impact events.'
                     : 'Discuss setups, trading concepts, and interact with the institutional flow.'}
                 </p>
             </div>
@@ -533,19 +541,50 @@ export function CommunityTab() {
                       <div className="w-16 h-16 rounded-full bg-yellow-500/10 flex items-center justify-center border border-yellow-500/20">
                           <Hash className="w-8 h-8 text-yellow-500" />
                       </div>
-                      <div className="space-y-2">
-                        <h3 className="text-lg font-bold text-yellow-500">Welcome to the VIP Lounge</h3>
-                        <p className="text-[var(--text-muted)] max-w-sm text-xs leading-relaxed">
+                      <div className="space-y-4 max-w-lg">
+                        <h3 className="text-xl font-black text-yellow-500 tracking-tight uppercase">VIP Lounge <span className="text-white opacity-80">(Coming Soon)</span></h3>
+                        <p className="text-[var(--text-muted)] text-sm leading-relaxed">
                           This is an exclusive space for direct interaction with the Zen Pips team. Secure, institutional-grade discussions only.
                         </p>
+                        <div className="bg-black/40 border border-yellow-500/20 rounded-2xl p-6 text-left mt-4">
+                            <h4 className="text-xs font-bold text-yellow-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <Shield className="w-4 h-4" /> Upcoming Features
+                            </h4>
+                            <ul className="space-y-3 text-xs text-gray-300">
+                                <li className="flex items-start gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-1" />
+                                    <span><strong>Direct Mentorship:</strong> 1-on-1 access to institutional traders and developers.</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-1" />
+                                    <span><strong>Alpha Scanners:</strong> Early access to our proprietary liquidity void and stop-hunt detection bots.</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-1" />
+                                    <span><strong>Advanced Vault Content:</strong> Exclusive PDF teardowns of high-impact news days and market maker traps.</span>
+                                </li>
+                            </ul>
+                        </div>
                       </div>
                    </div>
                 )}
 
                 {displayMessages.filter(msg => !msg.parent_id).map((msg, i) => {
-                    const isSystem = !msg.user_id;
-                    const isOfficial = msg.user_id === 'zen-official';
-                    const initials = msg.user_data?.full_name?.substring(0,2)?.toUpperCase() || "ZP";
+                    const isSystem = !msg.user_id && !msg.content.startsWith('**');
+                    const isPersona = !msg.user_id && msg.content.startsWith('**');
+                    let personaName = 'AI Agent';
+                    let renderContent = msg.content;
+                    
+                    if (isPersona) {
+                        const split = msg.content.split('**:');
+                        if (split.length > 1) {
+                            personaName = split[0].replace('**', '').trim();
+                            renderContent = split.slice(1).join('**:').trim();
+                        }
+                    }
+
+                    const isOfficial = msg.user_id === 'zen-official' || isPersona;
+                    const initials = isPersona ? personaName.substring(0, 2).toUpperCase() : (msg.user_data?.full_name?.substring(0,2)?.toUpperCase() || "ZP");
                     const isChartChannel = activeChannel === 'setups-and-charts';
                     const replies = messages.filter(m => m.parent_id === msg.id);
                     
@@ -558,7 +597,7 @@ export function CommunityTab() {
                                 className={`flex gap-4 ${isSystem ? 'justify-center py-4' : ''} ${isChartChannel ? 'bg-[var(--card-bg)] p-6 rounded-3xl border border-[var(--border-color)]' : ''} group relative`}
                             >
                                 {!isSystem && !isChartChannel && (
-                                    <div className={`w-9 h-9 rounded-full shrink-0 flex items-center justify-center bg-[var(--panel-bg)] border border-[var(--border-color)] text-[10px] font-bold shadow-md`}>
+                                    <div className={`w-9 h-9 rounded-full shrink-0 flex items-center justify-center bg-[var(--panel-bg)] ${isPersona ? 'border-yellow-500/50 text-yellow-500' : 'border-[var(--border-color)] text-[var(--foreground)]'} text-[10px] font-bold shadow-md`}>
                                         {initials}
                                     </div>
                                 )}
@@ -572,10 +611,10 @@ export function CommunityTab() {
                                                     </div>
                                                 )}
                                                 <span className={`font-bold text-sm ${msg.user_data?.is_vip || isOfficial ? 'text-yellow-500' : 'text-gray-200'}`}>
-                                                    {isOfficial ? "Zen Institutional Hub" : (msg.user_data?.full_name || "Anonymous Trader")}
+                                                    {isPersona ? personaName : isOfficial ? "Zen Institutional Hub" : (msg.user_data?.full_name || "Anonymous Trader")}
                                                 </span>
                                                 {(msg.user_data?.is_vip || isOfficial) && (
-                                                    <span className="text-[8px] bg-yellow-500/10 text-yellow-500 px-1.5 py-0.5 rounded border border-yellow-500/20 font-bold uppercase tracking-wider">OFFICIAL</span>
+                                                    <span className="text-[8px] bg-yellow-500/10 text-yellow-500 px-1.5 py-0.5 rounded border border-yellow-500/20 font-bold uppercase tracking-wider">{isPersona ? 'AI AGENT' : 'OFFICIAL'}</span>
                                                 )}
                                             </div>
                                             <div className="flex items-center gap-3">
@@ -587,7 +626,7 @@ export function CommunityTab() {
                                     )}
                                     <div className={`leading-relaxed whitespace-pre-line relative ${isSystem ? 'bg-blue-500/10 text-[var(--color-info)] px-4 py-2 rounded-xl text-xs font-mono font-bold border border-blue-500/20 inline-block mx-auto' : 'text-[var(--foreground)]'}`}>
                                         <div className="max-h-32 sm:max-h-48 overflow-y-auto custom-scrollbar pr-2 mb-2 text-xs sm:text-sm">
-                                            {msg.content}
+                                            {renderContent}
                                         </div>
                                         {msg.image && (
                                             <div className={`mt-2 rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-2xl bg-black group/img relative ${isChartChannel ? 'aspect-video w-full' : 'max-w-2xl'}`}>

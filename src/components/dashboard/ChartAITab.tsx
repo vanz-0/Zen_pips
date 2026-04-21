@@ -28,11 +28,17 @@ export function ChartAITab() {
   const [customLink, setCustomLink] = useState("")
   
   const CORE_PAIRS = [
-    { label: "Bitcoin (BTC/USD)", value: "BINANCE:BTCUSD" },
+    { label: "Bitcoin (BTC/USDT)", value: "BINANCE:BTCUSDT" },
+    { label: "Ethereum (ETH/USDT)", value: "BINANCE:ETHUSDT" },
     { label: "Euro (EUR/USD)", value: "OANDA:EURUSD" },
     { label: "Pound (GBP/USD)", value: "OANDA:GBPUSD" },
     { label: "Gold (XAU/USD)", value: "OANDA:XAUUSD" },
     { label: "Silver (XAG/USD)", value: "OANDA:XAGUSD" },
+    { label: "Nasdaq 100", value: "OANDA:NAS100USD" },
+    { label: "S&P 500", value: "OANDA:SPX500USD" },
+    { label: "UK 100", value: "OANDA:UK100GBP" },
+    { label: "Solana (SOL/USDT)", value: "BINANCE:SOLUSDT" },
+    { label: "Ripple (XRP/USDT)", value: "BINANCE:XRPUSDT" },
   ]
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -164,15 +170,20 @@ export function ChartAITab() {
       }
 
       const tag = analysisMode === 'live' ? `[${selectedPair.split(':')[1] || selectedPair}] ` : '';
+      const targetChannel = isAdmin ? 'setups-and-charts' : 'pending-setups';
       const { error } = await supabase.from('community_messages').insert({
         user_id: user.id,
         content: `🎯 AI ANALYSIS SHARED:\n\n${tag}${analysisResult.split('### 4. Verdict:')[0].trim()}`,
         image: lastImageUrl,
-        channel: 'setups-and-charts'
+        channel: targetChannel
       })
 
       if (!error) {
-        alert("🚀 SHARED: Your analysis has been broadcast to the community hub.")
+        if (isAdmin) {
+          alert("🚀 SHARED: Your analysis has been broadcast to the community hub.")
+        } else {
+          alert("✅ SUBMITTED: Your analysis has been sent to the Admin team for review. It will appear in the community feed once approved.")
+        }
       }
     } catch (e) {
       console.error("Sharing error:", e)

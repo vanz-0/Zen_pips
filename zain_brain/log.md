@@ -1,0 +1,12 @@
+# ZAIN Operational Log
+- 2026-04-21: Initialized Karpathy-Inspired Wiki Architecture (v2.0).
+- 2026-04-21: Created agents.md, index.md, hot.md, and log.md.
+- 2026-04-21: Migrated legacy concept subdirectories.
+- 2026-04-21: Initiated 'Great Migration' of educational PDFs.
+- 2026-04-22: **Signal Bridge 2.0 Deployed** — Full institutional pipeline verified.
+- 2026-04-22: Created `scripts/news_engine.py` — Dynamic Windows daemon for 1AM briefs & 15min pre-news warnings.
+- 2026-04-22: Deprecated `netlify/functions/` — Netlify now serves frontend only.
+- 2026-04-22: Added `PendingApprovalsQueue` to `SignalControlPanel.tsx` — Admin approval gate for user signals.
+- 2026-04-22: Updated `ChartAITab.tsx` — Non-admin shares route to `pending-setups` channel.
+- 2026-04-22: Added `[[Python Daemons]]` node to `index.md`.
+- 2026-04-22: Updated `hot.md` — Reflects Signal Bridge 2.0 production state.

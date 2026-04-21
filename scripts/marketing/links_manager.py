@@ -13,7 +13,7 @@ class LinksManager:
     def __init__(self):
         self.base_domain = os.getenv("NEXT_PUBLIC_SITE_URL", "https://zenpips.netlify.app")
         # Community Channel / Support Bot
-        self.channel_link = "https://t.me/+_gM-I1B7_p00MjZk" # Replaced with standard channel invite pattern or actual link if known
+        self.channel_link = "https://t.me/+zWQd9S4pAyMyNmY8"
         self.bot_link = "https://t.me/zenpips_support_bot"
         
         # Free Lead Magnets (Cold Leads - Value First)

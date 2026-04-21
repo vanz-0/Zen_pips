@@ -20,14 +20,15 @@ const AuthContext = createContext<AuthContextType>({
     signOut: async () => { },
 })
 
-// ⚡ DEV BYPASS — set to true to skip auth on localhost for testing
-const DEV_BYPASS = false
+// ⚡ DEV BYPASS — Set to true to automatically login as admin on localhost
+const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+const DEV_BYPASS = isLocalhost
 
 const MOCK_USER = {
     id: "c3abc54b-2801-4624-b8b3-c56accb5d20e",
-    email: "dev@zenpips.com",
+    email: "merchzenith@gmail.com",
     app_metadata: {},
-    user_metadata: { full_name: "Dev Tester" },
+    user_metadata: { full_name: "Admin Tester" },
     aud: "authenticated",
     created_at: new Date().toISOString(),
 } as unknown as User
@@ -35,7 +36,14 @@ const MOCK_USER = {
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(DEV_BYPASS ? MOCK_USER : null)
     const [session, setSession] = useState<Session | null>(null)
-    const [profile, setProfile] = useState<any | null>(DEV_BYPASS ? { is_vip: true } : null)
+    const [profile, setProfile] = useState<any | null>(DEV_BYPASS ? { 
+        id: "c3abc54b-2801-4624-b8b3-c56accb5d20e",
+        email: "merchzenith@gmail.com",
+        is_vip: true, 
+        is_admin: true,
+        plan: 'VIP',
+        ai_usage_total: 0 
+    } : null)
     const [loading, setLoading] = useState(DEV_BYPASS ? false : true)
 
     const fetchProfile = async (userId: string) => {
