@@ -43,11 +43,64 @@ def get_vantage_symbol(base_pair):
         symbol = f"{clean_pair}{suffix}"
         info = mt5.symbol_info(symbol)
         if info is not None:
+            # Check if trading is disabled for this specific symbol (mode 0)
+            if info.trade_mode == mt5.SYMBOL_TRADE_MODE_DISABLED:
+                continue
+                
             if not info.visible:
                 mt5.symbol_select(symbol, True)
+            print(f"   [Symbol Match] Found Tradable Symbol: {symbol}")
             return symbol
             
     return clean_pair # Fallback to base
+
+def cancel_existing_orders(base_pair):
+    """
+    Clears all pending orders AND closes active positions for ALL variants of a pair
+    to prevent duplicates and ensure a strict 3-order limit.
+    """
+    clean_pair = base_pair.replace("/", "")
+    suffixes = ["", ".v", "+", "m", "c"]
+    
+    for suffix in suffixes:
+        symbol = f"{clean_pair}{suffix}"
+        
+        # 1. Clear Pending Orders
+        orders = mt5.orders_get(symbol=symbol)
+        if orders:
+            print(f"[*] Cleaning up {len(orders)} pending orders for {symbol}...")
+            for order in orders:
+                request = {
+                    "action": mt5.TRADE_ACTION_REMOVE,
+                    "order": order.ticket
+                }
+                mt5.order_send(request)
+        
+        # 2. Close Active Positions
+        positions = mt5.positions_get(symbol=symbol)
+        if positions:
+            print(f"[*] Closing {len(positions)} active positions for {symbol}...")
+            for pos in positions:
+                # Determine opposite side for closure
+                type_close = mt5.ORDER_TYPE_SELL if pos.type == mt5.POSITION_TYPE_BUY else mt5.ORDER_TYPE_BUY
+                tick = mt5.symbol_info_tick(symbol)
+                if not tick: continue
+                
+                price_close = tick.bid if pos.type == mt5.POSITION_TYPE_BUY else tick.ask
+                
+                request = {
+                    "action": mt5.TRADE_ACTION_DEAL,
+                    "symbol": symbol,
+                    "volume": pos.volume,
+                    "type": type_close,
+                    "position": pos.ticket,
+                    "price": price_close,
+                    "magic": 123456,
+                    "comment": "ZenPips Cleanup",
+                    "type_time": mt5.ORDER_TIME_GTC,
+                    "type_filling": mt5.ORDER_FILLING_IOC,
+                }
+                mt5.order_send(request)
 
 def handle_pending_events():
     try:
@@ -70,6 +123,10 @@ def handle_pending_events():
             
             # Map signal to MT5 order
             symbol = get_vantage_symbol(sig["pair"])
+            
+            # 🛡️ PREVENT DUPLICATES: Cancel any existing pending orders for this symbol first
+            cancel_existing_orders(sig["pair"])
+            
             direction = sig["direction"]
             # Trademark 3-Order Split: Always 0.01 lot x 3 orders
             split_lot = 0.01
@@ -106,6 +163,7 @@ def handle_pending_events():
 
             deployed_tickets = []
             
+            last_error = "None"
             for i, tp in enumerate(tps):
                 if tp == 0: continue
                 
@@ -126,7 +184,8 @@ def handle_pending_events():
                 result = mt5.order_send(request)
                 
                 if result.retcode != mt5.TRADE_RETCODE_DONE:
-                    print(f"[FAIL] TP{i+1} Order Failed: {result.comment}")
+                    last_error = f"Retcode: {result.retcode}, Comment: {result.comment}"
+                    print(f"[FAIL] TP{i+1} Order Failed: {last_error}")
                 else:
                     print(f"[OK] TP{i+1} Set! Ticket: {result.order}")
                     deployed_tickets.append(str(result.order))
@@ -139,7 +198,7 @@ def handle_pending_events():
             else:
                 supabase.table("copy_events").update({
                     "status": "FAILED",
-                    "error_message": "All 3 order attempts failed."
+                    "error_message": f"MT5 Failed: {last_error}"
                 }).eq("id", event["id"]).execute()
 
     except Exception as e:
