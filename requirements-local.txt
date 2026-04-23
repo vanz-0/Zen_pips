@@ -3,3 +3,8 @@ supabase
 MetaTrader5
 numpy
 httpx
+praw
+requests
+yfinance
+schedule
+selenium

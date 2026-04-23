@@ -19,7 +19,7 @@ export function NewsAlertManager() {
                 
             if (data && data.length > 0) {
                 // Parse standard "8:30am" times into exact Date objects for today
-                const parsedNews = data.map(item => {
+                const parsedNews = data.map((item: any) => {
                     const parsedData = { ...item, triggerTimeUtc: 0 }
                     try {
                         const timeString = item.event_time.toLowerCase()
@@ -40,7 +40,7 @@ export function NewsAlertManager() {
                         console.error('Time parsing error for alert', e)
                     }
                     return parsedData
-                }).filter(n => n.triggerTimeUtc > 0)
+                }).filter((n: any) => n.triggerTimeUtc > 0)
                 
                 setNews(parsedNews)
             }

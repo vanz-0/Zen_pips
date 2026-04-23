@@ -153,7 +153,7 @@ function DashboardContent() {
           </div>
           {/* Desktop nav links */}
           <div className="hidden lg:flex gap-8 text-sm font-medium text-[var(--text-muted)]" suppressHydrationWarning>
-            {user ? (
+            {mounted && user ? (
               <>
                 <button onClick={() => handleNavClick(null)} className="hover:text-[var(--foreground)] transition-colors duration-300" suppressHydrationWarning>Home</button>
                 <button onClick={() => handleNavClick("help")} className={`hover:text-[#d4af37] transition-colors duration-300 font-bold ${activeTab === 'help' ? 'text-[#d4af37]' : 'text-[var(--text-muted)]'}`} suppressHydrationWarning>Setup Guide</button>
@@ -165,13 +165,13 @@ function DashboardContent() {
                 <button onClick={() => handleNavClick("journal")} className={`hover:text-[var(--foreground)] transition-colors duration-300 ${activeTab === 'journal' ? 'text-yellow-500 font-bold' : ''}`} suppressHydrationWarning>Journal</button>
                 <a href="/blog" className="hover:text-[var(--foreground)] transition-colors duration-300 font-semibold px-3 py-1 rounded-lg bg-[var(--card-bg)] border border-[var(--border-color)]">Blog</a>
               </>
-            ) : (
+            ) : mounted ? (
               <>
                 <a href="#features" className="hover:text-[var(--foreground)] transition-colors duration-300">Features</a>
                 <a href="#results" className="hover:text-[var(--foreground)] transition-colors duration-300">Results</a>
                 <a href="#pricing" className="hover:text-[var(--foreground)] transition-colors duration-300">Pricing</a>
               </>
-            )}
+            ) : null}
           </div>
           {/* Hamburger Toggle & Profile - Only visible on mobile/tablet */}
           <div className="flex items-center gap-2 md:gap-4 z-[110]">
@@ -184,7 +184,7 @@ function DashboardContent() {
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
 
-            {user ? (
+            {mounted && user ? (
               <div className="relative">
                 <button
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
@@ -227,11 +227,11 @@ function DashboardContent() {
                   )}
                 </AnimatePresence>
               </div>
-            ) : (
+            ) : mounted ? (
               <a href="/auth" className="hidden lg:flex px-6 py-2 rounded-xl bg-yellow-500 text-black font-bold text-sm hover:bg-yellow-400 transition-all">
                 GET STARTED FREE
               </a>
-            )}
+            ) : null}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="lg:hidden relative w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--card-bg)] hover:bg-[var(--accent-glow)] border border-[var(--border-color)] transition-all duration-200"

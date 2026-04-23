@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useAuth } from "@/context/AuthContext"
 import { useRouter } from "next/navigation"
-import ChartUploader from "@/components/Admin/ChartUploader"
+import ChartUploader from "@/components/admin/ChartUploader"
 import { motion } from "framer-motion"
 import { ShieldAlert, BarChart3, Settings, Users, LogOut, ChevronRight } from "lucide-react"
 

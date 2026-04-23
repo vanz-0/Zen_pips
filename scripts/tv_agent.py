@@ -103,6 +103,9 @@ def check_live_prices():
             current_price = ticker_data.history(period="1d")["Close"].iloc[-1]
             print(f"   [+] {sig['pair']} ({ticker}) | Live Price: {current_price:.5f} | Entry: {sig['entry']} | Direction: {sig['direction']}")
             
+            # Update last_checked timestamp in DB
+            supabase.table("signals").update({"last_checked": datetime.now().isoformat()}).eq("id", sig["id"]).execute()
+            
             # TODO: Implement full Risk Management Logic here based on current_price vs TP1/TP2/SL
             # This directly overrides the old TwelveData architecture.
 

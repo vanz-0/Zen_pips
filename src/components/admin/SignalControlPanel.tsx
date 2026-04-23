@@ -490,7 +490,7 @@ export function SignalControlPanel() {
                         <div className="mt-4 pt-4 border-t border-white/5">
                             <p className="text-[9px] text-gray-600 uppercase tracking-widest mb-2 font-bold">Active Confluences ({Object.values(thesis).flat().length})</p>
                             <div className="flex flex-wrap gap-1.5">
-                                {Object.values(thesis).flat().map(item => (
+                                {Object.values(thesis).flat().map((item: any) => (
                                     <span key={item} className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#d4af37]/10 text-[#d4af37] border border-[#d4af37]/20">
                                         {item}
                                     </span>
