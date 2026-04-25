@@ -19,16 +19,27 @@ if not SUPABASE_URL or not SUPABASE_KEY:
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-def initialize_mt5():
-    if not mt5.initialize():
-        print(f"[FAIL] MT5 Initialization failed: {mt5.last_error()}")
+# Account mapping for multi-account institutional trading
+ACCOUNTS = {
+    "25113210": {"password": "!pA@Rj@0", "server": "VantageInternational-Demo"},
+    "24963323": {"password": "cX$P02Br", "server": "VantageInternational-Demo"}
+}
+
+def switch_account(login_id):
+    login_id = str(login_id)
+    if login_id not in ACCOUNTS:
+        print(f"[FAIL] Account {login_id} not found in secure mapping.")
+        return False
+        
+    acc = ACCOUNTS[login_id]
+    mt5.shutdown() # Reset previous connection
+    
+    print(f"[*] Attempting MT5 Initialize on Account {login_id}...")
+    if not mt5.initialize(login=int(login_id), password=acc["password"], server=acc["server"]):
+        print(f"[FAIL] MT5 Switch to {login_id} failed: {mt5.last_error()}")
         return False
     
-    print("[OK] MT5 Connected Successfully")
-    account_info = mt5.account_info()
-    if account_info:
-        print(f"[*] Trading Account: {account_info.login}")
-        print(f"[*] Server: {account_info.server}")
+    print(f"[OK] MT5 Switched to Account: {login_id}")
     return True
 
 def get_vantage_symbol(base_pair):
@@ -103,6 +114,7 @@ def cancel_existing_orders(base_pair):
                 mt5.order_send(request)
 
 def handle_pending_events():
+    global current_account
     try:
         response = supabase.table("copy_events").select("*").eq("status", "PENDING").execute()
         events = response.data
@@ -113,6 +125,15 @@ def handle_pending_events():
         print(f"[{datetime.now().strftime('%H:%M:%S')}] [*] Found {len(events)} pending execution tasks...")
 
         for event in events:
+            target_acc = str(event.get("mt5_account_id", "25113210"))
+            
+            # Switch account if necessary
+            if current_account != target_acc:
+                if not switch_account(target_acc):
+                    continue
+                current_account = target_acc
+                time.sleep(1) # Wait for terminal to settle after switch
+
             # Re-verify signal data from 'signals' table
             signal_res = supabase.table("signals").select("*").eq("id", event["signal_id"]).execute()
             if not signal_res.data:
@@ -128,8 +149,8 @@ def handle_pending_events():
             cancel_existing_orders(sig["pair"])
             
             direction = sig["direction"]
-            # Trademark 3-Order Split: Always 0.01 lot x 3 orders
-            split_lot = 0.01
+            # Trademark 3-Order Split: Use lot_size from event or default to 0.01
+            split_lot = float(event["lot_size"]) if event.get("lot_size") is not None else 0.01
             
             entry = float(sig["entry"])
             sl = float(sig["sl"]) if sig.get("sl") else 0
@@ -140,7 +161,7 @@ def handle_pending_events():
                 float(sig["tp3"]) if sig.get("tp3") else 0
             ]
 
-            print(f"[*] Attempting 3-Order Split for {direction} {symbol} @ {entry} (0.01 x 3)...")
+            print(f"[*] Attempting 3-Order Split for {direction} {symbol} @ {entry} ({split_lot} x 3)...")
 
             # FETCH LIVE PRICE for Logic
             tick = mt5.symbol_info_tick(symbol)
@@ -208,7 +229,12 @@ if __name__ == "__main__":
     print("--- Zen Pips Institutional MT5 Bridge Starting ---")
     print(f"[*] Session: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
-    if initialize_mt5():
+    current_account = None
+    
+    # Start with the default account from .env
+    default_login = os.getenv("MT5_LOGIN", "25113210")
+    if switch_account(default_login):
+        current_account = default_login
         last_heartbeat = time.time()
         try:
             while True:
@@ -216,7 +242,7 @@ if __name__ == "__main__":
                 
                 # Heartbeat every 60s
                 if time.time() - last_heartbeat > 60:
-                    print(f"[{datetime.now().strftime('%H:%M:%S')}] [*] Polling active...")
+                    print(f"[{datetime.now().strftime('%H:%M:%S')}] [*] Polling active (Account: {current_account})...")
                     last_heartbeat = time.time()
                     
                 time.sleep(2) 
