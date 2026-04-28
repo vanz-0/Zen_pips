@@ -182,8 +182,11 @@ def handle_pending_events():
 
             print(f"   [Routing] Live: {current_price} | Entry: {entry} | Selected: {direction}_{log_type}")
 
-            deployed_tickets = []
+            expiry_hours = int(sig.get("expiry_hours", 24)) if sig.get("expiry_hours") else 24
+            expiration = int(time.time() + (expiry_hours * 3600))
             
+            deployed_tickets = []
+
             last_error = "None"
             for i, tp in enumerate(tps):
                 if tp == 0: continue
@@ -198,7 +201,8 @@ def handle_pending_events():
                     "tp": tp,
                     "magic": 123456,
                     "comment": f"ZenPips TP{i+1}",
-                    "type_time": mt5.ORDER_TIME_GTC,
+                    "type_time": mt5.ORDER_TIME_SPECIFIED,
+                    "expiration": expiration,
                     "type_filling": mt5.ORDER_FILLING_RETURN,
                 }
 

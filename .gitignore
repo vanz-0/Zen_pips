@@ -51,3 +51,5 @@ tv_markup_*.png
 task.md
 implementation_plan.md
 walkthrough.md
+# MT5 Fleet copies
+scripts/MT5_Fleet/

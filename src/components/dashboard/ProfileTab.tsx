@@ -256,6 +256,15 @@ export function ProfileTab() {
               >
                 Education Vault
               </button>
+              {user.email === 'merchzenith@gmail.com' && (
+                <button
+                  onClick={() => router.push("/admin")}
+                  className="w-full py-2.5 bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 rounded-lg font-bold text-sm hover:bg-yellow-500 hover:text-black transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(234,179,8,0.1)]"
+                >
+                  <Zap className="w-4 h-4" />
+                  Signal Command Center
+                </button>
+              )}
             </div>
           </motion.div>
         </div>

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
+import crypto from 'crypto'
 
 function getClients() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -18,15 +19,16 @@ function getClients() {
 }
 
 export async function POST(req: Request) {
-    return NextResponse.json({ error: "Method not fully implemented. Switching to Base64 JSON." }, { status: 405 });
+    return PUT(req);
 }
 
 export async function PUT(req: Request) {
     try {
         const { supabase, openai } = getClients();
-        const { imageBase64, userId } = await req.json()
+        const { imageBase64, image, userId, mode } = await req.json()
         
-        if (!imageBase64) return NextResponse.json({ error: "No image received" }, { status: 400 })
+        const finalImage = imageBase64 || image;
+        if (!finalImage) return NextResponse.json({ error: "No image received" }, { status: 400 })
 
         // 1. Verify Usage Limit (Skip if Admin or VIP)
         if (userId) {
@@ -52,11 +54,10 @@ export async function PUT(req: Request) {
                     if (usageToday >= dailyLimit) {
                         return NextResponse.json({ 
                             error: "LIMIT_REACHED",
-                            message: `🔴 DAILY LIMIT REACHED: You have used your ${dailyLimit} AI credits for today. ${bonusToday > 0 ? '' : 'Complete social tasks to earn 10 extra credits or '}upgrade to VIP for unlimited institutional analysis.` 
+                            message: `🔴 DAILY LIMIT REACHED: You have used your ${dailyLimit} AI credits for today.` 
                         }, { status: 403 });
                     }
 
-                    // If it's a new day, reset the counter in the DB
                     if (!isSameDay) {
                         await supabase.from('client_trading_profiles')
                             .update({ 
@@ -73,34 +74,33 @@ export async function PUT(req: Request) {
         const systemPrompt = `You are the Zen Pips Institutional AI Analyst. 
         
         CRITICAL FIRST STEP: Determine if the image is a trading chart screenshot (e.g., TradingView, MT4/5, Binance, etc.). 
-        If it is NOT a chart (e.g., photo of a person, cat, car, unrelated UI, or non-trading screenshot), you MUST start your response with 'INVALID_CHART' and provide a brief explanation.
+        If it is NOT a chart, start with 'INVALID_CHART'.
         
-        If it IS a trading chart, analyze price action using Smart Money Concepts (SMC) and ICT logic.
+        If it IS a trading chart, analyze price action.
         
-        TONE: Confident yet open. Maintain a disciplined, professional Bloomberg-terminal tone.
-        TYPOGRAPHY: Use proper Markdown headers and bullet points.
-
-        OUTPUT FORMAT IF VALID:
-        ## Institutional Analysis: [PAIR NAME]
-
-        ### 1. Market Structure:
-        - **Current Trend**: [Explain if Bearish/Bullish]
-        - **Break of Structure (BOS)**: [Identify key levels]
-        - **Change of Character (CHoCH)**: [Note potential shifts]
-
-        ### 2. Liquidity:
-        - **Buy Side Liquidity (BSL)**: [Identify pools above]
-        - **Sell Side Liquidity (SSL)**: [Identify pools below]
-
-        ### 3. Points of Interest (POIs):
-        - **Fair Value Gap (FVG)**: [Locate imbalances]
-        - **Order Blocks (OB)**: [Identify supply/demand zones]
-        - **Breaker Blocks**: [Note broken OBs if any]
-
-        ### 4. Verdict:
-        - **Institutional Recommendation: [WAIT / BUY / SELL]**
+        CRITICAL: If it is a valid chart, you MUST extract the following values if visible on the chart:
+        - Asset Pair (e.g., XAUUSD, EURUSD)
+        - Trade Direction (BUY or SELL)
+        - Entry Price
+        - Stop Loss (SL)
+        - Take Profit 1, 2, and 3 (TP1, TP2, TP3)
         
-        [Provide a clear, declarative reasoning for the verdict based on the confluences above. Mention risk management.]`;
+        Format your response with the analysis first, then at the VERY END, provide exactly one JSON block with the extracted data:
+        \`\`\`json
+        {
+          "pair": "XAUUSD",
+          "direction": "BUY",
+          "entry": 2350.50,
+          "sl": 2340.00,
+          "tp1": 2360.00,
+          "tp2": 2370.00,
+          "tp3": 2380.00,
+          "isChart": true
+        }
+        \`\`\`
+        
+        If you cannot find a value, use null.
+        `;
 
         const response = await openai.chat.completions.create({
             model: "gpt-4o",
@@ -109,25 +109,36 @@ export async function PUT(req: Request) {
                     role: "user",
                     content: [
                         { type: "text", text: systemPrompt },
-                        { type: "image_url", image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }
+                        { type: "image_url", image_url: { url: finalImage.startsWith('data:') ? finalImage : `data:image/jpeg;base64,${finalImage}` } }
                     ]
                 }
             ],
             max_tokens: 1200,
-            temperature: 0.2
+            temperature: 0.1
         });
 
         const analysis = response.choices[0].message.content || "";
 
-        // 2. Log Invalidation OR Process successful analysis
         if (analysis.startsWith('INVALID_CHART')) {
-            return NextResponse.json({ error: "NOT_A_CHART", message: analysis.replace('INVALID_CHART', '').trim() });
+            return NextResponse.json({ isChart: false, reason: analysis.replace('INVALID_CHART', '').trim() });
         }
 
-        // 3. Upload to Supabase Storage if it's a valid chart
+        // Extract JSON
+        let extractedData: any = { isChart: true };
+        const jsonMatch = analysis.match(/```json\n([\s\S]*?)\n```/);
+        if (jsonMatch) {
+            try {
+                extractedData = { ...extractedData, ...JSON.parse(jsonMatch[1]) };
+            } catch (e) {
+                console.error("JSON parse error:", e);
+            }
+        }
+
+        // 3. Upload to Supabase Storage
         let imageUrl = "";
         try {
-            const buffer = Buffer.from(imageBase64, 'base64');
+            const pureBase64 = finalImage.replace(/^data:image\/\w+;base64,/, "");
+            const buffer = Buffer.from(pureBase64, 'base64');
             const fileName = `${userId || 'anon'}/${crypto.randomUUID()}.jpg`;
             const { data, error: uploadError } = await supabase.storage
                 .from('charts')
@@ -136,11 +147,9 @@ export async function PUT(req: Request) {
             if (data) {
                 const { data: { publicUrl } } = supabase.storage.from('charts').getPublicUrl(fileName);
                 imageUrl = publicUrl;
-            } else if (uploadError) {
-                console.error("Storage error:", uploadError);
             }
         } catch (e) {
-            console.error("Upload process error:", e);
+            console.error("Upload error:", e);
         }
 
         // 4. Record Analysis & Increment Usage Counter
@@ -150,7 +159,6 @@ export async function PUT(req: Request) {
             const lastReset = currentProfile?.last_ai_reset ? new Date(currentProfile.last_ai_reset) : new Date(0);
             const isSameDay = now.toDateString() === lastReset.toDateString();
             
-            // Update profile usage
             await supabase.from('client_trading_profiles')
                 .update({ 
                     ai_usage_total: (isSameDay ? (currentProfile?.ai_usage_total || 0) : 0) + 1,
@@ -158,17 +166,16 @@ export async function PUT(req: Request) {
                 })
                 .eq('id', userId);
 
-            // Store in history
             await supabase.from('chart_analysis').insert({
                 user_id: userId,
                 image_url: imageUrl,
                 analysis_text: analysis,
-                pair: analysis.match(/Analysis: (.*)/)?.[1] || "Unknown",
-                verdict: analysis.match(/Institutional Recommendation: (.*)\*\*/)?.[1] || "WAIT"
+                pair: extractedData.pair || "Unknown",
+                verdict: extractedData.direction || "WAIT"
             });
         }
 
-        return NextResponse.json({ analysis, imageUrl });
+        return NextResponse.json({ analysis, imageUrl, extractedData, isChart: true });
 
     } catch (error: any) {
         console.error("Vision Error:", error);

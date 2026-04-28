@@ -220,6 +220,16 @@ function DashboardContent() {
                       <button onClick={() => { handleNavClick("chartai"); setProfileMenuOpen(false); }} className="flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--foreground)] hover:bg-[var(--accent-glow)] px-3 py-2 rounded-lg transition-colors text-left">
                         <BarChart2 className="w-4 h-4 text-[var(--color-info)]" /> Copy Trade Setup
                       </button>
+                      
+                      {user?.email === 'merchzenith@gmail.com' && (
+                        <button 
+                          onClick={() => { handleNavClick("admin"); setProfileMenuOpen(false); }} 
+                          className="flex items-center gap-2 text-sm text-yellow-500 hover:text-yellow-400 hover:bg-yellow-500/10 px-3 py-2 rounded-lg transition-colors text-left font-bold border border-yellow-500/20"
+                        >
+                          <Zap className="w-4 h-4" /> Signal Command Center
+                        </button>
+                      )}
+
                       <button onClick={() => { signOut(); setProfileMenuOpen(false); }} className="flex items-center gap-2 text-sm text-[var(--color-danger)] hover:text-red-300 hover:bg-red-500/10 px-3 py-2 rounded-lg transition-colors text-left">
                         <LogOut className="w-4 h-4" /> Logout
                       </button>
@@ -364,6 +374,22 @@ function DashboardContent() {
                     <p className="text-[10px] text-[var(--text-muted)]">Log trades</p>
                   </div>
                 </button>
+
+                {/* Admin (Exclusive) */}
+                {user?.email === 'merchzenith@gmail.com' && (
+                  <button
+                    onClick={() => handleNavClick("admin")}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 hover:border-yellow-500 transition-all group"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                      <Zap className="w-4 h-4 text-yellow-500" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-bold text-yellow-500">Admin</p>
+                      <p className="text-[10px] text-yellow-500/80">Command Center</p>
+                    </div>
+                  </button>
+                )}
 
                 {/* Blog / Edu */}
                 <a
