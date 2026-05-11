@@ -71,36 +71,38 @@ export async function PUT(req: Request) {
             }
         }
 
-        const systemPrompt = `You are the Zen Pips Institutional AI Analyst. 
-        
-        CRITICAL FIRST STEP: Determine if the image is a trading chart screenshot (e.g., TradingView, MT4/5, Binance, etc.). 
-        If it is NOT a chart, start with 'INVALID_CHART'.
-        
-        If it IS a trading chart, analyze price action.
-        
-        CRITICAL: If it is a valid chart, you MUST extract the following values if visible on the chart:
-        - Asset Pair (e.g., XAUUSD, EURUSD)
-        - Trade Direction (BUY or SELL)
-        - Entry Price
-        - Stop Loss (SL)
-        - Take Profit 1, 2, and 3 (TP1, TP2, TP3)
-        
-        Format your response with the analysis first, then at the VERY END, provide exactly one JSON block with the extracted data:
-        \`\`\`json
-        {
-          "pair": "XAUUSD",
-          "direction": "BUY",
-          "entry": 2350.50,
-          "sl": 2340.00,
-          "tp1": 2360.00,
-          "tp2": 2370.00,
-          "tp3": 2380.00,
-          "isChart": true
-        }
-        \`\`\`
-        
-        If you cannot find a value, use null.
-        `;
+        const systemPrompt = `You are the Zen Pips Institutional AI Analyst.
+
+CRITICAL FIRST STEP: Determine if the image is a trading chart screenshot (e.g., TradingView, MT4/5, Binance, etc.).
+If it is NOT a chart, start your response with exactly 'INVALID_CHART' followed by a brief reason.
+
+If it IS a trading chart, analyze the price action in depth.
+
+FORMATTING RULES (MANDATORY):
+- Use PLAIN TEXT only. Do NOT use markdown syntax like **, ##, ###, -, or backticks.
+- Structure your response using these exact section headers on their own line:
+  1. MARKET STRUCTURE
+  2. KEY LEVELS
+  3. CONFLUENCE FACTORS
+  4. INSTITUTIONAL RECOMMENDATION
+- Under each section, write clear sentences. Use line breaks between points.
+- For the INSTITUTIONAL RECOMMENDATION section, clearly state BUY, SELL, or WAIT with reasoning.
+- Do NOT include any JSON in your visible analysis text.
+
+CRITICAL: You MUST also extract structured data. Place it at the VERY END of your response inside a JSON code block:
+\`\`\`json
+{
+  "pair": "XAUUSD",
+  "direction": "BUY",
+  "entry": 2350.50,
+  "sl": 2340.00,
+  "tp1": 2360.00,
+  "tp2": 2370.00,
+  "tp3": 2380.00,
+  "isChart": true
+}
+\`\`\`
+If you cannot find a value, use null. The JSON block will be stripped from the display — it is for internal use only.`;
 
         const response = await openai.chat.completions.create({
             model: "gpt-4o",
@@ -117,15 +119,15 @@ export async function PUT(req: Request) {
             temperature: 0.1
         });
 
-        const analysis = response.choices[0].message.content || "";
+        const rawAnalysis = response.choices[0].message.content || "";
 
-        if (analysis.startsWith('INVALID_CHART')) {
-            return NextResponse.json({ isChart: false, reason: analysis.replace('INVALID_CHART', '').trim() });
+        if (rawAnalysis.startsWith('INVALID_CHART')) {
+            return NextResponse.json({ isChart: false, reason: rawAnalysis.replace('INVALID_CHART', '').trim() });
         }
 
-        // Extract JSON
+        // Extract JSON block for structured data
         let extractedData: any = { isChart: true };
-        const jsonMatch = analysis.match(/```json\n([\s\S]*?)\n```/);
+        const jsonMatch = rawAnalysis.match(/```json\n([\s\S]*?)\n```/);
         if (jsonMatch) {
             try {
                 extractedData = { ...extractedData, ...JSON.parse(jsonMatch[1]) };
@@ -133,6 +135,14 @@ export async function PUT(req: Request) {
                 console.error("JSON parse error:", e);
             }
         }
+
+        // Strip JSON block and any remaining markdown artifacts from the display text
+        const analysis = rawAnalysis
+            .replace(/```json[\s\S]*?```/g, '')
+            .replace(/```[\s\S]*?```/g, '')
+            .replace(/\*\*/g, '')
+            .replace(/^#{1,3}\s/gm, '')
+            .trim();
 
         // 3. Upload to Supabase Storage
         let imageUrl = "";
@@ -175,7 +185,7 @@ export async function PUT(req: Request) {
             });
         }
 
-        return NextResponse.json({ analysis, imageUrl, extractedData, isChart: true });
+        return NextResponse.json({ analysis, imageUrl, extractedData, isChart: true, cleanAnalysis: true });
 
     } catch (error: any) {
         console.error("Vision Error:", error);

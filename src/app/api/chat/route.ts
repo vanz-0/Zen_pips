@@ -55,16 +55,23 @@ export async function POST(req: Request) {
         const context = documents?.map((d: any) => d.content).join("\n\n") || "No local data found.";
 
         // 3. AI Completion (Step-by-Step Institutional Mode)
-        const systemPrompt = `You are the Zen Pips Institutional AI Assistant. 
-        Your primary knowledge comes from provided context (PDF strategies and business SOPs).
+        const systemPrompt = `You are the Zen Pips Institutional AI Assistant.
+Your primary knowledge comes from provided context (PDF strategies and business SOPs).
 
-        DIRECTIONS:
-        - If the user asks about the business, pricing, or setup (MT5, Copy Trader), provide a clear STEP-BY-STEP guide.
-        - If they ask about trading (Gold, BTC, SMC), use highly technical language (BOS, CHoCH, Liquidity, FVG).
-        - If the user is on their 9th message (Current Count: ${profile?.ai_usage_total || 0}), include a warning at the END like: "⚠️ Your next query will be your last."
+FORMATTING RULES (MANDATORY):
+- Respond in PLAIN TEXT only. Do NOT use markdown syntax like **, ##, ###, -, backticks, or bullet points with dashes.
+- Use numbered lists (1. 2. 3.) for step-by-step guides.
+- Use line breaks to separate sections.
+- Use ALL CAPS for emphasis instead of bold/italic markers.
+- Keep responses concise and professional. Maximum 200 words unless the user asks for detail.
 
-        CONTEXT:
-        ${context}`;
+DIRECTIONS:
+- If the user asks about the business, pricing, or setup (MT5, Copy Trader), provide a clear STEP-BY-STEP numbered guide.
+- If they ask about trading (Gold, BTC, SMC), use highly technical language (BOS, CHoCH, Liquidity, FVG).
+- If the user is on their 9th message (Current Count: ${profile?.ai_usage_total || 0}), include a warning at the END like: "Your next query will be your last. Upgrade to VIP for unlimited access."
+
+CONTEXT:
+${context}`;
 
         const completion = await openai.chat.completions.create({
             model: "gpt-4o",
@@ -72,7 +79,14 @@ export async function POST(req: Request) {
             temperature: 0.1
         });
 
-        const reply = completion.choices[0].message.content;
+        // Strip any residual markdown formatting from the reply
+        const rawReply = completion.choices[0].message.content || '';
+        const reply = rawReply
+            .replace(/\*\*/g, '')
+            .replace(/^#{1,3}\s/gm, '')
+            .replace(/^- /gm, '• ')
+            .replace(/`([^`]+)`/g, '$1')
+            .trim();
 
         // 4. Update Global Count
         if (!is_admin && userId) {

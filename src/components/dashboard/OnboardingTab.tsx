@@ -182,57 +182,13 @@ export function OnboardingTab() {
                         </div>
                     </Step>
 
-                    {/* Step 2: MT5 ID */}
+                    {/* Step 2: Funding */}
                     <Step 
                         number={2} 
-                        title="Locate Your MT5 Login ID" 
-                        description="This ID is the key to linking our signals to your portfolio."
-                        isOpen={openStep === 2}
-                        onToggle={() => setOpenStep(2)}
-                    >
-                        <div className="bg-gradient-to-br from-[var(--card-bg)] via-[var(--background)] to-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-2 text-yellow-500">
-                                        <Smartphone className="w-4 h-4" />
-                                        <span className="text-xs font-bold uppercase tracking-wider">Mobile App (iPhone/Android)</span>
-                                    </div>
-                                    <ol className="space-y-3 text-sm text-[var(--text-muted)] list-decimal pl-4">
-                                        <li>Open the MT5 App.</li>
-                                        <li>Go to <strong className="text-[var(--foreground)]">Settings</strong> &gt; <strong className="text-[var(--foreground)]">New Account</strong>.</li>
-                                        <li>Select Vantage as your broker and log in.</li>
-                                        <li>Your 8-digit Login ID will appear at the top of your Account profile.</li>
-                                    </ol>
-                                </div>
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-2 text-yellow-500">
-                                        <Monitor className="w-4 h-4" />
-                                        <span className="text-xs font-bold uppercase tracking-wider">Desktop Platform</span>
-                                    </div>
-                                    <ol className="space-y-3 text-sm text-[var(--text-muted)] list-decimal pl-4">
-                                        <li>Open MetaTrader 5 on your PC.</li>
-                                        <li>Look at the <strong className="text-[var(--foreground)]">Navigator</strong> window (Press Ctrl+N).</li>
-                                        <li>Expand the 'Accounts' tree.</li>
-                                        <li>The number listed next to your name is your MT5 ID (e.g., 86213984).</li>
-                                    </ol>
-                                </div>
-                            </div>
-                            <div className="mt-8 p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-xl flex items-start gap-4">
-                                <Info className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
-                                <p className="text-xs text-yellow-500/80 leading-relaxed font-medium">
-                                    <strong>IMPORTANT:</strong> You only need to provide the Login ID. <strong>NEVER</strong> share your MT5 Master Password with anyone, including us. Our bridge only requires the ID to route signals via the Vantage server.
-                                </p>
-                            </div>
-                        </div>
-                    </Step>
-
-                    {/* Step 3: Funding */}
-                    <Step 
-                        number={3} 
                         title="Capital Injection (Funding)" 
                         description="Deposit your trading capital into your Vantage Wallet."
-                        isOpen={openStep === 3}
-                        onToggle={() => setOpenStep(3)}
+                        isOpen={openStep === 2}
+                        onToggle={() => setOpenStep(2)}
                     >
                         <div className="bg-gradient-to-br from-[var(--card-bg)] via-[var(--background)] to-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-6 space-y-6">
                             <div className="flex flex-col md:flex-row gap-8">
@@ -268,73 +224,23 @@ export function OnboardingTab() {
                         </div>
                     </Step>
 
-                    {/* Step 4: Token Provisioning */}
+                    {/* Step 3: Fleet Activation */}
                     <Step 
-                        number={4} 
-                        title="Institutional Token Provisioning" 
-                        description="Your account is provisioned with 10 Daily AI Execution Credits."
-                        isOpen={openStep === 4}
-                        onToggle={() => setOpenStep(4)}
-                    >
-                        <div className="bg-gradient-to-br from-[var(--card-bg)] via-[var(--background)] to-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-6 space-y-8">
-                            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-[#d4af37]/10 to-transparent rounded-2xl border border-[#d4af37]/20">
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 relative">
-                                            <Zap className="w-full h-full text-[#d4af37]" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-[var(--text-muted)] font-bold uppercase tracking-widest">Provisioning Active</p>
-                                            <h4 className="text-2xl font-black text-[var(--foreground)]">FREE INSTITUTIONAL ACCESS</h4>
-                                        </div>
-                                    </div>
-                                    <p className="text-sm text-[var(--text-muted)] max-w-md">No subscription fees. Your access is fully sponsored. Your account receives **10 AI Credits** every 24 hours for deep SMC/ICT analysis and automated execution.</p>
-                                </div>
-                                <div className="hidden lg:block">
-                                    <Shield className="w-12 h-12 text-[#d4af37]/20" />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="space-y-4">
-                                    <p className="text-sm font-bold text-[var(--foreground)] flex items-center gap-2">
-                                        <CheckCircle2 className="w-4 h-4 text-[#d4af37]" />
-                                        Unlimited Vault & Journal
-                                    </p>
-                                    <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                                        Access all 60+ PDF resources and our high-fidelity trade journaling system at zero cost. This is the Zen Pips commitment to institutional transparency.
-                                    </p>
-                                </div>
-                                <div className="space-y-4">
-                                    <p className="text-sm font-bold text-[var(--foreground)] flex items-center gap-2">
-                                        <CheckCircle2 className="w-4 h-4 text-[#d4af37]" />
-                                        Global Support Bot
-                                    </p>
-                                    <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                                        Our Support Bot monitors for execution errors and critical failures 24/5. Simply trade, and the system handles the heavy lifting.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </Step>
-
-                    {/* Step 5: Activation */}
-                    <Step 
-                        number={5} 
-                        title="Finalize & Activate Connection" 
-                        description="Enter your ID and Go Live with the Zen Pips Bridge."
-                        isOpen={openStep === 5}
-                        onToggle={() => setOpenStep(5)}
+                        number={3} 
+                        title="Request Slave Fleet Activation" 
+                        description="Switch from manual to institutional fleet automation."
+                        isOpen={openStep === 3}
+                        onToggle={() => setOpenStep(3)}
                         isLast
                     >
                         <div className="bg-gradient-to-br from-[var(--card-bg)] via-[var(--background)] to-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-6 flex flex-col items-center text-center space-y-6">
-                            <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
-                                <CheckCircle2 className="w-8 h-8 text-green-500" />
+                            <div className="w-16 h-16 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center">
+                                <Zap className="w-8 h-8 text-yellow-500" />
                             </div>
                             <div className="space-y-2">
-                                <h4 className="text-xl font-bold">You're Ready to Dominate.</h4>
+                                <h4 className="text-xl font-bold">Deploy Your Capital.</h4>
                                 <p className="text-sm text-[var(--text-muted)] max-w-lg mx-auto leading-relaxed">
-                                    Once you've done the above, go to the <strong className="text-[var(--foreground)] font-bold">Analytics</strong> tab and enter your Vantage MT5 ID in the Connection Portal. Your copy trader will instantly switch to <strong className="text-[var(--foreground)]">ACTIVE</strong> mode.
+                                    Individual bridge setup is no longer required. Once your Vantage account is funded, simply request access to the **Institutional Slave Fleet** via your Profile settings. Our server-side fleet handles all executions automatically.
                                 </p>
                             </div>
                             <div className="flex gap-4">
@@ -342,7 +248,7 @@ export function OnboardingTab() {
                                     onClick={() => window.scrollTo(0,0)} 
                                     className="px-8 py-3 bg-[#d4af37] text-black font-black rounded-xl hover:brightness-110 transition-all uppercase text-xs tracking-widest shadow-[0_0_20px_rgba(212,175,55,0.2)]"
                                 >
-                                    Go to Dashboard
+                                    Return to Profile
                                 </button>
                             </div>
                         </div>

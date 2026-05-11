@@ -154,7 +154,29 @@ export default function ChatWidget() {
                                         ? 'bg-[#d4af37] text-black font-medium rounded-tr-none'
                                         : 'bg-[var(--sub-panel-bg)] text-[var(--foreground)] border border-[var(--border-color)] rounded-tl-none'
                                         }`}>
-                                        {msg.content}
+                                        {msg.role === 'assistant' ? (
+                                            <div className="space-y-1.5 font-[family-name:var(--font-outfit)]">
+                                                {msg.content.split('\n').map((line, li) => {
+                                                    const trimmed = line.trim()
+                                                    if (!trimmed) return <div key={li} className="h-1" />
+                                                    // Numbered step lines
+                                                    if (/^\d+\.\s/.test(trimmed)) {
+                                                        return <p key={li} className="text-[13px] leading-relaxed pl-1">{trimmed}</p>
+                                                    }
+                                                    // ALL CAPS section headers
+                                                    if (trimmed === trimmed.toUpperCase() && trimmed.length > 3 && trimmed.length < 50 && !/^\d/.test(trimmed)) {
+                                                        return <p key={li} className="text-[11px] font-bold text-[#d4af37] uppercase tracking-wider mt-2">{trimmed}</p>
+                                                    }
+                                                    // Bullet points
+                                                    if (trimmed.startsWith('•')) {
+                                                        return <p key={li} className="text-[13px] leading-relaxed pl-2">{trimmed}</p>
+                                                    }
+                                                    return <p key={li} className="text-[13px] leading-relaxed">{trimmed}</p>
+                                                })}
+                                            </div>
+                                        ) : (
+                                            msg.content
+                                        )}
                                     </div>
                                 </div>
                             ))}

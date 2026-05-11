@@ -10,6 +10,7 @@ interface AuthContextType {
     profile: any | null
     loading: boolean
     signOut: () => Promise<void>
+    refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
     profile: null,
     loading: true,
     signOut: async () => { },
+    refreshProfile: async () => { },
 })
 
 // ⚡ DEV BYPASS — Set to true to automatically login as admin on localhost
@@ -66,6 +68,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }
 
+    const refreshProfile = async () => {
+        if (user) await fetchProfile(user.id)
+    }
+
     useEffect(() => {
         if (DEV_BYPASS) return // skip real auth in dev mode
 
@@ -86,17 +92,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         )
 
         return () => subscription.unsubscribe()
-    }, [])
+    }, [user]) // added user to dependency to ensure session changes are caught correctly
 
     const signOut = async () => {
         if (DEV_BYPASS) return
         await supabase.auth.signOut()
         setUser(null)
         setSession(null)
+        setProfile(null)
     }
 
     return (
-        <AuthContext.Provider value={{ user, session, profile, loading, signOut }}>
+        <AuthContext.Provider value={{ user, session, profile, loading, signOut, refreshProfile }}>
             {children}
         </AuthContext.Provider>
     )

@@ -60,15 +60,26 @@ export function ProfileTab() {
   const handleSave = async () => {
     if (!user) return
     setSaving(true)
-    const { error } = await supabase.auth.updateUser({
+    
+    // Update Auth Metadata for full_name and telegram
+    const { error: authError } = await supabase.auth.updateUser({
       data: {
         full_name: fullName,
         telegram_username: telegramUsername,
-        mt5_account_id: mt5AccountId,
       },
     })
+
+    // Update client_trading_profiles table
+    const { error: profileError } = await supabase
+      .from('client_trading_profiles')
+      .update({
+        telegram_handle: telegramUsername,
+        mt5_account_id: mt5AccountId
+      })
+      .eq('id', user.id)
+
     setSaving(false)
-    if (!error) {
+    if (!authError && !profileError) {
       setSaved(true)
       setEditing(false)
       setTimeout(() => setSaved(false), 3000)
@@ -301,42 +312,56 @@ export function ProfileTab() {
             <div className="w-full md:w-[380px] bg-[var(--card-bg)]/60 rounded-2xl p-6 border border-[var(--border-color)] backdrop-blur-xl relative z-10 shrink-0 shadow-2xl space-y-6">
                <div>
                  <h3 className="text-lg font-bold text-[var(--foreground)] mb-2 flex items-center gap-2">
-                   <Link className="w-5 h-5 text-[var(--text-muted)]" />
-                   Connection Portal
+                   <Zap className="w-5 h-5 text-yellow-500" />
+                   Slave Fleet Portal
                  </h3>
-                 <p className="text-xs text-[var(--text-muted)]">Input your MT5 ID to route signals dynamically.</p>
+                 <p className="text-xs text-[var(--text-muted)]">Connect your capital to our institutional execution pool.</p>
                </div>
 
                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-extrabold">Vantage MT5 ID</label>
-                    <input
-                      type="text"
-                      value={mt5AccountId}
-                      onChange={(e) => setMt5AccountId(e.target.value)}
-                      className="w-full bg-[var(--background)] p-3 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] focus:border-yellow-500/50 outline-none transition-colors font-mono text-sm"
-                      placeholder="e.g. 86213984"
-                    />
-                  </div>
-
-                  {/* Removed Cloud MAM placeholders as password collection is explicitly forbidden. */}
-
-                  <button
-                    onClick={handleSave}
-                    disabled={saving || !mt5AccountId}
-                    className="w-full py-3 bg-[var(--panel-bg)] text-[var(--foreground)] rounded-xl font-bold hover:bg-yellow-500 hover:text-black transition-colors border border-[var(--border-color)] flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
-                  >
-                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Connection ID"}
-                  </button>
-
-                  {mt5AccountId && (
-                    <div className="p-3 rounded-xl bg-green-500/5 border border-green-500/10">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                        <p className="text-[10px] text-[var(--color-success)] font-bold uppercase tracking-widest">Active Linkage</p>
+                  {!mt5AccountId || mt5AccountId === "" ? (
+                    <button
+                      onClick={async () => {
+                        setSaving(true)
+                        const { error } = await supabase
+                          .from('client_trading_profiles')
+                          .update({ mt5_account_id: "FLEET_REQUESTED" })
+                          .eq('id', user.id)
+                        setSaving(false)
+                        if (!error) {
+                          setMt5AccountId("FLEET_REQUESTED")
+                          setSaved(true)
+                          setTimeout(() => setSaved(false), 3000)
+                        }
+                      }}
+                      disabled={saving}
+                      className="w-full py-4 bg-yellow-500 text-black rounded-xl font-black uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.2)] text-xs"
+                    >
+                      {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Request Fleet Access <Zap className="w-4 h-4" /></>}
+                    </button>
+                  ) : mt5AccountId === "FLEET_REQUESTED" ? (
+                    <div className="p-4 rounded-xl bg-yellow-500/5 border border-yellow-500/20 text-center space-y-2">
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-4 h-4 text-yellow-500 animate-spin" />
+                        <p className="text-xs font-bold text-yellow-500 uppercase tracking-widest">Pending Activation</p>
                       </div>
+                      <p className="text-[10px] text-[var(--text-muted)]">Your Vantage account is being provisioned for the Institutional Slave Fleet.</p>
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20 text-center space-y-2">
+                      <div className="flex items-center justify-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        <p className="text-xs font-bold text-green-500 uppercase tracking-widest">Fleet Connection Active</p>
+                      </div>
+                      <p className="text-[10px] text-[var(--text-muted)]">MT5 Bridge Status: Connected to Zen Slave Fleet v2.0</p>
                     </div>
                   )}
+
+                  <div className="pt-2 text-center">
+                    <p className="text-[10px] text-[var(--text-muted)] italic leading-relaxed">
+                      "Individual bridge setup is deprecated. Our server-side fleet now handles all executions for verified members."
+                    </p>
+                  </div>
                </div>
             </div>
           </div>

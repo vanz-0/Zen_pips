@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Mail, Send, X, Shield, Zap, CheckCircle2, Loader2, MessageSquare, ExternalLink } from "lucide-react"
+import { Mail, Send, X, Shield, Zap, CheckCircle2, Loader2, MessageSquare, ExternalLink, ArrowRight } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { supabase } from "@/lib/supabase"
 import confetti from "canvas-confetti"
@@ -16,7 +16,7 @@ export function ProfileSetupPopup() {
     const [isSuccess, setIsSuccess] = useState(false)
 
     const [step, setStep] = useState(1) // 1: Vantage Broker, 2: Journal & Community
-    const [mt5Id, setMt5Id] = useState("")
+    const [wantsFleet, setWantsFleet] = useState(false)
 
     useEffect(() => {
         // 1. Check for 'first_login' query parameter (triggered by activation link)
@@ -28,12 +28,12 @@ export function ProfileSetupPopup() {
             return
         }
 
-        // 2. Fallback: Show after 20 seconds if MT5 ID is missing
+        // 2. Fallback: Show after 20 seconds if email is missing
         const hasShown = localStorage.getItem('zenpips_onboarding_dismissed')
         if (hasShown) return
 
         const timer = setTimeout(() => {
-            const needsSetup = profile && (!profile.mt5_account_id || !profile.email)
+            const needsSetup = profile && (!profile.email)
             if (needsSetup) {
                 setIsVisible(true)
             }
@@ -49,10 +49,6 @@ export function ProfileSetupPopup() {
 
     const handleBrokerSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (mt5Id.trim() === "") {
-            alert("Vantage Account ID is mandatory for the copy trading bridge.");
-            return;
-        }
         setStep(2)
     }
 
@@ -67,18 +63,20 @@ export function ProfileSetupPopup() {
                 .update({
                     email: email || user.email,
                     telegram_handle: telegramHandle || null,
-                    mt5_account_id: mt5Id
+                    // Use a string indicator or a metadata field if column doesn't exist
+                    mt5_account_id: wantsFleet ? "FLEET_REQUESTED" : null
                 })
                 .eq('id', user.id)
 
             if (error) throw error
 
             setIsSuccess(true)
+            // ... (rest of the success logic) ...
             confetti({
                 particleCount: 150,
                 spread: 70,
                 origin: { y: 0.6 },
-                colors: ['#d4af37', '#000000', '#ffffff'] // Zen Pips Gold, Black, White
+                colors: ['#d4af37', '#000000', '#ffffff']
             })
 
             setTimeout(() => {
@@ -102,9 +100,9 @@ export function ProfileSetupPopup() {
                         initial={{ scale: 0.9, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                        className="relative w-full max-w-lg my-auto bg-[var(--card-bg)] border border-blue-500/30 rounded-2xl sm:rounded-[32px] p-5 sm:p-6 md:p-10 shadow-[0_0_50px_rgba(0,102,255,0.15)]"
+                        className="relative w-full max-w-lg my-auto bg-[var(--card-bg)] border border-yellow-500/30 rounded-2xl sm:rounded-[32px] p-5 sm:p-6 md:p-10 shadow-[0_0_50px_rgba(212,175,55,0.15)]"
                     >
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#d4af37] to-transparent" />
                         
                         <button 
                             onClick={(e) => {
@@ -121,39 +119,49 @@ export function ProfileSetupPopup() {
                                 {step === 1 ? (
                                     <form onSubmit={handleBrokerSubmit} className="space-y-4 sm:space-y-6">
                                         <div className="text-center space-y-2 sm:space-y-3">
-                                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-500/10 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto border border-blue-500/20 mb-3 sm:mb-4">
-                                                <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
+                                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-yellow-500/10 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto border border-yellow-500/20 mb-3 sm:mb-4">
+                                                <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-[#d4af37]" />
                                             </div>
                                             <h2 className="text-xl sm:text-2xl md:text-3xl font-black italic tracking-tight uppercase text-[var(--foreground)]">Vantage Gateway</h2>
                                             <p className="text-[var(--text-muted)] text-xs sm:text-sm leading-relaxed">
-                                                To utilize the Institutional Copy Trading tools, a verified **Vantage Markets** account is mandatory.
+                                                To utilize the Institutional Trading tools, a verified **Vantage Markets** account is required.
                                             </p>
                                         </div>
 
                                         <div className="p-4 bg-[var(--panel-bg)] border border-[var(--border-color)] rounded-2xl space-y-4">
                                             <div className="flex flex-col gap-2">
                                                 <span className="text-xs font-bold text-[var(--text-muted)] font-mono">1. Register with our Hub Link</span>
-                                                <a href="https://vigco.co/la-com-inv/TItFx2Oy" target="_blank" className="bg-blue-600/10 text-blue-400 py-2 px-4 rounded-xl text-center text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-blue-600/20 transition-all border border-blue-500/20">
+                                                <a href="https://vigco.co/la-com-inv/TItFx2Oy" target="_blank" className="bg-yellow-500/10 text-yellow-500 py-3 px-4 rounded-xl text-center text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-yellow-500/20 transition-all border border-yellow-500/20">
                                                     Open Vantage Registration 
                                                 </a>
                                             </div>
-                                            <div className="flex flex-col gap-2">
-                                                <span className="text-xs font-bold text-[var(--text-muted)] font-mono">2. Enter your MT5 Account ID</span>
-                                                <input
-                                                    type="text"
-                                                    value={mt5Id}
-                                                    onChange={(e) => setMt5Id(e.target.value)}
-                                                    placeholder="Vantage MT5 ID (e.g. 892019)"
-                                                    className="w-full bg-[var(--background)] p-3 rounded-xl border border-[var(--border-color)] text-[var(--foreground)] focus:border-yellow-500/50 outline-none transition-colors font-mono text-sm leading-relaxed"
-                                                />
+                                            
+                                            <div 
+                                                onClick={() => setWantsFleet(!wantsFleet)}
+                                                className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
+                                                    wantsFleet ? 'bg-yellow-500/10 border-yellow-500/40' : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-5 h-5 rounded flex items-center justify-center border transition-all ${
+                                                        wantsFleet ? 'bg-yellow-500 border-yellow-500' : 'bg-transparent border-white/30'
+                                                    }`}>
+                                                        {wantsFleet && <CheckCircle2 className="w-3.5 h-3.5 text-black" />}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs font-bold text-[var(--foreground)]">Request Slave Fleet Access</p>
+                                                        <p className="text-[10px] text-[var(--text-muted)]">Automate signals with our institutional pool</p>
+                                                    </div>
+                                                </div>
+                                                <Zap className={`w-4 h-4 transition-all ${wantsFleet ? 'text-yellow-500 animate-pulse' : 'text-neutral-600'}`} />
                                             </div>
                                         </div>
 
                                         <button 
                                             type="submit"
-                                            className="w-full bg-blue-600 text-white h-12 sm:h-14 rounded-xl font-black uppercase tracking-widest text-sm sm:text-base flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all"
+                                            className="w-full bg-yellow-500 text-black h-12 sm:h-14 rounded-xl font-black uppercase tracking-widest text-sm sm:text-base flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(212,175,55,0.2)]"
                                         >
-                                            Confirm Broker <Send className="w-4 h-4 ml-1" />
+                                            Confirm Broker <ArrowRight className="w-4 h-4 ml-1" />
                                         </button>
                                     </form>
                                 ) : (

@@ -139,7 +139,14 @@ export function ChartAITab() {
 
       const data = await response.json()
       if (data.analysis) {
-        setAnalysisResult(data.analysis)
+        // Strip any residual JSON or markdown artifacts from display
+        const cleanAnalysis = data.analysis
+          .replace(/```json[\s\S]*?```/g, '')
+          .replace(/```[\s\S]*?```/g, '')
+          .replace(/\*\*/g, '')
+          .replace(/^#{1,3}\s/gm, '')
+          .trim()
+        setAnalysisResult(cleanAnalysis)
         if (data.imageUrl) {
           setLastImageUrl(data.imageUrl)
           fetchHistory()
@@ -169,11 +176,16 @@ export function ChartAITab() {
            .ilike('content', `%[${pairSimple}]%`)
       }
 
+      const cleanContent = analysisResult
+        .replace(/```json[\s\S]*?```/g, '')
+        .replace(/```[\s\S]*?```/g, '')
+        .trim()
+
       const tag = analysisMode === 'live' ? `[${selectedPair.split(':')[1] || selectedPair}] ` : '';
       const targetChannel = isAdmin ? 'setups-and-charts' : 'pending-setups';
       const { error } = await supabase.from('community_messages').insert({
         user_id: user.id,
-        content: `🎯 AI ANALYSIS SHARED:\n\n${tag}${analysisResult.split('### 4. Verdict:')[0].trim()}`,
+        content: `🎯 AI ANALYSIS SHARED:\n\n${tag}${cleanContent.split('4. INSTITUTIONAL RECOMMENDATION')[0].trim()}`,
         image: lastImageUrl,
         channel: targetChannel
       })
@@ -286,28 +298,74 @@ export function ChartAITab() {
   }
 
   const renderAnalysis = (text: string) => {
-    return text.split('\n').map((line, i) => {
-      if (line.startsWith('## ')) return <h2 key={i} className="text-xl font-bold text-blue-400 mt-6 mb-3 uppercase tracking-tighter italic">{line.replace('## ', '')}</h2>
-      if (line.startsWith('### ')) return <h3 key={i} className="text-md font-bold text-white mt-4 mb-2 uppercase tracking-wide border-l-2 border-blue-500 pl-3">{line.replace('### ', '')}</h3>
-      if (line.startsWith('- **')) {
-        const [title, desc] = line.split(': ')
+    // Clean any residual JSON/markdown artifacts
+    const cleanText = text
+      .replace(/```json[\s\S]*?```/g, '')
+      .replace(/```[\s\S]*?```/g, '')
+      .replace(/\*\*/g, '')
+      .trim()
+
+    const sectionHeaders = ['MARKET STRUCTURE', 'KEY LEVELS', 'CONFLUENCE FACTORS', 'INSTITUTIONAL RECOMMENDATION']
+
+    return cleanText.split('\n').map((line, i) => {
+      const trimmed = line.trim()
+      if (!trimmed) return <div key={i} className="h-2" />
+
+      // Section headers
+      const headerMatch = sectionHeaders.find(h => trimmed.startsWith(h) || trimmed === h)
+      if (headerMatch) {
         return (
-          <div key={i} className="mb-2 text-[12px] leading-relaxed">
-            <span className="text-blue-400 font-bold">{title.replace('- **', '').replace('**', '')}</span>: 
-            <span className="text-gray-400 ml-1">{desc}</span>
+          <h3 key={i} className="text-sm font-bold text-blue-400 mt-5 mb-2 uppercase tracking-wider border-l-2 border-blue-500 pl-3 font-[family-name:var(--font-outfit)]">
+            {trimmed.replace(/^\d+\.\s*/, '')}
+          </h3>
+        )
+      }
+
+      // Numbered section labels (e.g., "1. MARKET STRUCTURE")
+      if (/^\d+\.\s*(MARKET STRUCTURE|KEY LEVELS|CONFLUENCE|INSTITUTIONAL)/.test(trimmed)) {
+        return (
+          <h3 key={i} className="text-sm font-bold text-blue-400 mt-5 mb-2 uppercase tracking-wider border-l-2 border-blue-500 pl-3 font-[family-name:var(--font-outfit)]">
+            {trimmed.replace(/^\d+\.\s*/, '')}
+          </h3>
+        )
+      }
+
+      // Recommendation line with BUY/SELL/WAIT
+      if (trimmed.includes('BUY') && (trimmed.includes('Recommendation') || trimmed.includes('RECOMMENDATION') || sectionHeaders.some(h => trimmed.includes(h)))) {
+        return (
+          <div key={i} className="my-4 p-4 rounded-xl border bg-green-500/10 border-green-500/30 text-green-500 font-bold text-center uppercase tracking-widest text-sm">
+            {trimmed}
           </div>
         )
       }
-      if (line.includes('Institutional Recommendation:')) {
-        const isSell = line.includes('SELL')
-        const isBuy = line.includes('BUY')
+      if (trimmed.includes('SELL') && (trimmed.includes('Recommendation') || trimmed.includes('RECOMMENDATION') || sectionHeaders.some(h => trimmed.includes(h)))) {
         return (
-          <div key={i} className={`my-6 p-4 rounded-xl border font-bold text-center uppercase tracking-widest ${isSell ? 'bg-red-500/10 border-red-500/30 text-red-500' : isBuy ? 'bg-green-500/10 border-green-500/30 text-green-500' : 'bg-blue-500/10 border-blue-500/30 text-blue-400'}`}>
-            {line}
+          <div key={i} className="my-4 p-4 rounded-xl border bg-red-500/10 border-red-500/30 text-red-500 font-bold text-center uppercase tracking-widest text-sm">
+            {trimmed}
           </div>
         )
       }
-      return <p key={i} className="text-[11px] text-gray-400 leading-relaxed mb-1">{line}</p>
+      if (trimmed.includes('WAIT') && (trimmed.includes('Recommendation') || trimmed.includes('RECOMMENDATION'))) {
+        return (
+          <div key={i} className="my-4 p-4 rounded-xl border bg-blue-500/10 border-blue-500/30 text-blue-400 font-bold text-center uppercase tracking-widest text-sm">
+            {trimmed}
+          </div>
+        )
+      }
+
+      // Key-value lines (e.g., "Entry: 2350.50" or "Pair: XAUUSD")
+      const kvMatch = trimmed.match(/^([A-Za-z\s\/]+):\s*(.+)$/)
+      if (kvMatch && kvMatch[1].length < 30) {
+        return (
+          <div key={i} className="mb-1.5 text-[12px] leading-relaxed">
+            <span className="text-blue-400 font-bold uppercase">{kvMatch[1]}</span>: 
+            <span className="text-gray-300 ml-1">{kvMatch[2]}</span>
+          </div>
+        )
+      }
+
+      // Regular paragraph text
+      return <p key={i} className="text-[11px] text-gray-400 leading-relaxed mb-1">{trimmed}</p>
     })
   }
 

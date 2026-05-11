@@ -393,7 +393,7 @@ export default function ChartUploader() {
                                 {targetAccounts.length === ACCOUNTS.length ? "Deselect All" : "Select All"}
                             </button>
                         </div>
-                        <div className="grid grid-cols-5 gap-2">
+                        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                             {ACCOUNTS.map(acc => (
                                 <button
                                     key={acc.id}
