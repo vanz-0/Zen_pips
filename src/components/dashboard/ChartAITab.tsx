@@ -169,9 +169,9 @@ export function ChartAITab() {
       } else {
         setAnalysisResult(data.message || "AI Analysis failed. System offline or image too large.")
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Analysis error:", error)
-      setAnalysisResult("An unexpected error occurred during analysis.")
+      setAnalysisResult(`⚠️ Error: ${error?.message || "An unexpected error occurred during analysis."}`)
     } finally {
       setIsAnalyzing(false)
     }

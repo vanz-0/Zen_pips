@@ -7,7 +7,7 @@ function getClients() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
     const geminiApiKey = process.env.GEMINI_API_KEY!;
-    
+
     if (!supabaseKey || !geminiApiKey) {
         throw new Error("Missing environment variables: SUPABASE_SERVICE_ROLE_KEY or GEMINI_API_KEY");
     }
@@ -26,7 +26,7 @@ export async function PUT(req: Request) {
     try {
         const { supabase, gemini } = getClients();
         const { imageBase64, image, userId, mode } = await req.json()
-        
+
         const finalImage = imageBase64 || image;
         if (!finalImage) return NextResponse.json({ error: "No image received" }, { status: 400 })
 
@@ -52,18 +52,18 @@ export async function PUT(req: Request) {
                     const dailyLimit = 10 + bonusToday;
 
                     if (usageToday >= dailyLimit) {
-                        return NextResponse.json({ 
+                        return NextResponse.json({
                             error: "LIMIT_REACHED",
-                            message: `🔴 DAILY LIMIT REACHED: You have used your ${dailyLimit} AI credits for today.` 
+                            message: `🔴 DAILY LIMIT REACHED: You have used your ${dailyLimit} AI credits for today.`
                         }, { status: 403 });
                     }
 
                     if (!isSameDay) {
                         await supabase.from('client_trading_profiles')
-                            .update({ 
-                                ai_usage_total: 0, 
-                                bonus_credits: 0, 
-                                last_ai_reset: now.toISOString() 
+                            .update({
+                                ai_usage_total: 0,
+                                bonus_credits: 0,
+                                last_ai_reset: now.toISOString()
                             })
                             .eq('id', userId);
                     }
@@ -104,24 +104,13 @@ CRITICAL: You MUST also extract structured data. Place it at the VERY END of you
 \`\`\`
 If you cannot find a value, use null. The JSON block will be stripped from the display — it is for internal use only.`;
 
-        // 2. Parse MimeType and Base64 dynamically
-        let mimeType = "image/jpeg";
-        let pureBase64 = finalImage;
-        if (finalImage.startsWith('data:')) {
-            const match = finalImage.match(/^data:([^;]+);base64,/);
-            if (match) {
-                mimeType = match[1];
-                pureBase64 = finalImage.replace(/^data:[^;]+;base64,/, '');
-            }
-        }
-
         const response = await gemini.models.generateContent({
             model: "gemini-2.5-flash",
             contents: [{
                 role: "user",
                 parts: [
                     { text: systemPrompt },
-                    { inlineData: { mimeType, data: pureBase64 } }
+                    { inlineData: { mimeType: "image/jpeg", data: finalImage.replace(/^data:image\/\w+;base64,/, '') } }
                 ]
             }],
             config: { temperature: 0.1, maxOutputTokens: 1200 }
@@ -155,12 +144,12 @@ If you cannot find a value, use null. The JSON block will be stripped from the d
         // 3. Upload to Supabase Storage
         let imageUrl = "";
         try {
+            const pureBase64 = finalImage.replace(/^data:image\/\w+;base64,/, "");
             const buffer = Buffer.from(pureBase64, 'base64');
-            const fileExt = mimeType.split('/')[1] || 'jpg';
-            const fileName = `${userId || 'anon'}/${crypto.randomUUID()}.${fileExt}`;
+            const fileName = `${userId || 'anon'}/${crypto.randomUUID()}.jpg`;
             const { data, error: uploadError } = await supabase.storage
                 .from('charts')
-                .upload(fileName, buffer, { contentType: mimeType });
+                .upload(fileName, buffer, { contentType: 'image/jpeg' });
 
             if (data) {
                 const { data: { publicUrl } } = supabase.storage.from('charts').getPublicUrl(fileName);
@@ -176,9 +165,9 @@ If you cannot find a value, use null. The JSON block will be stripped from the d
             const now = new Date();
             const lastReset = currentProfile?.last_ai_reset ? new Date(currentProfile.last_ai_reset) : new Date(0);
             const isSameDay = now.toDateString() === lastReset.toDateString();
-            
+
             await supabase.from('client_trading_profiles')
-                .update({ 
+                .update({
                     ai_usage_total: (isSameDay ? (currentProfile?.ai_usage_total || 0) : 0) + 1,
                     last_ai_reset: now.toISOString()
                 })
