@@ -104,13 +104,24 @@ CRITICAL: You MUST also extract structured data. Place it at the VERY END of you
 \`\`\`
 If you cannot find a value, use null. The JSON block will be stripped from the display — it is for internal use only.`;
 
+        // 2. Parse MimeType and Base64 dynamically
+        let mimeType = "image/jpeg";
+        let pureBase64 = finalImage;
+        if (finalImage.startsWith('data:')) {
+            const match = finalImage.match(/^data:([^;]+);base64,/);
+            if (match) {
+                mimeType = match[1];
+                pureBase64 = finalImage.replace(/^data:[^;]+;base64,/, '');
+            }
+        }
+
         const response = await gemini.models.generateContent({
             model: "gemini-2.5-flash",
             contents: [{
                 role: "user",
                 parts: [
                     { text: systemPrompt },
-                    { inlineData: { mimeType: "image/jpeg", data: finalImage.replace(/^data:image\/\w+;base64,/, '') } }
+                    { inlineData: { mimeType, data: pureBase64 } }
                 ]
             }],
             config: { temperature: 0.1, maxOutputTokens: 1200 }
@@ -144,12 +155,12 @@ If you cannot find a value, use null. The JSON block will be stripped from the d
         // 3. Upload to Supabase Storage
         let imageUrl = "";
         try {
-            const pureBase64 = finalImage.replace(/^data:image\/\w+;base64,/, "");
             const buffer = Buffer.from(pureBase64, 'base64');
-            const fileName = `${userId || 'anon'}/${crypto.randomUUID()}.jpg`;
+            const fileExt = mimeType.split('/')[1] || 'jpg';
+            const fileName = `${userId || 'anon'}/${crypto.randomUUID()}.${fileExt}`;
             const { data, error: uploadError } = await supabase.storage
                 .from('charts')
-                .upload(fileName, buffer, { contentType: 'image/jpeg' });
+                .upload(fileName, buffer, { contentType: mimeType });
 
             if (data) {
                 const { data: { publicUrl } } = supabase.storage.from('charts').getPublicUrl(fileName);
