@@ -38,7 +38,7 @@ export default function AuthPage() {
                     password,
                 })
                 if (signInError) throw signInError
-                router.push("/")
+                router.push("/?tab=profile")
                 router.refresh()
             } else {
                 const response = await fetch('/api/auth/register', {

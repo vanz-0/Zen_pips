@@ -137,15 +137,26 @@ export function ChartAITab() {
         body: JSON.stringify({ imageBase64: base64Image, userId: user.id }),
       })
 
-      const data = await response.json()
       if (data.analysis) {
-        // Strip any residual JSON or markdown artifacts from display
-        const cleanAnalysis = data.analysis
-          .replace(/```json[\s\S]*?```/g, '')
-          .replace(/```[\s\S]*?```/g, '')
+        let cleanAnalysis = data.analysis;
+        const jsonMatch = cleanAnalysis.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+        if (jsonMatch) cleanAnalysis = jsonMatch[1];
+        try {
+            const parsed = JSON.parse(cleanAnalysis);
+            if (typeof parsed === 'object' && parsed !== null) {
+                cleanAnalysis = Object.entries(parsed).map(([k, v]) => `${k.toUpperCase()}\n${v}`).join('\n\n');
+            }
+        } catch(e) {}
+        
+        cleanAnalysis = cleanAnalysis
+          .replace(/```json/gi, '')
+          .replace(/```/g, '')
           .replace(/\*\*/g, '')
           .replace(/^#{1,3}\s/gm, '')
-          .trim()
+          .replace(/[\{\}]/g, '')
+          .replace(/"([^"]+)":/g, '$1:')
+          .trim();
+          
         setAnalysisResult(cleanAnalysis)
         if (data.imageUrl) {
           setLastImageUrl(data.imageUrl)
@@ -176,9 +187,22 @@ export function ChartAITab() {
            .ilike('content', `%[${pairSimple}]%`)
       }
 
-      const cleanContent = analysisResult
-        .replace(/```json[\s\S]*?```/g, '')
-        .replace(/```[\s\S]*?```/g, '')
+      let cleanContent = analysisResult;
+      const jsonMatch = cleanContent.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (jsonMatch) cleanContent = jsonMatch[1];
+      try {
+          const parsed = JSON.parse(cleanContent);
+          if (typeof parsed === 'object' && parsed !== null) {
+              cleanContent = Object.entries(parsed).map(([k, v]) => `${k.toUpperCase()}\n${v}`).join('\n\n');
+          }
+      } catch(e) {}
+      
+      cleanContent = cleanContent
+        .replace(/```json/gi, '')
+        .replace(/```/g, '')
+        .replace(/\*\*/g, '')
+        .replace(/[\{\}]/g, '')
+        .replace(/"([^"]+)":/g, '$1:')
         .trim()
 
       const tag = analysisMode === 'live' ? `[${selectedPair.split(':')[1] || selectedPair}] ` : '';
@@ -298,11 +322,22 @@ export function ChartAITab() {
   }
 
   const renderAnalysis = (text: string) => {
-    // Clean any residual JSON/markdown artifacts
-    const cleanText = text
-      .replace(/```json[\s\S]*?```/g, '')
-      .replace(/```[\s\S]*?```/g, '')
+    let cleanText = text;
+    const jsonMatch = cleanText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (jsonMatch) cleanText = jsonMatch[1];
+    try {
+        const parsed = JSON.parse(cleanText);
+        if (typeof parsed === 'object' && parsed !== null) {
+            cleanText = Object.entries(parsed).map(([k, v]) => `${k.toUpperCase()}\n${v}`).join('\n\n');
+        }
+    } catch(e) {}
+    
+    cleanText = cleanText
+      .replace(/```json/gi, '')
+      .replace(/```/g, '')
       .replace(/\*\*/g, '')
+      .replace(/[\{\}]/g, '')
+      .replace(/"([^"]+)":/g, '$1:')
       .trim()
 
     const sectionHeaders = ['MARKET STRUCTURE', 'KEY LEVELS', 'CONFLUENCE FACTORS', 'INSTITUTIONAL RECOMMENDATION']

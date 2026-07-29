@@ -133,10 +133,10 @@ export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     
                     {/* Proposal Form */}
-                    <div className="lg:col-span-1">
+                    <div className="lg:col-span-3">
                         <div className="bg-[var(--panel-bg)] p-8 rounded-3xl border border-[var(--border-color)] sticky top-24">
                             <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                                 <Send className="w-5 h-5 text-[#d4af37]" /> Submit Idea
@@ -180,7 +180,7 @@ export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
                         </div>
 
                     {/* Proposal Feed */}
-                    <div className="lg:col-span-2 space-y-6">
+                    <div className="lg:col-span-5 space-y-6">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-[10px] text-[var(--text-muted)] uppercase font-bold flex items-center gap-2">
                                 <Box className="w-3 h-3" /> Live Proposals
@@ -250,25 +250,30 @@ export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
                             </div>
                         )}
 
-                        {/* Active Agent Integrations Command Center */}
-                        <div className="mt-8 bg-[var(--panel-bg)] border border-[var(--border-color)] rounded-3xl p-6">
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Active Agent Integrations Command Center */}
+                    <div className="lg:col-span-4">
+                        <div className="bg-[var(--panel-bg)] border border-[var(--border-color)] rounded-3xl p-6 sticky top-24">
                             <div className="flex items-center gap-2 mb-6">
                                 <Terminal className="w-5 h-5 text-[#d4af37]" />
-                                <h2 className="text-xl font-bold">Active Agent Ecosystem</h2>
+                                <h2 className="text-xl font-bold italic tracking-tighter uppercase">Agent Ecosystem</h2>
                             </div>
                             
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-4">
                                 {/* Component 1: MT5 Bridge */}
                                 <div className="bg-[var(--background)] p-4 rounded-2xl border border-[var(--border-color)] group hover:border-[#d4af37]/30 transition-all">
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2">
                                             <Zap className="w-4 h-4 text-[#d4af37]" />
-                                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#d4af37]">MT5 Execution Node</h3>
+                                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#d4af37]">MT5 Bridge</h3>
                                         </div>
-                                        <span className="text-[8px] font-bold px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20">DISCONNECTED</span>
+                                        <span className="text-[8px] font-bold px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20">OFFLINE</span>
                                     </div>
                                     <p className="text-[10px] text-[var(--text-muted)] leading-relaxed font-medium">
-                                        The core execution bridge syncing institutional signals to local terminals with strict 1% risk management. Run `python mt5_bridge.py` to initiate.
+                                        Syncing signals to local terminals. Run `mt5_bridge.py` to initiate.
                                     </p>
                                 </div>
 
@@ -277,12 +282,12 @@ export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2">
                                             <Activity className="w-4 h-4 text-[#d4af37]" />
-                                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#d4af37]">TV Signal Sentinel</h3>
+                                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#d4af37]">TV Sentinel</h3>
                                         </div>
-                                        <span className="text-[8px] font-bold px-2 py-0.5 rounded bg-green-500/10 text-green-500 border border-green-500/20">AUTONOMOUS</span>
+                                        <span className="text-[8px] font-bold px-2 py-0.5 rounded bg-green-500/10 text-green-500 border border-green-500/20">MONITORING</span>
                                     </div>
                                     <p className="text-[10px] text-[var(--text-muted)] leading-relaxed font-medium">
-                                        Replaces external APIs (TwelveData) by extracting real-time price validation directly from the charts to manage SL tracking and TP milestones.
+                                        Extracting real-time price validation directly from charts.
                                     </p>
                                 </div>
 
@@ -293,28 +298,29 @@ export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
                                             <Shield className="w-4 h-4 text-[#d4af37]" />
                                             <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#d4af37]">News Oracle</h3>
                                         </div>
-                                        <span className="text-[8px] font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20">LIVE</span>
+                                        <span className="text-[8px] font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20">ACTIVE</span>
                                     </div>
                                     <p className="text-[10px] text-[var(--text-muted)] leading-relaxed font-medium">
-                                        Generates the pre-London and pre-New York fundamental briefings autonomously, overriding volatility using institutional risk algorithms.
+                                        Autonomous macro briefings and volatility assessment.
                                     </p>
                                 </div>
 
-                                {/* Component 4: Multi-Agent Consensus */}
+                                {/* Component 4: Consensus AI */}
                                 <div className="bg-[var(--background)] p-4 rounded-2xl border border-[var(--border-color)] group hover:border-[#d4af37]/30 transition-all">
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2">
                                             <MessageSquare className="w-4 h-4 text-[#d4af37]" />
-                                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#d4af37]">Consensus AI</h3>
+                                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-[#d4af37]">Consensus</h3>
                                         </div>
                                         <span className="text-[8px] font-bold px-2 py-0.5 rounded bg-[var(--border-color)] text-[var(--text-muted)] border border-[var(--border-color)]">STANDBY</span>
                                     </div>
                                     <p className="text-[10px] text-[var(--text-muted)] leading-relaxed font-medium">
-                                        A multi-agent debate system (Technical vs. Sentiment vs. Risk) utilizing MCP to pre-validate signals before community broadcast.
+                                        MCP multi-agent debate system for signal validation.
                                     </p>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
                     </div>
                 </div>

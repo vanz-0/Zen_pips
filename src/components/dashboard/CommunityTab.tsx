@@ -626,13 +626,26 @@ export function CommunityTab() {
                                     )}
                                     <div className={`leading-relaxed whitespace-pre-line relative ${isSystem ? 'bg-blue-500/10 text-[var(--color-info)] px-4 py-2 rounded-xl text-xs font-mono font-bold border border-blue-500/20 inline-block mx-auto' : 'text-[var(--foreground)]'}`}>
                                         <div className="max-h-32 sm:max-h-48 overflow-y-auto custom-scrollbar pr-2 mb-2 text-xs sm:text-sm">
-                                            {renderContent
-                                              .replace(/```json[\s\S]*?```/g, '')
-                                              .replace(/```[\s\S]*?```/g, '')
-                                              .replace(/\*\*/g, '')
-                                              .replace(/^#{1,3}\s/gm, '')
-                                              .trim()
-                                            }
+                                            {(() => {
+                                              let text = renderContent;
+                                              const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+                                              if (jsonMatch) text = jsonMatch[1];
+                                              try {
+                                                  const parsed = JSON.parse(text);
+                                                  if (typeof parsed === 'object' && parsed !== null) {
+                                                      text = Object.entries(parsed).map(([k, v]) => `${k.toUpperCase()}\n${v}`).join('\n\n');
+                                                  }
+                                              } catch(e) {}
+                                              
+                                              return text
+                                                .replace(/```json/gi, '')
+                                                .replace(/```/g, '')
+                                                .replace(/\*\*/g, '')
+                                                .replace(/^#{1,3}\s/gm, '')
+                                                .replace(/[\{\}]/g, '')
+                                                .replace(/"([^"]+)":/g, '$1:')
+                                                .trim();
+                                            })()}
                                         </div>
                                         {msg.image && (
                                             <div className={`mt-2 rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-2xl bg-black group/img relative ${isChartChannel ? 'aspect-video w-full' : 'max-w-2xl'}`}>
