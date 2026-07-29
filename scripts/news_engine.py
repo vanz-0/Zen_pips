@@ -3,20 +3,21 @@ import time
 import datetime
 from dotenv import load_dotenv
 from supabase import create_client, Client
-from openai import OpenAI
+from google import genai
+from google.genai import types
 
 load_dotenv()
 
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-if not all([SUPABASE_URL, SUPABASE_KEY, OPENAI_API_KEY]):
-    print("[ERROR] Missing required environment variables (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY)")
+if not all([SUPABASE_URL, SUPABASE_KEY, GEMINI_API_KEY]):
+    print("[ERROR] Missing required environment variables (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, GEMINI_API_KEY)")
     exit(1)
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 def generate_daily_brief(news_events):
     if not news_events:
@@ -29,24 +30,24 @@ def generate_daily_brief(news_events):
     
     prompt += "\nFormat as a short, institutional Telegram message warning traders of volatility windows and giving a bearish/bullish tilt. Use emojis."
 
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=250
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config=types.GenerateContentConfig(max_output_tokens=250)
     )
-    return response.choices[0].message.content
+    return response.text
 
 def generate_news_warning(event):
     prompt = "You are Zen Pips AI. Provide a 1-sentence institutional warning that high-impact news is dropping in 15 minutes.\n"
     prompt += f"Event: {event['country']} {event['title']} at {event['time']}.\n"
     prompt += "Advise traders to manage risk, close partials, or move SL to break even. Use emojis."
 
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=100
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config=types.GenerateContentConfig(max_output_tokens=100)
     )
-    return response.choices[0].message.content
+    return response.text
 
 def post_to_community(content):
     post_message = f"🌅 **ZEN PIPS DAILY INSTITUTIONAL BRIEF** 🌅\n\n{content}\n\n*Powered by Autonomous News Engine*"

@@ -137,6 +137,9 @@ export function ChartAITab() {
         body: JSON.stringify({ imageBase64: base64Image, userId: user.id }),
       })
 
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Analysis failed")
+
       if (data.analysis) {
         let cleanAnalysis = data.analysis;
         const jsonMatch = cleanAnalysis.match(/```(?:json)?\s*([\s\S]*?)\s*```/);

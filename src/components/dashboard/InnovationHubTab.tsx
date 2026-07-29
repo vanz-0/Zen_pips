@@ -144,13 +144,13 @@ export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div>
                                     <label className="text-[10px] text-[var(--text-muted)] uppercase font-bold mb-2 block">Tool Title</label>
-                                        <input 
-                                            value={title}
-                                            onChange={(e) => setTitle(e.target.value)}
-                                            placeholder="e.g. Volume Profile Script"
-                                            className="w-full bg-[var(--background)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:border-[#d4af37]/50 outline-none transition-all"
-                                            required
-                                        />
+                                    <input 
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        placeholder="e.g. Volume Profile Script"
+                                        className="w-full bg-[var(--background)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:border-[#d4af37]/50 outline-none transition-all"
+                                        required
+                                    />
                                 </div>
                                 <div>
                                     <label className="text-[10px] text-[var(--text-muted)] uppercase font-bold mb-2 block">Technical Description</label>
@@ -175,9 +175,9 @@ export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
                                         🚀 PROPOSAL TRANSMITTED TO R&D
                                     </p>
                                 )}
-                                 </form>
-                            </div>
+                            </form>
                         </div>
+                    </div>
 
                     {/* Proposal Feed */}
                     <div className="lg:col-span-5 space-y-6">
@@ -234,7 +234,7 @@ export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
                                             </div>
                                             <p className="text-sm text-[var(--text-muted)] leading-relaxed max-w-xl">{item.description}</p>
                                             
-                                            {/* AI PLAN ACCORDION (Example visual) */}
+                                            {/* AI PLAN ACCORDION */}
                                             <div className="mt-6 border-t border-[var(--border-color)] pt-6">
                                                 <div className="flex items-center gap-2 text-[#d4af37] mb-4">
                                                     <Cpu className="w-4 h-4" />
@@ -249,10 +249,8 @@ export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
                                 ))}
                             </div>
                         )}
-
-                            </div>
-                        )}
                     </div>
+
 
                     {/* Active Agent Integrations Command Center */}
                     <div className="lg:col-span-4">
@@ -273,7 +271,7 @@ export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
                                         <span className="text-[8px] font-bold px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20">OFFLINE</span>
                                     </div>
                                     <p className="text-[10px] text-[var(--text-muted)] leading-relaxed font-medium">
-                                        Syncing signals to local terminals. Run `mt5_bridge.py` to initiate.
+                                        Syncing signals to local terminals. Run 'mt5_bridge.py' to initiate.
                                     </p>
                                 </div>
 
@@ -320,8 +318,6 @@ export function InnovationHubTab({ onNavigate }: InnovationHubProps) {
                                 </div>
                             </div>
                         </div>
-                    </div>
-
                     </div>
                 </div>
             </div>

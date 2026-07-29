@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js';
+import { GoogleGenAI } from '@google/genai';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -72,29 +73,19 @@ export async function GET() {
             sourceUrl: `https://www.forexfactory.com/calendar?day=${todayStr}`
         }));
 
-        const openaiKey = process.env.OPENAI_API_KEY;
-        if (openaiKey) {
+        const geminiKey = process.env.GEMINI_API_KEY;
+        if (geminiKey) {
             try {
             const eventSummary = events.map((e: any) => `${e.currency} ${e.event} (${e.impact})`).join(', ');
-            const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                'Authorization': `Bearer ${openaiKey}`,
-                'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                model: "gpt-4o",
-                messages: [{
-                    role: "system",
-                    content: "You are a senior institutional FX analyst. Provide direct, instruction-giving trading conclusions based on the provided economic events and current price levels. Do not use markdown. Use plenty of emojis. Specifically explain the perspective for the 'Bears' (Downside risk) and 'Bulls' (Upside potential). Keep it concise and professional. Structure: [Event] - [Instruction] - [Bulls/Bears Confluence]."
-                }, {
+            const gemini = new GoogleGenAI({ apiKey: geminiKey });
+            const aiResult = await gemini.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: [{
                     role: "user",
-                    content: `Current Technical Context: ${technicalConfluence}. Events today: ${eventSummary}. Generate analysis and instructions.`
+                    parts: [{ text: `You are a senior institutional FX analyst. Provide direct, instruction-giving trading conclusions based on the provided economic events and current price levels. Do not use markdown. Use plenty of emojis. Specifically explain the perspective for the 'Bears' (Downside risk) and 'Bulls' (Upside potential). Keep it concise and professional. Structure: [Event] - [Instruction] - [Bulls/Bears Confluence].\n\nCurrent Technical Context: ${technicalConfluence}. Events today: ${eventSummary}. Generate analysis and instructions.` }]
                 }]
-                })
             });
-            const aiData = await aiResponse.json();
-            analysis = aiData.choices[0].message.content;
+            analysis = aiResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
             } catch (aiErr) {
             console.error("AI Analysis failed:", aiErr);
             analysis = "🚨 *ALERT*: High volatility expected. Avoid direct exposure during releases. Institutional liquidity grabs likely.";

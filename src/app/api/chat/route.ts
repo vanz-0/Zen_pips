@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import OpenAI from 'openai'
+import { GoogleGenAI } from '@google/genai'
 
 // Master Limit: 10 queries per week
 const WEEKLY_LIMIT = 10;
@@ -8,22 +8,22 @@ const WEEKLY_LIMIT = 10;
 function getClients() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    const openaiApiKey = process.env.OPENAI_API_KEY!;
+    const geminiApiKey = process.env.GEMINI_API_KEY!;
     
-    if (!supabaseKey || !openaiApiKey) {
-        throw new Error("Missing environment variables: SUPABASE_SERVICE_ROLE_KEY or OPENAI_API_KEY");
+    if (!supabaseKey || !geminiApiKey) {
+        throw new Error("Missing environment variables: SUPABASE_SERVICE_ROLE_KEY or GEMINI_API_KEY");
     }
 
     return {
         supabase: createClient(supabaseUrl, supabaseKey),
-        openai: new OpenAI({ apiKey: openaiApiKey })
+        gemini: new GoogleGenAI({ apiKey: geminiApiKey })
     };
 }
 
 
 export async function POST(req: Request) {
     try {
-        const { supabase, openai } = getClients();
+        const { supabase, gemini } = getClients();
         const { message, userId } = await req.json()
         if (!message) return NextResponse.json({ error: "Empty" }, { status: 400 })
 
@@ -46,9 +46,12 @@ export async function POST(req: Request) {
         }
 
         // 2. RAG Logic (Search Documents)
-        const embedRes = await openai.embeddings.create({ input: message, model: "text-embedding-3-small" });
+        const embedRes = await gemini.models.embedContent({
+            model: "text-embedding-004",
+            contents: [{ parts: [{ text: message }] }]
+        });
         const { data: documents } = await supabase.rpc("match_documents", {
-            query_embedding: embedRes.data[0].embedding,
+            query_embedding: embedRes.embeddings?.[0]?.values ?? [],
             match_count: 5
         });
 
@@ -73,14 +76,14 @@ DIRECTIONS:
 CONTEXT:
 ${context}`;
 
-        const completion = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [{ role: "system", content: systemPrompt }, { role: "user", content: message }],
-            temperature: 0.1
+        const completion = await gemini.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\nUser: ${message}` }] }],
+            config: { temperature: 0.1 }
         });
 
         // Strip any residual markdown formatting from the reply
-        const rawReply = completion.choices[0].message.content || '';
+        const rawReply = completion.candidates?.[0]?.content?.parts?.[0]?.text || '';
         const reply = rawReply
             .replace(/\*\*/g, '')
             .replace(/^#{1,3}\s/gm, '')

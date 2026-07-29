@@ -7,20 +7,21 @@ import subprocess
 from glob import glob
 from datetime import datetime
 from dotenv import load_dotenv
-from openai import OpenAI
+from google import genai
+from google.genai import types
 
 if sys.stdout.encoding != 'utf-8':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 load_dotenv('.env')
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-if not OPENAI_API_KEY:
-    print("Error: Missing OpenAI API Key.")
+if not GEMINI_API_KEY:
+    print("Error: Missing Gemini API Key.")
     exit(1)
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = genai.Client(api_key=GEMINI_API_KEY)
 BRAIN_DIR = os.path.join(os.getcwd(), 'zain_brain')
 RAW_DIR = os.path.join(BRAIN_DIR, 'raw')
 CONCEPTS_DIR = os.path.join(BRAIN_DIR, 'concepts')
@@ -60,20 +61,17 @@ def generate_concepts(raw_text, filename):
     """
 
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You output ONLY valid JSON."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.3
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(temperature=0.3)
         )
-        content = response.choices[0].message.content.strip()
+        content = response.text.strip()
         if content.startswith("```json"):
             content = content[7:-3]
         return json.loads(content)
     except Exception as e:
-        print(f"OpenAI Generation Error: {e}")
+        print(f"Gemini Generation Error: {e}")
         return []
 
 def update_index():
