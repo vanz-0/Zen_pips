@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         )
 
         return () => subscription.unsubscribe()
-    }, [user]) // added user to dependency to ensure session changes are caught correctly
+    }, []) // Removed user from dependency to prevent infinite re-renders on object reference change
 
     const signOut = async () => {
         if (DEV_BYPASS) return
