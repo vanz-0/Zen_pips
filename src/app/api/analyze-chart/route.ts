@@ -1,20 +1,20 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import OpenAI from 'openai'
+import { GoogleGenAI } from '@google/genai'
 import crypto from 'crypto'
 
 function getClients() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    const openaiApiKey = process.env.OPENAI_API_KEY!;
-    
-    if (!supabaseKey || !openaiApiKey) {
-        throw new Error("Missing environment variables: SUPABASE_SERVICE_ROLE_KEY or OPENAI_API_KEY");
+    const geminiApiKey = process.env.GEMINI_API_KEY!;
+
+    if (!supabaseKey || !geminiApiKey) {
+        throw new Error("Missing environment variables: SUPABASE_SERVICE_ROLE_KEY or GEMINI_API_KEY");
     }
 
     return {
         supabase: createClient(supabaseUrl, supabaseKey),
-        openai: new OpenAI({ apiKey: openaiApiKey })
+        gemini: new GoogleGenAI({ apiKey: geminiApiKey })
     };
 }
 
@@ -24,9 +24,9 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
     try {
-        const { supabase, openai } = getClients();
+        const { supabase, gemini } = getClients();
         const { imageBase64, image, userId, mode } = await req.json()
-        
+
         const finalImage = imageBase64 || image;
         if (!finalImage) return NextResponse.json({ error: "No image received" }, { status: 400 })
 
@@ -52,18 +52,18 @@ export async function PUT(req: Request) {
                     const dailyLimit = 10 + bonusToday;
 
                     if (usageToday >= dailyLimit) {
-                        return NextResponse.json({ 
+                        return NextResponse.json({
                             error: "LIMIT_REACHED",
-                            message: `🔴 DAILY LIMIT REACHED: You have used your ${dailyLimit} AI credits for today.` 
+                            message: `🔴 DAILY LIMIT REACHED: You have used your ${dailyLimit} AI credits for today.`
                         }, { status: 403 });
                     }
 
                     if (!isSameDay) {
                         await supabase.from('client_trading_profiles')
-                            .update({ 
-                                ai_usage_total: 0, 
-                                bonus_credits: 0, 
-                                last_ai_reset: now.toISOString() 
+                            .update({
+                                ai_usage_total: 0,
+                                bonus_credits: 0,
+                                last_ai_reset: now.toISOString()
                             })
                             .eq('id', userId);
                     }
@@ -104,22 +104,19 @@ CRITICAL: You MUST also extract structured data. Place it at the VERY END of you
 \`\`\`
 If you cannot find a value, use null. The JSON block will be stripped from the display — it is for internal use only.`;
 
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                {
-                    role: "user",
-                    content: [
-                        { type: "text", text: systemPrompt },
-                        { type: "image_url", image_url: { url: finalImage.startsWith('data:') ? finalImage : `data:image/jpeg;base64,${finalImage}` } }
-                    ]
-                }
-            ],
-            max_tokens: 1200,
-            temperature: 0.1
+        const response = await gemini.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: [{
+                role: "user",
+                parts: [
+                    { text: systemPrompt },
+                    { inlineData: { mimeType: "image/jpeg", data: finalImage.replace(/^data:image\/\w+;base64,/, '') } }
+                ]
+            }],
+            config: { temperature: 0.1, maxOutputTokens: 1200 }
         });
 
-        const rawAnalysis = response.choices[0].message.content || "";
+        const rawAnalysis = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
         if (rawAnalysis.startsWith('INVALID_CHART')) {
             return NextResponse.json({ isChart: false, reason: rawAnalysis.replace('INVALID_CHART', '').trim() });
@@ -168,9 +165,9 @@ If you cannot find a value, use null. The JSON block will be stripped from the d
             const now = new Date();
             const lastReset = currentProfile?.last_ai_reset ? new Date(currentProfile.last_ai_reset) : new Date(0);
             const isSameDay = now.toDateString() === lastReset.toDateString();
-            
+
             await supabase.from('client_trading_profiles')
-                .update({ 
+                .update({
                     ai_usage_total: (isSameDay ? (currentProfile?.ai_usage_total || 0) : 0) + 1,
                     last_ai_reset: now.toISOString()
                 })

@@ -41,7 +41,7 @@ export async function GET(req: Request) {
                     'api-key': process.env.BREVO_API_KEY!
                 },
                 body: JSON.stringify({
-                    sender: { name: 'Zenpips Team', email: 'zenithbrainiac@gmail.com' },
+                    sender: { name: 'Zenpips Team', email: 'evansumakaz@gmail.com' },
                     to: [{ email, name: full_name }],
                     subject: 'Zen Pips: Your Institutional Master Guide & Manual',
                     htmlContent: htmlContent

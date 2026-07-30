@@ -29,11 +29,11 @@ def push_template():
     
     payload = {
         "tag": "institutional_welcome",
-        "sender": {"name": "Zenpips Team", "email": "zenithbrainiac@gmail.com"},
+        "sender": {"name": "Zenpips Team", "email": "evansumakaz@gmail.com"},
         "templateName": "Zen Pips Institutional Welcome (Zero Password)",
         "htmlContent": html_content,
         "subject": "Welcome to Zenpips - Institutional Access Initialized",
-        "replyTo": "zenithbrainiac@gmail.com",
+        "replyTo": "evansumakaz@gmail.com",
         "isActive": True
     }
 

@@ -36,11 +36,11 @@ def push_master_guide():
     
     update_payload = {
         "tag": "InstitutionalMasterGuide",
-        "sender": {"name": "Zen Pips Institutional", "email": "zenithbrainiac@gmail.com"},
+        "sender": {"name": "Zen Pips Institutional", "email": "evansumakaz@gmail.com"},
         "templateName": "Zen Pips: Master Guide & Manual (Institutional)",
         "htmlContent": html_content,
         "subject": "Zen Pips: Your Definitive Institutional Manual & Setup Guide",
-        "replyTo": "zenithbrainiac@gmail.com",
+        "replyTo": "evansumakaz@gmail.com",
         "isActive": True
     }
 
@@ -62,9 +62,9 @@ def push_master_guide():
             "name": "Zen Pips: Master Guide & Manual (Institutional)",
             "htmlContent": html_content,
             "subject": "Zen Pips: Your Definitive Institutional Manual & Setup Guide",
-            "sender": {"name": "Zen Pips Institutional", "email": "zenithbrainiac@gmail.com"},
+            "sender": {"name": "Zen Pips Institutional", "email": "evansumakaz@gmail.com"},
             "isActive": True,
-            "replyTo": "zenithbrainiac@gmail.com",
+            "replyTo": "evansumakaz@gmail.com",
             "tag": "InstitutionalMasterGuide"
         }
         

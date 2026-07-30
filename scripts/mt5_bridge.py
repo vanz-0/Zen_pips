@@ -22,7 +22,8 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 # Account mapping for multi-account institutional trading
 ACCOUNTS = {
     "25113210": {"password": "!pA@Rj@0", "server": "VantageInternational-Demo"},
-    "24963323": {"password": "cX$P02Br", "server": "VantageInternational-Demo"}
+    "24963323": {"password": "cX$P02Br", "server": "VantageInternational-Demo"},
+    "25803510": {"password": "!OzRmn6U", "server": "VantageMarkets-Demo"}
 }
 
 def switch_account(login_id):
@@ -32,11 +33,19 @@ def switch_account(login_id):
         return False
         
     acc = ACCOUNTS[login_id]
-    mt5.shutdown() # Reset previous connection
     
-    print(f"[*] Attempting MT5 Initialize on Account {login_id}...")
-    if not mt5.initialize(login=int(login_id), password=acc["password"], server=acc["server"]):
-        print(f"[FAIL] MT5 Switch to {login_id} failed: {mt5.last_error()}")
+    if not mt5.initialize():
+        print(f"[FAIL] MT5 Initialize failed: {mt5.last_error()}")
+        return False
+        
+    account_info = mt5.account_info()
+    if account_info and str(account_info.login) == login_id:
+        print(f"[OK] Already on Account: {login_id}")
+        return True
+        
+    print(f"[*] Attempting MT5 Login on Account {login_id}...")
+    if not mt5.login(login=int(login_id), password=acc["password"], server=acc["server"]):
+        print(f"[FAIL] MT5 Login to {login_id} failed: {mt5.last_error()}")
         return False
     
     print(f"[OK] MT5 Switched to Account: {login_id}")
@@ -235,22 +244,42 @@ if __name__ == "__main__":
     
     current_account = None
     
-    # Start with the default account from .env
-    default_login = os.getenv("MT5_LOGIN", "25113210")
-    if switch_account(default_login):
-        current_account = default_login
-        last_heartbeat = time.time()
-        try:
-            while True:
-                handle_pending_events()
-                
-                # Heartbeat every 60s
-                if time.time() - last_heartbeat > 60:
-                    print(f"[{datetime.now().strftime('%H:%M:%S')}] [*] Polling active (Account: {current_account})...")
-                    last_heartbeat = time.time()
-                    
-                time.sleep(2) 
-        except KeyboardInterrupt:
-            print("\n[!] Bridge Stopping...")
-        finally:
+    # Step 1: Just connect to the running terminal (no login args)
+    if not mt5.initialize():
+        print(f"[FAIL] MT5 Initialize failed: {mt5.last_error()}")
+        print("[!] Make sure MetaTrader 5 is open on your desktop.")
+        exit(1)
+    
+    # Step 2: Check who is already logged in
+    account_info = mt5.account_info()
+    if account_info:
+        current_account = str(account_info.login)
+        print(f"[OK] Connected to MT5 — Already logged in as: {current_account} ({account_info.server})")
+        print(f"[OK] Balance: ${account_info.balance:.2f} | Equity: ${account_info.equity:.2f}")
+    else:
+        # Terminal is open but not logged in — try default account
+        default_login = os.getenv("MT5_LOGIN", "25803510")
+        print(f"[*] No active session. Attempting login to {default_login}...")
+        if switch_account(default_login):
+            current_account = default_login
+        else:
+            print("[FAIL] Could not log in. Exiting.")
             mt5.shutdown()
+            exit(1)
+    
+    # Step 3: Start polling
+    last_heartbeat = time.time()
+    try:
+        while True:
+            handle_pending_events()
+            
+            # Heartbeat every 60s
+            if time.time() - last_heartbeat > 60:
+                print(f"[{datetime.now().strftime('%H:%M:%S')}] [*] Polling active (Account: {current_account})...")
+                last_heartbeat = time.time()
+                
+            time.sleep(2) 
+    except KeyboardInterrupt:
+        print("\n[!] Bridge Stopping...")
+    finally:
+        mt5.shutdown()
