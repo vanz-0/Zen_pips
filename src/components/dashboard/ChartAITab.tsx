@@ -121,39 +121,42 @@ export function ChartAITab() {
     setAnalysisResult(null)
 
     try {
-      const reader = new FileReader()
       const base64Promise = new Promise<string>((resolve, reject) => {
-        const img = new Image()
-        img.onload = () => {
-          const canvas = document.createElement('canvas')
-          let { width, height } = img
-          const maxDimension = 1600
+        const reader = new FileReader()
+        reader.onload = () => {
+          const img = new Image()
+          img.onload = () => {
+            const canvas = document.createElement('canvas')
+            let { width, height } = img
+            const maxDimension = 1600
 
-          if (width > maxDimension || height > maxDimension) {
-            if (width > height) {
-              height = Math.round((height * maxDimension) / width)
-              width = maxDimension
-            } else {
-              width = Math.round((width * maxDimension) / height)
-              height = maxDimension
+            if (width > maxDimension || height > maxDimension) {
+              if (width > height) {
+                height = Math.round((height * maxDimension) / width)
+                width = maxDimension
+              } else {
+                width = Math.round((width * maxDimension) / height)
+                height = maxDimension
+              }
             }
+            canvas.width = width
+            canvas.height = height
+            const ctx = canvas.getContext('2d')
+            if (!ctx) {
+               const base64String = (reader.result as string).split(',')[1]
+               resolve(base64String)
+               return
+            }
+            ctx.drawImage(img, 0, 0, width, height)
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
+            resolve(dataUrl.split(',')[1])
           }
-          canvas.width = width
-          canvas.height = height
-          const ctx = canvas.getContext('2d')
-          if (!ctx) {
-             const base64String = (reader.result as string).split(',')[1]
-             resolve(base64String)
-             return
-          }
-          ctx.drawImage(img, 0, 0, width, height)
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
-          resolve(dataUrl.split(',')[1])
+          img.onerror = () => reject(new Error("Failed to load image for compression"))
+          img.src = reader.result as string
         }
-        img.onerror = () => reject(new Error("Failed to load image for compression"))
-        img.src = reader.result as string
+        reader.onerror = () => reject(new Error("Failed to read file"))
+        reader.readAsDataURL(selectedFile)
       })
-      reader.readAsDataURL(selectedFile)
       const base64Image = await base64Promise
 
       const response = await fetch('/api/analyze-chart', {

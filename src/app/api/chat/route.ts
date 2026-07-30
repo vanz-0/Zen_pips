@@ -45,17 +45,27 @@ export async function POST(req: Request) {
             })
         }
 
-        // 2. RAG Logic (Search Documents)
-        const embedRes = await gemini.models.embedContent({
-            model: "text-embedding-004",
-            contents: [{ parts: [{ text: message }] }]
-        });
-        const { data: documents } = await supabase.rpc("match_documents", {
-            query_embedding: embedRes.embeddings?.[0]?.values ?? [],
-            match_count: 5
-        });
+        // 2. RAG Logic (Search Documents) — gracefully degrade if unavailable
+        let context = "No local data found.";
+        try {
+            const embedRes = await gemini.models.embedContent({
+                model: "text-embedding-004",
+                contents: [{ parts: [{ text: message }] }]
+            });
+            const embedding = embedRes.embeddings?.[0]?.values ?? [];
+            if (embedding.length > 0) {
+                const { data: documents } = await supabase.rpc("match_documents", {
+                    query_embedding: embedding,
+                    match_count: 5
+                });
+                if (documents && documents.length > 0) {
+                    context = documents.map((d: any) => d.content).join("\n\n");
+                }
+            }
+        } catch (ragErr: any) {
+            console.warn("RAG lookup failed, continuing without context:", ragErr.message);
+        }
 
-        const context = documents?.map((d: any) => d.content).join("\n\n") || "No local data found.";
 
         // 3. AI Completion (Step-by-Step Institutional Mode)
         const systemPrompt = `You are the Zen Pips Institutional AI Assistant.
