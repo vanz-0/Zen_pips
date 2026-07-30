@@ -292,19 +292,19 @@ export function ProfileTab() {
           <div className="p-8 md:p-10 flex flex-col md:flex-row gap-10 items-center">
             <div className="flex-1 space-y-6 relative z-10">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs font-bold uppercase tracking-wider">
-                <img src="/vantage-logo.svg" alt="Vantage" className="w-3.5 h-3.5" /> Multi-Broker Copier
+                <span className="font-black text-xs">HFM</span> Multi-Broker Copier
               </div>
               <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-[var(--foreground)] leading-tight font-[family-name:var(--font-outfit)]">
                 Automate Your Edge <br className="hidden sm:block" />
                 <span className="text-[#d4af37]">with Institutional Liquidity.</span>
               </h2>
               <p className="text-[var(--text-muted)] text-sm sm:text-base md:text-lg leading-relaxed max-w-xl">
-                The Zen Pips Bridge supports Vantage Markets. Link your preferred broker to activate zero-latency institutional trade synchronization.
+                The Zen Pips Bridge supports <strong className="text-[var(--foreground)]">HFM (HF Markets)</strong>. Link your broker to activate zero-latency institutional trade synchronization.
               </p>
               
               <div className="pt-4">
-                <a href="https://vigco.co/la-com-inv/TItFx2Oy" target="_blank" rel="noopener noreferrer" className="inline-block bg-[#d4af37]/10 text-[#d4af37] border border-[#d4af37]/30 px-8 py-3 rounded-xl font-bold hover:bg-[#d4af37] hover:text-black transition-all text-center text-sm shadow-lg hover:-translate-y-1">
-                  Connect Vantage Account
+                <a href="https://www.hfm.com/ke/en/?refid=30508914" target="_blank" rel="noopener noreferrer" className="inline-block bg-[#d4af37]/10 text-[#d4af37] border border-[#d4af37]/30 px-8 py-3 rounded-xl font-bold hover:bg-[#d4af37] hover:text-black transition-all text-center text-sm shadow-lg hover:-translate-y-1">
+                  Open HFM Account
                 </a>
               </div>
             </div>
@@ -345,7 +345,7 @@ export function ProfileTab() {
                         <Loader2 className="w-4 h-4 text-yellow-500 animate-spin" />
                         <p className="text-xs font-bold text-yellow-500 uppercase tracking-widest">Pending Activation</p>
                       </div>
-                      <p className="text-[10px] text-[var(--text-muted)]">Your Vantage account is being provisioned for the Institutional Slave Fleet.</p>
+                      <p className="text-[10px] text-[var(--text-muted)]">Your HFM account is being provisioned for the Institutional Slave Fleet.</p>
                     </div>
                   ) : (
                     <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20 text-center space-y-2">

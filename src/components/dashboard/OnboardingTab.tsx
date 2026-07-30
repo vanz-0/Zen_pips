@@ -133,7 +133,7 @@ export function OnboardingTab() {
                     {/* Step 1: Broker Setup */}
                     <Step 
                         number={1} 
-                        title="Establish Your Brokerage (Vantage)" 
+                        title="Establish Your Brokerage (HFM)" 
                         description="Access institutional-grade liquidity and raw spreads."
                         isOpen={openStep === 1}
                         onToggle={() => setOpenStep(1)}
@@ -142,16 +142,16 @@ export function OnboardingTab() {
                             <div className="flex flex-col md:flex-row gap-6 items-start">
                                 <div className="flex-1 space-y-4">
                                     <p className="text-[var(--text-muted)] text-sm sm:text-base leading-relaxed">
-                                        We exclusively use <strong className="text-[var(--foreground)]">Vantage (Vantage Markets)</strong> for our Copy Trader bridge. Their execution speed ensures all our members enter at the exact same price as the main institutional flow.
+                                        We use <strong className="text-[var(--foreground)]">HFM (HF Markets)</strong> for our Copy Trader bridge. Institutional-grade execution ensures every member enters at the exact same price as the main institutional flow.
                                     </p>
                                     <ul className="space-y-3">
                                         <li className="flex items-start gap-3 text-sm text-[var(--text-muted)]">
                                             <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                                            <span>Click the button below to visit Vantage.</span>
+                                            <span>Click the button below to register with HFM via our affiliate link.</span>
                                         </li>
                                         <li className="flex items-start gap-3 text-sm text-[var(--text-muted)]">
                                             <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                                            <span>Register an account and specifically choose an <strong className="text-[var(--foreground)]">MT5 Premium</strong> or <strong className="text-[var(--foreground)]">Vantage Copy</strong> account.</span>
+                                            <span>Register and choose an <strong className="text-[var(--foreground)]">HFM Pro</strong> or <strong className="text-[var(--foreground)]">HFM Raw Spread</strong> MT5 account.</span>
                                         </li>
                                         <li className="flex items-start gap-3 text-sm text-[var(--text-muted)]">
                                             <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
@@ -161,12 +161,12 @@ export function OnboardingTab() {
                                 </div>
                                     <div className="space-y-3">
                                         <a 
-                                            href="https://vigco.co/la-com-inv/TItFx2Oy" 
+                                            href="https://www.hfm.com/ke/en/?refid=30508914" 
                                             target="_blank" 
                                             rel="noopener noreferrer"
-                                            className="flex items-center justify-center gap-2 w-full py-4 bg-white/5 border border-white/10 text-white font-black rounded-xl hover:bg-white/10 transition-all text-sm uppercase tracking-wider"
+                                            className="flex items-center justify-center gap-2 w-full py-4 bg-[#d4af37]/10 border border-[#d4af37]/30 text-[#d4af37] font-black rounded-xl hover:bg-[#d4af37] hover:text-black transition-all text-sm uppercase tracking-wider"
                                         >
-                                            <div className="w-6 h-6 relative mr-1"><Image src="/vantage-logo.svg" alt="Vantage" fill className="object-contain" /></div> JOIN Vantage <ExternalLink className="w-4 h-4" />
+                                            <span className="font-black text-sm">HFM</span> Open HFM Account <ExternalLink className="w-4 h-4" />
                                         </a>
                                         <a 
                                             href="/Zen_Pips_Institutional_Guidelines.pdf" 
@@ -198,7 +198,7 @@ export function OnboardingTab() {
                                         Funding Options
                                     </h4>
                                     <p className="text-sm text-[var(--text-muted)]">
-                                        Vantage provides multiple zero-fee deposit methods. Login to the Vantage Portal area on their site and click 'Deposit'.
+                                        HFM provides multiple zero-fee deposit methods. Login to the HFM Portal and click 'Deposit'.
                                     </p>
                                     <div className="grid grid-cols-2 gap-3 pb-2">
                                         {['Visa/Mastercard', 'Wire Transfer', 'Skrill/Neteller', 'Crypto (Bitcoin)'].map(m => (
@@ -240,7 +240,7 @@ export function OnboardingTab() {
                             <div className="space-y-2">
                                 <h4 className="text-xl font-bold">Deploy Your Capital.</h4>
                                 <p className="text-sm text-[var(--text-muted)] max-w-lg mx-auto leading-relaxed">
-                                    Individual bridge setup is no longer required. Once your Vantage account is funded, simply request access to the **Institutional Slave Fleet** via your Profile settings. Our server-side fleet handles all executions automatically.
+                                     Individual bridge setup is no longer required. Once your HFM account is funded, simply request access to the **Institutional Slave Fleet** via your Profile settings. Our server-side fleet handles all executions automatically.
                                 </p>
                             </div>
                             <div className="flex gap-4">

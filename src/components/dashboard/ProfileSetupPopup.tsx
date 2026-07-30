@@ -122,17 +122,17 @@ export function ProfileSetupPopup() {
                                             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-yellow-500/10 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto border border-yellow-500/20 mb-3 sm:mb-4">
                                                 <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-[#d4af37]" />
                                             </div>
-                                            <h2 className="text-xl sm:text-2xl md:text-3xl font-black italic tracking-tight uppercase text-[var(--foreground)]">Vantage Gateway</h2>
+                                            <h2 className="text-xl sm:text-2xl md:text-3xl font-black italic tracking-tight uppercase text-[var(--foreground)]">HFM Gateway</h2>
                                             <p className="text-[var(--text-muted)] text-xs sm:text-sm leading-relaxed">
-                                                To utilize the Institutional Trading tools, a verified **Vantage Markets** account is required.
+                                                To utilize the Institutional Trading tools, a verified <strong>HFM (HF Markets)</strong> account is required.
                                             </p>
                                         </div>
 
                                         <div className="p-4 bg-[var(--panel-bg)] border border-[var(--border-color)] rounded-2xl space-y-4">
                                             <div className="flex flex-col gap-2">
                                                 <span className="text-xs font-bold text-[var(--text-muted)] font-mono">1. Register with our Hub Link</span>
-                                                <a href="https://vigco.co/la-com-inv/TItFx2Oy" target="_blank" className="bg-yellow-500/10 text-yellow-500 py-3 px-4 rounded-xl text-center text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-yellow-500/20 transition-all border border-yellow-500/20">
-                                                    Open Vantage Registration 
+                                                <a href="https://www.hfm.com/ke/en/?refid=30508914" target="_blank" className="bg-yellow-500/10 text-yellow-500 py-3 px-4 rounded-xl text-center text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-yellow-500/20 transition-all border border-yellow-500/20">
+                                                    Open HFM Registration 
                                                 </a>
                                             </div>
                                             

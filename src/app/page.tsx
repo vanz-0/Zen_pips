@@ -938,31 +938,35 @@ function DashboardContent() {
               </div>
             </FadeInSection>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
+              {/* Step 1 - HFM Broker */}
               <FadeInSection delay={0.1}>
-                <a href="https://vigco.co/la-com-inv/TItFx2Oy" target="_blank" rel="noopener noreferrer"
-                  className="group bg-gradient-to-br from-[var(--card-bg)] to-transparent border border-[var(--border-color)] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl transition-all duration-300 flex flex-col items-start h-full">
+                <a href="https://www.hfm.com/ke/en/?refid=30508914" target="_blank" rel="noopener noreferrer"
+                  className="group bg-gradient-to-br from-[var(--card-bg)] to-transparent border border-[var(--border-color)] hover:border-[#d4af37]/40 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl transition-all duration-300 flex flex-col items-start h-full hover:-translate-y-1">
                   <div className="flex items-center gap-3 mb-4 sm:mb-6">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#d4af37]/10 rounded-full flex items-center justify-center">
-                      <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="40,60 150,60 260,340 150,340" fill="#024D56" /><polygon points="180,60 360,60 260,260 220,200" fill="#E24E24" /></svg>
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#d4af37]/10 rounded-full flex items-center justify-center border border-[#d4af37]/20">
+                      <svg className="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 60 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <text x="0" y="24" fontSize="28" fontWeight="bold" fill="#d4af37" fontFamily="Arial">HFM</text>
+                      </svg>
                     </div>
                     <span className="text-[10px] sm:text-xs bg-[#d4af37]/10 text-[#d4af37] px-2 sm:px-3 py-1 rounded-full font-semibold uppercase tracking-wider">Step 1</span>
                   </div>
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[var(--foreground)] mb-2 sm:mb-3">Open Your Broker</h3>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[var(--foreground)] mb-2 sm:mb-3">Open HFM Broker</h3>
                   <p className="text-[var(--text-muted)] mb-4 sm:mb-6 leading-relaxed text-sm">
-                    We exclusively use <strong className="text-[var(--foreground)]">Vantage Markets</strong> for prop-firm friendly raw spreads.
+                    We use <strong className="text-[var(--foreground)]">HFM (HF Markets)</strong> — institutional-grade liquidity, raw spreads, and zero-commission MT5 accounts.
                   </p>
-                  <div className="mt-auto flex items-center gap-2 text-[#d4af37] font-semibold text-sm">
-                    Connect Vantage <ExternalLink className="w-4 h-4" />
+                  <div className="mt-auto flex items-center gap-2 text-[#d4af37] font-semibold text-sm group-hover:gap-3 transition-all">
+                    Open HFM Account <ExternalLink className="w-4 h-4" />
                   </div>
                 </a>
               </FadeInSection>
 
+              {/* Step 2 - Binance */}
               <FadeInSection delay={0.2}>
                 <a href="https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?hl=en&ref=GRO_28502_E50OE&utm_source=default" target="_blank" rel="noopener noreferrer"
-                  className="group bg-gradient-to-br from-[var(--card-bg)] to-transparent border border-[var(--border-color)] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl transition-all duration-300 flex flex-col items-start h-full">
+                  className="group bg-gradient-to-br from-[var(--card-bg)] to-transparent border border-[var(--border-color)] hover:border-yellow-500/40 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl transition-all duration-300 flex flex-col items-start h-full hover:-translate-y-1">
                   <div className="flex items-center gap-3 mb-4 sm:mb-6">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500/10 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500/10 rounded-full flex items-center justify-center border border-yellow-500/20">
                       <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="#F3BA2F" xmlns="http://www.w3.org/2000/svg"><path d="M16.624 13.9202l2.7175 2.7154-7.3415 7.353-7.3415-7.353 2.7175-2.7154 4.624 4.6595 4.624-4.6595zm4.6366-4.6366L24 12l-2.7394 2.7154-2.7394-2.7154 2.7394-2.7154zM7.376 10.0798L4.6585 7.3644 12 .0115l7.3415 7.3529-2.7175 2.7154-4.624-4.6595-4.624 4.6595zM2.7394 9.2846L0 12l2.7394 2.7154 2.7394-2.7154-2.7394-2.7154zM12 15.2154l-2.7175-2.7154L12 9.7846l2.7175 2.7154L12 15.2154z"/></svg>
                     </div>
                     <span className="text-[10px] sm:text-xs bg-yellow-500/10 text-yellow-400 px-2 sm:px-3 py-1 rounded-full font-semibold uppercase tracking-wider">Step 2</span>
@@ -971,24 +975,37 @@ function DashboardContent() {
                   <p className="text-[var(--text-muted)] mb-4 sm:mb-6 leading-relaxed text-sm">
                     Purchase <strong className="text-[var(--foreground)]">USDT</strong> via card or bank transfer, then send via TRC-20 to join VIP.
                   </p>
-                  <div className="mt-auto flex items-center gap-2 text-yellow-400 font-semibold text-sm">
+                  <div className="mt-auto flex items-center gap-2 text-yellow-400 font-semibold text-sm group-hover:gap-3 transition-all">
                     Create Binance Account <ExternalLink className="w-4 h-4" />
+                  </div>
+                </a>
+              </FadeInSection>
+
+              {/* Step 3 - Join VIP */}
+              <FadeInSection delay={0.3}>
+                <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer"
+                  className="group bg-gradient-to-br from-[#d4af37]/10 to-transparent border border-[#d4af37]/30 hover:border-[#d4af37]/60 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl transition-all duration-300 flex flex-col items-start h-full hover:-translate-y-1 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#d4af37]/5 to-transparent pointer-events-none" />
+                  <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#d4af37]/20 rounded-full flex items-center justify-center border border-[#d4af37]/40">
+                      <Users className="w-5 h-5 sm:w-6 sm:h-6 text-[#d4af37]" />
+                    </div>
+                    <span className="text-[10px] sm:text-xs bg-[#d4af37]/20 text-[#d4af37] px-2 sm:px-3 py-1 rounded-full font-semibold uppercase tracking-wider">Step 3</span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[var(--foreground)] mb-2 sm:mb-3">Join the VIP Group</h3>
+                  <p className="text-[var(--text-muted)] mb-6 leading-relaxed text-sm">
+                    Message our bot to unlock your <strong className="text-[#d4af37]">VIP access</strong> — real-time signals, live analysis & the institutional copy-trade fleet.
+                  </p>
+                  <div className="mt-auto w-full">
+                    <div className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-[#d4af37] text-black rounded-xl font-black text-sm uppercase tracking-widest group-hover:brightness-110 transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+                      <Zap className="w-4 h-4" /> Join VIP Now
+                    </div>
                   </div>
                 </a>
               </FadeInSection>
             </div>
 
-            <FadeInSection delay={0.3}>
-              <div className="mt-8 sm:mt-12 text-center">
-                <div className="inline-flex items-center gap-2 sm:gap-3 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-full px-4 sm:px-8 py-3 sm:py-4 flex-wrap justify-center">
-                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-[#d4af37]" />
-                  <span className="text-[var(--text-muted)] text-sm">Step 3:</span>
-                  <a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="text-[#d4af37] font-bold hover:underline text-sm">
-                    Message @Zen_pips to unlock VIP
-                  </a>
-                </div>
-              </div>
-            </FadeInSection>
+
           </section>
         </div>
         )}
@@ -1022,7 +1039,7 @@ function DashboardContent() {
                   <h4 className="text-sm font-semibold text-[var(--foreground)] uppercase tracking-wider mb-4">Quick Links</h4>
                   <ul className="space-y-3 text-sm text-[var(--text-muted)]">
                     <li><a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Join VIP</a></li>
-                    <li><a href="https://www.hfm.com/ke/en/?refid=30508914" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Open Broker (Vantage)</a></li>
+                    <li><a href="https://www.hfm.com/ke/en/?refid=30508914" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Open Broker (HFM)</a></li>
                     <li><a href="https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?hl=en&ref=GRO_28502_E50OE&utm_source=default" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Buy USDT (Binance)</a></li>
                   </ul>
                 </div>
