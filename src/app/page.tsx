@@ -44,6 +44,7 @@ function DashboardContent() {
   const [activeReviewSlide, setActiveReviewSlide] = useState(0);
   const [isNewsOpen, setIsNewsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [brokerModal, setBrokerModal] = useState<'hfm' | 'vantage' | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -939,26 +940,57 @@ function DashboardContent() {
             </FadeInSection>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
-              {/* Step 1 - HFM Broker */}
+
+              {/* Step 1 - Dual Broker Choice */}
               <FadeInSection delay={0.1}>
-                <a href="https://www.hfm.com/ke/en/?refid=30508914" target="_blank" rel="noopener noreferrer"
-                  className="group bg-gradient-to-br from-[var(--card-bg)] to-transparent border border-[var(--border-color)] hover:border-[#d4af37]/40 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl transition-all duration-300 flex flex-col items-start h-full hover:-translate-y-1">
-                  <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                <div className="bg-gradient-to-br from-[var(--card-bg)] to-transparent border border-[var(--border-color)] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl flex flex-col h-full">
+                  <div className="flex items-center gap-3 mb-4 sm:mb-5">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#d4af37]/10 rounded-full flex items-center justify-center border border-[#d4af37]/20">
-                      <svg className="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 60 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <text x="0" y="24" fontSize="28" fontWeight="bold" fill="#d4af37" fontFamily="Arial">HFM</text>
-                      </svg>
+                      <Shield className="w-5 h-5 text-[#d4af37]" />
                     </div>
                     <span className="text-[10px] sm:text-xs bg-[#d4af37]/10 text-[#d4af37] px-2 sm:px-3 py-1 rounded-full font-semibold uppercase tracking-wider">Step 1</span>
                   </div>
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[var(--foreground)] mb-2 sm:mb-3">Open HFM Broker</h3>
-                  <p className="text-[var(--text-muted)] mb-4 sm:mb-6 leading-relaxed text-sm">
-                    We use <strong className="text-[var(--foreground)]">HFM (HF Markets)</strong> — institutional-grade liquidity, raw spreads, and zero-commission MT5 accounts.
-                  </p>
-                  <div className="mt-auto flex items-center gap-2 text-[#d4af37] font-semibold text-sm group-hover:gap-3 transition-all">
-                    Open HFM Account <ExternalLink className="w-4 h-4" />
-                  </div>
-                </a>
+                  <h3 className="text-lg sm:text-xl font-bold text-[var(--foreground)] mb-1">Choose Your Broker</h3>
+                  <p className="text-[var(--text-muted)] text-xs mb-5 leading-relaxed">Pick the option that fits your location and trading goals.</p>
+
+                  {/* HFM Option */}
+                  <button
+                    onClick={() => setBrokerModal('hfm')}
+                    className="group w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--border-color)] hover:border-red-500/50 hover:bg-red-500/5 transition-all duration-200 mb-3 text-left"
+                  >
+                    <div className="w-9 h-9 rounded-lg bg-black flex items-center justify-center shrink-0 border border-white/10">
+                      <svg viewBox="0 0 56 32" className="w-8 h-5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <text x="0" y="23" fontSize="22" fontWeight="900" fill="white" fontFamily="Arial Black, Arial">HF</text>
+                        <text x="28" y="23" fontSize="22" fontWeight="900" fill="#cc0000" fontFamily="Arial Black, Arial">M</text>
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-bold text-[var(--foreground)]">HFM <span className="text-[10px] font-normal text-[var(--text-muted)]">(Local)</span></p>
+                      <p className="text-[10px] text-[var(--text-muted)]">CMA Licensed · Kenya Offices</p>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-red-400 transition-colors shrink-0" />
+                  </button>
+
+                  {/* Vantage Option */}
+                  <button
+                    onClick={() => setBrokerModal('vantage')}
+                    className="group w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--border-color)] hover:border-[#024D56]/60 hover:bg-[#024D56]/10 transition-all duration-200 text-left"
+                  >
+                    <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10">
+                      <svg className="w-5 h-5" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="40,60 150,60 260,340 150,340" fill="#024D56" />
+                        <polygon points="180,60 360,60 260,260 220,200" fill="#E24E24" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-bold text-[var(--foreground)]">Vantage <span className="text-[10px] font-normal text-[var(--text-muted)]">(International)</span></p>
+                      <p className="text-[10px] text-[var(--text-muted)]">ASIC/FCA Licensed · Crypto Pairs</p>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[#E24E24] transition-colors shrink-0" />
+                  </button>
+
+                  <p className="text-[10px] text-center text-[var(--text-muted)] mt-auto pt-4">Click to see details & open account</p>
+                </div>
               </FadeInSection>
 
               {/* Step 2 - Binance */}
@@ -971,9 +1003,9 @@ function DashboardContent() {
                     </div>
                     <span className="text-[10px] sm:text-xs bg-yellow-500/10 text-yellow-400 px-2 sm:px-3 py-1 rounded-full font-semibold uppercase tracking-wider">Step 2</span>
                   </div>
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[var(--foreground)] mb-2 sm:mb-3">Get USDT via Binance</h3>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-[var(--foreground)] mb-2 sm:mb-3">Fund via Binance</h3>
                   <p className="text-[var(--text-muted)] mb-4 sm:mb-6 leading-relaxed text-sm">
-                    Purchase <strong className="text-[var(--foreground)]">USDT</strong> via card or bank transfer, then send via TRC-20 to join VIP.
+                    Binance is our primary exchange for converting currency to <strong className="text-[var(--foreground)]">USDT</strong>. Purchase via card or bank transfer, then send TRC-20 to fund your account.
                   </p>
                   <div className="mt-auto flex items-center gap-2 text-yellow-400 font-semibold text-sm group-hover:gap-3 transition-all">
                     Create Binance Account <ExternalLink className="w-4 h-4" />
@@ -1005,6 +1037,127 @@ function DashboardContent() {
               </FadeInSection>
             </div>
 
+            {/* Broker Detail Modal */}
+            <AnimatePresence>
+              {brokerModal && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+                  onClick={() => setBrokerModal(null)}
+                >
+                  <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.92, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.92, y: 20 }}
+                    transition={{ type: "spring", duration: 0.4 }}
+                    className="relative z-10 bg-[#0d0d0d] border rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl"
+                    style={{ borderColor: brokerModal === 'hfm' ? 'rgba(204,0,0,0.4)' : 'rgba(2,77,86,0.5)' }}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    {/* Modal Header */}
+                    <div className="p-6 border-b border-white/10 flex items-center justify-between"
+                      style={{ background: brokerModal === 'hfm' ? 'linear-gradient(135deg, rgba(204,0,0,0.12), transparent)' : 'linear-gradient(135deg, rgba(2,77,86,0.15), transparent)' }}
+                    >
+                      <div className="flex items-center gap-4">
+                        {brokerModal === 'hfm' ? (
+                          <div className="w-14 h-14 rounded-xl bg-black border border-white/10 flex items-center justify-center">
+                            <svg viewBox="0 0 56 32" className="w-10 h-6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <text x="0" y="23" fontSize="22" fontWeight="900" fill="white" fontFamily="Arial Black, Arial">HF</text>
+                              <text x="28" y="23" fontSize="22" fontWeight="900" fill="#cc0000" fontFamily="Arial Black, Arial">M</text>
+                            </svg>
+                          </div>
+                        ) : (
+                          <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                            <svg className="w-8 h-8" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <polygon points="40,60 150,60 260,340 150,340" fill="#024D56" />
+                              <polygon points="180,60 360,60 260,260 220,200" fill="#E24E24" />
+                            </svg>
+                          </div>
+                        )}
+                        <div>
+                          <h3 className="text-xl font-black text-white">{brokerModal === 'hfm' ? 'HFM · HF Markets' : 'Vantage Markets'}</h3>
+                          <span className="text-xs px-2 py-0.5 rounded-full font-bold uppercase tracking-wider"
+                            style={{ background: brokerModal === 'hfm' ? 'rgba(204,0,0,0.15)' : 'rgba(2,77,86,0.2)', color: brokerModal === 'hfm' ? '#ff4444' : '#4ecdc4' }}
+                          >
+                            {brokerModal === 'hfm' ? '🇰🇪 Local · CMA Licensed' : '🌍 International · ASIC / FCA'}
+                          </span>
+                        </div>
+                      </div>
+                      <button onClick={() => setBrokerModal(null)} className="text-gray-500 hover:text-white transition-colors p-1">
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    {/* Modal Body */}
+                    <div className="p-6 space-y-4">
+                      {brokerModal === 'hfm' ? (
+                        <>
+                          <p className="text-sm text-gray-400 leading-relaxed">
+                            HFM (HF Markets) is your best choice if you're based in <strong className="text-white">Kenya or East Africa</strong>. It holds a <strong className="text-white">CMA (Capital Markets Authority) license</strong>, meaning it is fully regulated under Kenyan law with physical offices you can walk into.
+                          </p>
+                          <div className="grid grid-cols-1 gap-2">
+                            {[
+                              { icon: '🏢', label: 'Physical offices in Kenya (Nairobi)' },
+                              { icon: '🔒', label: 'CMA regulated — full local protection' },
+                              { icon: '💳', label: 'M-Pesa & local bank deposits supported' },
+                              { icon: '📊', label: 'MT5 Pro & Raw Spread accounts' },
+                              { icon: '🚀', label: 'Institutional execution, deep liquidity' },
+                            ].map((f, i) => (
+                              <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/5">
+                                <span className="text-base">{f.icon}</span>
+                                <span className="text-sm text-gray-300">{f.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm text-gray-400 leading-relaxed">
+                            Vantage Markets is an <strong className="text-white">internationally accredited</strong> broker trusted by institutions and prop-firms globally. It's licensed by <strong className="text-white">ASIC (Australia) and FCA (UK)</strong>, offering the deepest market access for forex, indices, commodities, and crypto.
+                          </p>
+                          <div className="grid grid-cols-1 gap-2">
+                            {[
+                              { icon: '🌍', label: 'ASIC + FCA + CIMA multi-jurisdiction regulated' },
+                              { icon: '₿', label: 'Crypto pairs including BTC, ETH, XRP & more' },
+                              { icon: '💱', label: 'Crypto-to-Forex exchange capabilities' },
+                              { icon: '⚡', label: 'Ultra-low latency institutional execution' },
+                              { icon: '📈', label: 'Prop-firm friendly raw spreads from 0.0 pips' },
+                            ].map((f, i) => (
+                              <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/5">
+                                <span className="text-base">{f.icon}</span>
+                                <span className="text-sm text-gray-300">{f.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Modal Footer CTA */}
+                    <div className="p-6 pt-0">
+                      <a
+                        href={brokerModal === 'hfm' ? 'https://www.hfm.com/ke/en/?refid=30508914' : 'https://vigco.co/la-com-inv/TItFx2Oy'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 w-full py-4 rounded-xl font-black text-sm uppercase tracking-widest transition-all hover:brightness-110 hover:-translate-y-0.5 shadow-lg"
+                        style={{
+                          background: brokerModal === 'hfm' ? 'linear-gradient(135deg, #cc0000, #990000)' : 'linear-gradient(135deg, #024D56, #013a42)',
+                          color: 'white',
+                          boxShadow: brokerModal === 'hfm' ? '0 0 24px rgba(204,0,0,0.25)' : '0 0 24px rgba(2,77,86,0.3)'
+                        }}
+                        onClick={() => setBrokerModal(null)}
+                      >
+                        Open {brokerModal === 'hfm' ? 'HFM' : 'Vantage'} Account <ExternalLink className="w-4 h-4" />
+                      </a>
+                      <p className="text-center text-[10px] text-gray-600 mt-3">Zen Pips official affiliate link · Zero extra cost to you</p>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
           </section>
         </div>
