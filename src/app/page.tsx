@@ -1053,7 +1053,7 @@ function DashboardContent() {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.92, y: 20 }}
                     transition={{ type: "spring", duration: 0.4 }}
-                    className="relative z-10 bg-[#0d0d0d] border rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl"
+                    className="relative z-10 bg-[#0d0d0d] border rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl"
                     style={{ borderColor: brokerModal === 'hfm' ? 'rgba(204,0,0,0.4)' : 'rgba(2,77,86,0.5)' }}
                     onClick={e => e.stopPropagation()}
                   >
