@@ -954,9 +954,12 @@ function DashboardContent() {
                   <p className="text-[var(--text-muted)] text-xs mb-5 leading-relaxed">Pick the option that fits your location and trading goals.</p>
 
                   {/* HFM Option */}
-                  <button
+                  <div
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setBrokerModal('hfm')}
-                    className="group w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--border-color)] hover:border-red-500/50 hover:bg-red-500/5 transition-all duration-200 mb-3 text-left"
+                    onKeyDown={(e) => e.key === 'Enter' && setBrokerModal('hfm')}
+                    className="group w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--border-color)] hover:border-red-500/50 hover:bg-red-500/5 transition-all duration-200 mb-3 text-left cursor-pointer"
                   >
                     <div className="w-9 h-9 rounded-lg bg-black flex items-center justify-center shrink-0 border border-white/10">
                       <svg viewBox="0 0 56 32" className="w-8 h-5" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -969,12 +972,15 @@ function DashboardContent() {
                       <p className="text-[10px] text-[var(--text-muted)]">CMA Licensed · Kenya Offices</p>
                     </div>
                     <ExternalLink className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-red-400 transition-colors shrink-0" />
-                  </button>
+                  </div>
 
                   {/* Vantage Option */}
-                  <button
+                  <div
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setBrokerModal('vantage')}
-                    className="group w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--border-color)] hover:border-[#024D56]/60 hover:bg-[#024D56]/10 transition-all duration-200 text-left"
+                    onKeyDown={(e) => e.key === 'Enter' && setBrokerModal('vantage')}
+                    className="group w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--border-color)] hover:border-[#024D56]/60 hover:bg-[#024D56]/10 transition-all duration-200 text-left cursor-pointer"
                   >
                     <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10">
                       <svg className="w-5 h-5" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -987,7 +993,7 @@ function DashboardContent() {
                       <p className="text-[10px] text-[var(--text-muted)]">ASIC/FCA Licensed · Crypto Pairs</p>
                     </div>
                     <ExternalLink className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[#E24E24] transition-colors shrink-0" />
-                  </button>
+                  </div>
 
                   <p className="text-[10px] text-center text-[var(--text-muted)] mt-auto pt-4">Click to see details & open account</p>
                 </div>
