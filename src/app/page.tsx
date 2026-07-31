@@ -953,13 +953,37 @@ function DashboardContent() {
                   <h3 className="text-lg sm:text-xl font-bold text-[var(--foreground)] mb-1">Choose Your Broker</h3>
                   <p className="text-[var(--text-muted)] text-xs mb-5 leading-relaxed">Pick the option that fits your location and trading goals.</p>
 
-                  {/* HFM Option */}
+                  {/* Vantage Option (Primary) */}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setBrokerModal('vantage')}
+                    onKeyDown={(e) => e.key === 'Enter' && setBrokerModal('vantage')}
+                    className="group w-full flex items-center gap-3 p-3 rounded-xl border-2 border-[#024D56] bg-[#024D56]/10 hover:bg-[#024D56]/20 transition-all duration-200 mb-3 text-left cursor-pointer relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 bg-[#024D56] text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wider">
+                      Recommended
+                    </div>
+                    <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10 mt-1">
+                      <svg className="w-5 h-5" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="40,60 150,60 260,340 150,340" fill="#024D56" />
+                        <polygon points="180,60 360,60 260,260 220,200" fill="#E24E24" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 mt-1">
+                      <p className="text-xs font-bold text-[var(--foreground)]">Vantage <span className="text-[10px] font-normal text-[var(--text-muted)]">(International)</span></p>
+                      <p className="text-[10px] text-[var(--text-muted)]">ASIC/FCA Licensed · Crypto Pairs</p>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[#E24E24] transition-colors shrink-0 mt-1" />
+                  </div>
+
+                  {/* HFM Option (Secondary) */}
                   <div
                     role="button"
                     tabIndex={0}
                     onClick={() => setBrokerModal('hfm')}
                     onKeyDown={(e) => e.key === 'Enter' && setBrokerModal('hfm')}
-                    className="group w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--border-color)] hover:border-red-500/50 hover:bg-red-500/5 transition-all duration-200 mb-3 text-left cursor-pointer"
+                    className="group w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--border-color)] hover:border-red-500/50 hover:bg-red-500/5 transition-all duration-200 text-left cursor-pointer opacity-80 hover:opacity-100"
                   >
                     <div className="w-9 h-9 rounded-lg bg-black flex items-center justify-center shrink-0 border border-white/10">
                       <svg viewBox="0 0 56 32" className="w-8 h-5" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -972,27 +996,6 @@ function DashboardContent() {
                       <p className="text-[10px] text-[var(--text-muted)]">CMA Licensed · Kenya Offices</p>
                     </div>
                     <ExternalLink className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-red-400 transition-colors shrink-0" />
-                  </div>
-
-                  {/* Vantage Option */}
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setBrokerModal('vantage')}
-                    onKeyDown={(e) => e.key === 'Enter' && setBrokerModal('vantage')}
-                    className="group w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--border-color)] hover:border-[#024D56]/60 hover:bg-[#024D56]/10 transition-all duration-200 text-left cursor-pointer"
-                  >
-                    <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10">
-                      <svg className="w-5 h-5" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <polygon points="40,60 150,60 260,340 150,340" fill="#024D56" />
-                        <polygon points="180,60 360,60 260,260 220,200" fill="#E24E24" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs font-bold text-[var(--foreground)]">Vantage <span className="text-[10px] font-normal text-[var(--text-muted)]">(International)</span></p>
-                      <p className="text-[10px] text-[var(--text-muted)]">ASIC/FCA Licensed · Crypto Pairs</p>
-                    </div>
-                    <ExternalLink className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[#E24E24] transition-colors shrink-0" />
                   </div>
 
                   <p className="text-[10px] text-center text-[var(--text-muted)] mt-auto pt-4">Click to see details & open account</p>
