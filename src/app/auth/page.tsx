@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Shield, Lock, Mail, ArrowRight, Loader2 } from "lucide-react"
+import { Shield, Lock, Mail, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
@@ -12,6 +12,9 @@ export default function AuthPage() {
     const [isForgotPassword, setIsForgotPassword] = useState(false)
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [fullName, setFullName] = useState("")
     const [rememberMe, setRememberMe] = useState(true)
     const [loading, setLoading] = useState(false)
@@ -23,6 +26,12 @@ export default function AuthPage() {
         e.preventDefault()
         setLoading(true)
         setError(null)
+
+        if (!isLogin && !isForgotPassword && password !== confirmPassword) {
+            setError("Passwords do not match")
+            setLoading(false)
+            return
+        }
 
         try {
             if (isForgotPassword) {
@@ -160,7 +169,7 @@ export default function AuthPage() {
                                 <label className="text-xs text-gray-400 uppercase font-bold tracking-widest ml-1">Password</label>
                                 <div className="relative">
                                     <input
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         placeholder="••••••••"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
@@ -168,6 +177,37 @@ export default function AuthPage() {
                                         className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-11 outline-none focus:border-yellow-500/50 transition-all text-white"
                                     />
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {!isLogin && !isForgotPassword && (
+                            <div className="space-y-1">
+                                <label className="text-xs text-gray-400 uppercase font-bold tracking-widest ml-1">Confirm Password</label>
+                                <div className="relative">
+                                    <input
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        placeholder="••••••••"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        required
+                                        className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-11 outline-none focus:border-yellow-500/50 transition-all text-white"
+                                    />
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                                    >
+                                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
                                 </div>
                             </div>
                         )}

@@ -1046,6 +1046,67 @@ function DashboardContent() {
               </FadeInSection>
             </div>
 
+          </section>
+        </div>
+        )}
+        
+
+
+        {/* Footer — only shown if NOT community tab, placed at bottom of scrollable area */}
+        {activeTab !== "community" && (
+          <footer className="relative z-10 border-t border-[var(--border-color)] py-8 sm:py-12 md:py-16 px-4 sm:px-6 bg-[var(--background)]">
+            <div className="max-w-7xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 md:gap-12 mb-8 sm:mb-12">
+                <div className="md:col-span-2">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="relative w-11 h-11 bg-[#d4af37] rounded-full p-0.5 shadow-md border border-yellow-600/30 flex items-center justify-center">
+                      <div className="w-full h-full bg-[#0a0a0a] rounded-full overflow-hidden relative">
+                        <Image 
+                          src="/logo.png" 
+                          alt="Zen Pips" 
+                          fill 
+                          className="object-contain" 
+                        />
+                      </div>
+                    </div>
+                    <span className="font-[family-name:var(--font-outfit)] font-bold text-xl tracking-wide text-[var(--foreground)]">ZENPIPS</span>
+                  </div>
+                  <p className="text-[var(--text-muted)] text-sm max-w-md leading-relaxed">
+                    The elite trading community built on precision, discipline, and institutional-grade analysis. XAU/USD and BTC/USD specialists.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-[var(--foreground)] uppercase tracking-wider mb-4">Quick Links</h4>
+                  <ul className="space-y-3 text-sm text-[var(--text-muted)]">
+                    <li><a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Join VIP</a></li>
+                    <li><a href="https://www.hfm.com/ke/en/?refid=30508914" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Open Broker (HFM)</a></li>
+                    <li><a href="https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?hl=en&ref=GRO_28502_E50OE&utm_source=default" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Buy USDT (Binance)</a></li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-[var(--foreground)] uppercase tracking-wider mb-4">Community</h4>
+                  <ul className="space-y-3 text-sm text-[var(--text-muted)]">
+                    <li>
+                        <a href="https://t.me/zenpips" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-white transition-colors text-xs font-medium">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Premium Group
+                        </a>
+                    </li>
+                    <li><a href="https://t.me/MadDmakz" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Contact Admin</a></li>
+                  </ul>
+                </div>
+              </div>
+              <div className="border-t border-[var(--border-color)] pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                <p className="text-[var(--text-muted)] text-xs max-w-lg text-center md:text-left">
+                  Trading foreign exchange on margin carries a high level of risk and may not be suitable for all investors. Past performance is not indicative of future results. This community is for educational purposes only.
+                </p>
+                <div className="text-xs text-[var(--text-muted)]">&copy; 2026 Zen Pips. All rights reserved.</div>
+              </div>
+            </div>
+          </footer>
+        )}
+      </section>
+      
+
             {/* Broker Detail Modal */}
             <AnimatePresence>
               {brokerModal && (
@@ -1168,65 +1229,6 @@ function DashboardContent() {
               )}
             </AnimatePresence>
 
-          </section>
-        </div>
-        )}
-        
-
-
-        {/* Footer — only shown if NOT community tab, placed at bottom of scrollable area */}
-        {activeTab !== "community" && (
-          <footer className="relative z-10 border-t border-[var(--border-color)] py-8 sm:py-12 md:py-16 px-4 sm:px-6 bg-[var(--background)]">
-            <div className="max-w-7xl mx-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 md:gap-12 mb-8 sm:mb-12">
-                <div className="md:col-span-2">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="relative w-11 h-11 bg-[#d4af37] rounded-full p-0.5 shadow-md border border-yellow-600/30 flex items-center justify-center">
-                      <div className="w-full h-full bg-[#0a0a0a] rounded-full overflow-hidden relative">
-                        <Image 
-                          src="/logo.png" 
-                          alt="Zen Pips" 
-                          fill 
-                          className="object-contain" 
-                        />
-                      </div>
-                    </div>
-                    <span className="font-[family-name:var(--font-outfit)] font-bold text-xl tracking-wide text-[var(--foreground)]">ZENPIPS</span>
-                  </div>
-                  <p className="text-[var(--text-muted)] text-sm max-w-md leading-relaxed">
-                    The elite trading community built on precision, discipline, and institutional-grade analysis. XAU/USD and BTC/USD specialists.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-[var(--foreground)] uppercase tracking-wider mb-4">Quick Links</h4>
-                  <ul className="space-y-3 text-sm text-[var(--text-muted)]">
-                    <li><a href="https://t.me/Zen_pips_bot" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Join VIP</a></li>
-                    <li><a href="https://www.hfm.com/ke/en/?refid=30508914" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Open Broker (HFM)</a></li>
-                    <li><a href="https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?hl=en&ref=GRO_28502_E50OE&utm_source=default" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Buy USDT (Binance)</a></li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-[var(--foreground)] uppercase tracking-wider mb-4">Community</h4>
-                  <ul className="space-y-3 text-sm text-[var(--text-muted)]">
-                    <li>
-                        <a href="https://t.me/zenpips" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-white transition-colors text-xs font-medium">
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Premium Group
-                        </a>
-                    </li>
-                    <li><a href="https://t.me/MadDmakz" target="_blank" rel="noopener noreferrer" className="hover:text-[#d4af37] transition-colors">Contact Admin</a></li>
-                  </ul>
-                </div>
-              </div>
-              <div className="border-t border-[var(--border-color)] pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-                <p className="text-[var(--text-muted)] text-xs max-w-lg text-center md:text-left">
-                  Trading foreign exchange on margin carries a high level of risk and may not be suitable for all investors. Past performance is not indicative of future results. This community is for educational purposes only.
-                </p>
-                <div className="text-xs text-[var(--text-muted)]">&copy; 2026 Zen Pips. All rights reserved.</div>
-              </div>
-            </div>
-          </footer>
-        )}
-      </section>
       <ProfileSetupPopup />
     </main>
   );

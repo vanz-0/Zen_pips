@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
@@ -11,11 +13,31 @@ const supabaseAdmin = createClient(
 export async function GET(req: Request) {
   const { searchParams, origin } = new URL(req.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') || '/dashboard';
+  const next = searchParams.get('next') || '/?tab=profile';
 
   if (code) {
-    // 1. Confirm the session
-    const { data, error } = await supabaseAdmin.auth.exchangeCodeForSession(code);
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll(cookiesToSet) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              )
+            } catch {}
+          },
+        },
+      }
+    )
+
+    // 1. Confirm the session using the user client to set cookies
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     
     if (!error && data.user) {
       const email = data.user.email!;
