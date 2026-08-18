@@ -105,7 +105,7 @@ function TradingViewChart({ symbol }: { symbol: string }) {
     }, [symbol, theme]);
 
     return (
-        <div ref={containerRef} className="tradingview-widget-container w-full h-full" />
+        <div ref={containerRef} className="tradingview-widget-container absolute inset-0 w-full h-full" />
     );
 }
 
@@ -341,7 +341,7 @@ export function TradingTerminal() {
                 )}
 
                 {/* ─── CENTER: TradingView Chart ─── */}
-                <div className="flex-1 min-w-0 min-h-[300px] lg:min-h-0 bg-[var(--card-bg)]">
+                <div className="flex-1 min-w-0 min-h-[300px] lg:min-h-0 bg-[var(--card-bg)] relative">
                     <TradingViewChart symbol={selectedSymbol} />
                 </div>
 
