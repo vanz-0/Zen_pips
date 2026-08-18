@@ -73,7 +73,8 @@ function TradingViewChart({ symbol }: { symbol: string }) {
         script.type = "text/javascript";
         script.async = true;
         script.innerHTML = JSON.stringify({
-            autosize: true,
+            width: "100%",
+            height: "100%",
             symbol: symbol,
             interval: "15",
             timezone: "Africa/Nairobi",
