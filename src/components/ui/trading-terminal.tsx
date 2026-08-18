@@ -5,12 +5,6 @@ import { TrendingUp, TrendingDown, ChevronLeft, ChevronRight, ChevronDown, Chevr
 import { useSignals } from "@/hooks/useSignals";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
-import dynamic from "next/dynamic";
-
-const AdvancedRealTimeChart = dynamic(
-    () => import("react-ts-tradingview-widgets").then((w) => w.AdvancedRealTimeChart),
-    { ssr: false }
-);
 
 // ─── Types ───
 export interface SignalData {
@@ -64,24 +58,180 @@ const WATCHLIST = [
 ];
 
 // ─── Full Advanced TradingView Chart (with Safari flexbox fix) ───
-function TradingViewChart({ symbol }: { symbol: string }) {
+// ─── Native Lightweight Chart (iOS Safari Safe) ───
+const INTERVALS = [
+    { label: "1m", value: "1min" },
+    { label: "5m", value: "5min" },
+    { label: "15m", value: "15min" },
+    { label: "1H", value: "1h" },
+    { label: "4H", value: "4h" },
+    { label: "1D", value: "1day" },
+];
+
+function LightweightChartComponent({ symbol }: { symbol: string }) {
     const { theme } = useTheme();
+    const containerRef = useRef<HTMLDivElement>(null);
+    const chartRef = useRef<any>(null);
+    const seriesRef = useRef<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [interval, setInterval] = useState("15min");
+
+    // Initialize chart
+    useEffect(() => {
+        if (!containerRef.current) return;
+
+        let cancelled = false;
+
+        const initChart = async () => {
+            // Dynamically import to avoid SSR issues
+            const { createChart, ColorType, CrosshairMode, CandlestickSeries } = await import('lightweight-charts');
+
+            if (cancelled || !containerRef.current) return;
+
+            // Clean up previous chart
+            if (chartRef.current) {
+                chartRef.current.remove();
+                chartRef.current = null;
+                seriesRef.current = null;
+            }
+
+            const isDark = theme === 'dark';
+
+            // Create chart with TradingView-like grid and axis styling
+            const chart = createChart(containerRef.current, {
+                width: containerRef.current.clientWidth,
+                height: containerRef.current.clientHeight,
+                layout: {
+                    background: { type: ColorType.Solid, color: isDark ? '#131722' : '#ffffff' }, // TradingView classic dark BG
+                    textColor: isDark ? '#b2b5be' : '#333333',
+                    fontSize: 12,
+                },
+                grid: {
+                    vertLines: { color: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)', style: 0 },
+                    horzLines: { color: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)', style: 0 },
+                },
+                crosshair: {
+                    mode: CrosshairMode.Normal,
+                    vertLine: { color: isDark ? '#758696' : '#758696', width: 1, style: 3, labelBackgroundColor: isDark ? '#4c525e' : '#4c525e' },
+                    horzLine: { color: isDark ? '#758696' : '#758696', width: 1, style: 3, labelBackgroundColor: isDark ? '#4c525e' : '#4c525e' },
+                },
+                rightPriceScale: {
+                    borderColor: isDark ? '#2b2b43' : '#d1d4dc',
+                    visible: true,
+                    borderVisible: true,
+                    autoScale: true,
+                },
+                timeScale: {
+                    borderColor: isDark ? '#2b2b43' : '#d1d4dc',
+                    timeVisible: true,
+                    secondsVisible: false,
+                    borderVisible: true,
+                },
+                handleScroll: { vertTouchDrag: false },
+            });
+
+            const candleSeries = chart.addSeries(CandlestickSeries, {
+                upColor: '#089981', // TradingView green
+                downColor: '#f23645', // TradingView red
+                borderUpColor: '#089981',
+                borderDownColor: '#f23645',
+                wickUpColor: '#089981',
+                wickDownColor: '#f23645',
+            });
+
+            chartRef.current = chart;
+            seriesRef.current = candleSeries;
+
+            // Fetch data
+            try {
+                setLoading(true);
+                setError(null);
+                const res = await fetch(`/api/candles?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=100`);
+                const data = await res.json();
+
+                if (cancelled) return;
+
+                if (data.error) {
+                    setError(data.error);
+                    setLoading(false);
+                    return;
+                }
+
+                if (data.candles && data.candles.length > 0) {
+                    candleSeries.setData(data.candles);
+                    chart.timeScale().fitContent();
+                } else {
+                    setError('No data available');
+                }
+            } catch (e) {
+                if (!cancelled) setError('Failed to load chart data');
+            }
+            if (!cancelled) setLoading(false);
+        };
+
+        initChart();
+
+        // Resize handler
+        const resizeObserver = new ResizeObserver((entries) => {
+            if (chartRef.current && entries[0]) {
+                const { width, height } = entries[0].contentRect;
+                chartRef.current.applyOptions({ width, height });
+            }
+        });
+        resizeObserver.observe(containerRef.current);
+
+        return () => {
+            cancelled = true;
+            resizeObserver.disconnect();
+            if (chartRef.current) {
+                chartRef.current.remove();
+                chartRef.current = null;
+                seriesRef.current = null;
+            }
+        };
+    }, [symbol, theme, interval]);
 
     return (
-        <div className="absolute inset-0 w-full h-full bg-[var(--card-bg)]">
-            <AdvancedRealTimeChart
-                symbol={symbol}
-                theme={theme === "dark" ? "dark" : "light"}
-                autosize
-                interval="15"
-                timezone="Etc/UTC"
-                style="1"
-                locale="en"
-                enable_publishing={false}
-                hide_side_toolbar={false}
-                allow_symbol_change={true}
-                calendar={false}
-            />
+        <div className="relative w-full h-full bg-[var(--card-bg)] flex flex-col">
+            {/* Custom Toolbar */}
+            <div className="absolute top-0 left-0 right-0 z-10 flex items-center p-2 bg-[var(--panel-bg)]/80 backdrop-blur-sm border-b border-[var(--border-color)]">
+                <div className="flex space-x-1 overflow-x-auto custom-scrollbar">
+                    {INTERVALS.map((int) => (
+                        <button
+                            key={int.value}
+                            onClick={() => setInterval(int.value)}
+                            className={`px-3 py-1 rounded text-xs font-semibold transition-colors ${
+                                interval === int.value
+                                    ? "bg-blue-500/20 text-blue-500"
+                                    : "text-[var(--text-muted)] hover:bg-[var(--border-color)] hover:text-[var(--foreground)]"
+                            }`}
+                        >
+                            {int.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+            
+            {/* Chart Container (offset by toolbar height) */}
+            <div ref={containerRef} className="w-full h-full pt-[40px]" />
+            
+            {loading && (
+                <div className="absolute inset-0 pt-[40px] flex items-center justify-center bg-[var(--card-bg)]/50 backdrop-blur-[1px]">
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="w-6 h-6 animate-spin border-2 border-blue-500 border-t-transparent rounded-full" />
+                        <span className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold">Loading {interval}...</span>
+                    </div>
+                </div>
+            )}
+            {error && !loading && (
+                <div className="absolute inset-0 pt-[40px] flex items-center justify-center bg-[var(--card-bg)]">
+                    <div className="flex flex-col items-center gap-2 text-center px-4">
+                        <span className="text-xs text-[var(--text-muted)]">⚠️ {error}</span>
+                        <span className="text-[10px] text-[var(--text-muted)]">Data may be temporarily unavailable</span>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
@@ -319,7 +469,7 @@ export function TradingTerminal() {
 
                 {/* ─── CENTER: TradingView Chart ─── */}
                 <div className="flex-1 relative min-w-0 min-h-[300px] lg:min-h-0 bg-[var(--card-bg)] w-full">
-                    <TradingViewChart symbol={selectedSymbol} />
+                    <LightweightChartComponent symbol={selectedSymbol} />
                 </div>
 
                 {/* ─── RIGHT PANEL: Signal Feed (Desktop only) ─── */}
