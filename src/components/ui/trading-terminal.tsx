@@ -65,14 +65,12 @@ function TradingViewChart({ symbol }: { symbol: string }) {
     const iframeSrc = `https://s.tradingview.com/widgetembed/?frameElementId=tradingview_123&symbol=${encodeURIComponent(symbol)}&interval=15&hidesidetoolbar=0&symboledit=1&saveimage=0&toolbarbg=f1f3f6&studies=%5B%5D&theme=${theme === 'dark' ? 'dark' : 'light'}&style=1&timezone=Africa%2FNairobi&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en`;
 
     return (
-        <div className="tradingview-widget-container flex-1 w-full h-full bg-[var(--card-bg)]">
-            <iframe 
-                src={iframeSrc}
-                className="w-full h-full"
-                frameBorder="0"
-                allowFullScreen
-            />
-        </div>
+        <iframe 
+            src={iframeSrc}
+            className="absolute inset-0 w-full h-full"
+            style={{ border: 'none' }}
+            allowFullScreen
+        />
     );
 }
 
@@ -308,7 +306,7 @@ export function TradingTerminal() {
                 )}
 
                 {/* ─── CENTER: TradingView Chart ─── */}
-                <div className="flex-1 flex flex-col min-w-0 min-h-[300px] lg:min-h-0 bg-[var(--card-bg)] w-full h-full">
+                <div className="flex-1 relative min-w-0 min-h-[300px] lg:min-h-0 bg-[var(--card-bg)] w-full">
                     <TradingViewChart symbol={selectedSymbol} />
                 </div>
 
