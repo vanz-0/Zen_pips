@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Left teal parallelogram -->
+  <polygon points="40,60 150,60 260,340 150,340" fill="#024D56" />
+  
+  <!-- Right orange shape - matching the geometric triangle/wedge shape -->
+  <polygon points="180,60 360,60 260,260 220,200" fill="#E24E24" />
+</svg>

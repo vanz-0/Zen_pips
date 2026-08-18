@@ -58,19 +58,145 @@ const WATCHLIST = [
     { symbol: "BINANCE:XRPUSDT", display: "XRP/USDT", name: "Ripple", price: "0.6240", change: "+1.15%", up: true, category: "Crypto" },
 ];
 
-// ─── TradingView Widget (center chart) ───
-function TradingViewChart({ symbol }: { symbol: string }) {
+// ─── Lightweight Chart (center chart — works on iOS Safari) ───
+function LightweightChartComponent({ symbol }: { symbol: string }) {
     const { theme } = useTheme();
+    const containerRef = useRef<HTMLDivElement>(null);
+    const chartRef = useRef<any>(null);
+    const seriesRef = useRef<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const iframeSrc = `https://s.tradingview.com/widgetembed/?frameElementId=tradingview_123&symbol=${encodeURIComponent(symbol)}&interval=15&hidesidetoolbar=0&symboledit=1&saveimage=0&toolbarbg=f1f3f6&studies=%5B%5D&theme=${theme === 'dark' ? 'dark' : 'light'}&style=1&timezone=Africa%2FNairobi&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en`;
+    // Initialize chart
+    useEffect(() => {
+        if (!containerRef.current) return;
+
+        let cancelled = false;
+
+        const initChart = async () => {
+            // Dynamically import to avoid SSR issues
+            const { createChart, ColorType, CrosshairMode, CandlestickSeries } = await import('lightweight-charts');
+
+            if (cancelled || !containerRef.current) return;
+
+            // Clean up previous chart
+            if (chartRef.current) {
+                chartRef.current.remove();
+                chartRef.current = null;
+                seriesRef.current = null;
+            }
+
+            const isDark = theme === 'dark';
+
+            const chart = createChart(containerRef.current, {
+                width: containerRef.current.clientWidth,
+                height: containerRef.current.clientHeight,
+                layout: {
+                    background: { type: ColorType.Solid, color: isDark ? '#0a0a0a' : '#ffffff' },
+                    textColor: isDark ? '#9ca3af' : '#6b7280',
+                    fontSize: 11,
+                },
+                grid: {
+                    vertLines: { color: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)' },
+                    horzLines: { color: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)' },
+                },
+                crosshair: {
+                    mode: CrosshairMode.Normal,
+                    vertLine: { color: isDark ? 'rgba(212,175,55,0.4)' : 'rgba(100,100,100,0.4)', width: 1, style: 2 },
+                    horzLine: { color: isDark ? 'rgba(212,175,55,0.4)' : 'rgba(100,100,100,0.4)', width: 1, style: 2 },
+                },
+                rightPriceScale: {
+                    borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                },
+                timeScale: {
+                    borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                    timeVisible: true,
+                    secondsVisible: false,
+                },
+                handleScroll: { vertTouchDrag: false },
+            });
+
+            const candleSeries = chart.addSeries(CandlestickSeries, {
+                upColor: '#22c55e',
+                downColor: '#ef4444',
+                borderUpColor: '#22c55e',
+                borderDownColor: '#ef4444',
+                wickUpColor: '#22c55e',
+                wickDownColor: '#ef4444',
+            });
+
+            chartRef.current = chart;
+            seriesRef.current = candleSeries;
+
+            // Fetch data
+            try {
+                setLoading(true);
+                setError(null);
+                const res = await fetch(`/api/candles?symbol=${encodeURIComponent(symbol)}&interval=15min&outputsize=100`);
+                const data = await res.json();
+
+                if (cancelled) return;
+
+                if (data.error) {
+                    setError(data.error);
+                    setLoading(false);
+                    return;
+                }
+
+                if (data.candles && data.candles.length > 0) {
+                    candleSeries.setData(data.candles);
+                    chart.timeScale().fitContent();
+                } else {
+                    setError('No data available');
+                }
+            } catch (e) {
+                if (!cancelled) setError('Failed to load chart data');
+            }
+            if (!cancelled) setLoading(false);
+        };
+
+        initChart();
+
+        // Resize handler
+        const resizeObserver = new ResizeObserver((entries) => {
+            if (chartRef.current && entries[0]) {
+                const { width, height } = entries[0].contentRect;
+                chartRef.current.applyOptions({ width, height });
+            }
+        });
+        resizeObserver.observe(containerRef.current);
+
+        return () => {
+            cancelled = true;
+            resizeObserver.disconnect();
+            if (chartRef.current) {
+                chartRef.current.remove();
+                chartRef.current = null;
+                seriesRef.current = null;
+            }
+        };
+    }, [symbol, theme]);
 
     return (
-        <iframe 
-            src={iframeSrc}
-            className="absolute inset-0 w-full h-full"
-            style={{ border: 'none' }}
-            allowFullScreen
-        />
+        <div className="relative w-full h-full bg-[var(--card-bg)]">
+            <div ref={containerRef} className="w-full h-full" />
+            {loading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-[var(--card-bg)]">
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="w-6 h-6 animate-spin border-2 border-[#d4af37] border-t-transparent rounded-full" />
+                        <span className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold">Loading chart...</span>
+                    </div>
+                </div>
+            )}
+            {error && !loading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-[var(--card-bg)]">
+                    <div className="flex flex-col items-center gap-2 text-center px-4">
+                        <span className="text-xs text-[var(--text-muted)]">⚠️ {error}</span>
+                        <span className="text-[10px] text-[var(--text-muted)]">Data may be temporarily unavailable</span>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -307,7 +433,7 @@ export function TradingTerminal() {
 
                 {/* ─── CENTER: TradingView Chart ─── */}
                 <div className="flex-1 relative min-w-0 min-h-[300px] lg:min-h-0 bg-[var(--card-bg)] w-full">
-                    <TradingViewChart symbol={selectedSymbol} />
+                    <LightweightChartComponent symbol={selectedSymbol} />
                 </div>
 
                 {/* ─── RIGHT PANEL: Signal Feed (Desktop only) ─── */}

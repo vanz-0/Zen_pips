@@ -23,7 +23,8 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 ACCOUNTS = {
     "25113210": {"password": "!pA@Rj@0", "server": "VantageInternational-Demo"},
     "24963323": {"password": "cX$P02Br", "server": "VantageInternational-Demo"},
-    "25803510": {"password": "!OzRmn6U", "server": "VantageMarkets-Demo"}
+    "25803510": {"password": "!OzRmn6U", "server": "VantageMarkets-Demo"},
+    "25872726": {"password": "%Z0!ZTUw", "server": "VantageMarkets-Demo"}
 }
 
 def switch_account(login_id):
