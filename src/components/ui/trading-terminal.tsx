@@ -65,7 +65,7 @@ function TradingViewChart({ symbol }: { symbol: string }) {
     const iframeSrc = `https://s.tradingview.com/widgetembed/?frameElementId=tradingview_123&symbol=${encodeURIComponent(symbol)}&interval=15&hidesidetoolbar=0&symboledit=1&saveimage=0&toolbarbg=f1f3f6&studies=%5B%5D&theme=${theme === 'dark' ? 'dark' : 'light'}&style=1&timezone=Africa%2FNairobi&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en`;
 
     return (
-        <div className="tradingview-widget-container absolute inset-0 w-full h-full bg-[var(--card-bg)]">
+        <div className="tradingview-widget-container flex-1 w-full h-full bg-[var(--card-bg)]">
             <iframe 
                 src={iframeSrc}
                 className="w-full h-full"
@@ -196,7 +196,7 @@ export function TradingTerminal() {
     const selectedPair = WATCHLIST.find(w => w.symbol === selectedSymbol);
 
     return (
-        <div className="w-full flex flex-col" style={{ height: "calc(100vh - 73px)" }}>
+        <div className="w-full flex flex-col" style={{ height: "calc(100dvh - 73px)" }}>
             {/* Terminal Header Bar */}
             <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-[var(--panel-bg)] border-b border-[var(--border-color)]">
                 <div className="flex items-center gap-2 sm:gap-3">
@@ -308,7 +308,7 @@ export function TradingTerminal() {
                 )}
 
                 {/* ─── CENTER: TradingView Chart ─── */}
-                <div className="flex-1 min-w-0 min-h-[300px] lg:min-h-0 bg-[var(--card-bg)] relative">
+                <div className="flex-1 flex flex-col min-w-0 min-h-[300px] lg:min-h-0 bg-[var(--card-bg)] w-full h-full">
                     <TradingViewChart symbol={selectedSymbol} />
                 </div>
 
