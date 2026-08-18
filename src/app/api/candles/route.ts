@@ -47,13 +47,19 @@ export async function GET(req: NextRequest) {
 
         // Transform to lightweight-charts format: { time, open, high, low, close }
         const candles = (data.values || [])
-            .map((v: any) => ({
-                time: v.datetime, // "YYYY-MM-DD HH:mm:ss" format
-                open: parseFloat(v.open),
-                high: parseFloat(v.high),
-                low: parseFloat(v.low),
-                close: parseFloat(v.close),
-            }))
+            .map((v: any) => {
+                // TwelveData returns "YYYY-MM-DD HH:mm:ss"
+                // Parse it as UTC to avoid local timezone offset issues on the server
+                const unixTimeSeconds = Math.floor(new Date(v.datetime.replace(' ', 'T') + 'Z').getTime() / 1000);
+                
+                return {
+                    time: unixTimeSeconds,
+                    open: parseFloat(v.open),
+                    high: parseFloat(v.high),
+                    low: parseFloat(v.low),
+                    close: parseFloat(v.close),
+                };
+            })
             .reverse(); // TwelveData returns newest first, Lightweight Charts needs oldest first
 
         return NextResponse.json({
