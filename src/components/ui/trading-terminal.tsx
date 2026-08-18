@@ -61,52 +61,18 @@ const WATCHLIST = [
 // ─── TradingView Widget (center chart) ───
 function TradingViewChart({ symbol }: { symbol: string }) {
     const { theme } = useTheme();
-    const containerRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        if (!containerRef.current) return;
-        const container = containerRef.current;
-        container.innerHTML = "";
-
-        const script = document.createElement("script");
-        script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
-        script.type = "text/javascript";
-        script.async = true;
-        script.innerHTML = JSON.stringify({
-            width: "100%",
-            height: "100%",
-            symbol: symbol,
-            interval: "15",
-            timezone: "Africa/Nairobi",
-            theme: theme === "dark" ? "dark" : "light",
-            style: "1",
-            locale: "en",
-            backgroundColor: theme === "dark" ? "rgba(10, 10, 10, 1)" : "rgba(255, 255, 255, 1)",
-            gridColor: theme === "dark" ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.03)",
-            hide_top_toolbar: false,
-            hide_legend: false,
-            allow_symbol_change: true,
-            save_image: false,
-            calendar: false,
-            hide_volume: false,
-            support_host: "https://www.tradingview.com",
-        });
-
-        const widgetDiv = document.createElement("div");
-        widgetDiv.className = "tradingview-widget-container__widget";
-        widgetDiv.style.height = "100%";
-        widgetDiv.style.width = "100%";
-
-        container.appendChild(widgetDiv);
-        container.appendChild(script);
-
-        return () => {
-            container.innerHTML = "";
-        };
-    }, [symbol, theme]);
+    const iframeSrc = `https://s.tradingview.com/widgetembed/?frameElementId=tradingview_123&symbol=${encodeURIComponent(symbol)}&interval=15&hidesidetoolbar=0&symboledit=1&saveimage=0&toolbarbg=f1f3f6&studies=%5B%5D&theme=${theme === 'dark' ? 'dark' : 'light'}&style=1&timezone=Africa%2FNairobi&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en`;
 
     return (
-        <div ref={containerRef} className="tradingview-widget-container absolute inset-0 w-full h-full" />
+        <div className="tradingview-widget-container absolute inset-0 w-full h-full bg-[var(--card-bg)]">
+            <iframe 
+                src={iframeSrc}
+                className="w-full h-full"
+                frameBorder="0"
+                allowFullScreen
+            />
+        </div>
     );
 }
 
